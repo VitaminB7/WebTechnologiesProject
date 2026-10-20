@@ -59,6 +59,9 @@ app.use('/api', (req, res) => {
 
 // ===== ไฟล์ทั่วไป =====
 app.use('/uploads', express.static(rooms.UPLOAD_DIR)); // รูปห้อง เช่น /uploads/L-1201-a1b2c3.jpg
+// TODO(ยังขาด): โจทย์ให้แยก 2 เซิร์ฟเวอร์ = Front-end server กับ Web Service server
+//   ตอนนี้แอปเดียวเสิร์ฟทั้งหน้าเว็บและ API ต้องแยกหน้าเว็บไปเป็นเซิร์ฟเวอร์ของตัวเอง (เปิด CORS + cookie ข้ามพอร์ต)
+//   และตั้งชื่อโฟลเดอร์ส่งงานเป็น sec2_gr1_fe_src / sec2_gr1_ws_src (rubric เว็บเซอร์วิสข้อ 12)
 app.use(express.static(FRONTEND_DIR)); // หน้าเว็บ (frontend/public)
 
 // ===== ตัวจัดการ error ตัวสุดท้าย =====

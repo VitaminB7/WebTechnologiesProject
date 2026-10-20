@@ -3,6 +3,7 @@
 ITDS241 Web Technologies, Phase 2. Node.js (Express) + MySQL 8.4 back end (`npm start` works without installing MySQL), plain HTML/CSS/JS front end.
 Express serves the API at `/api` and the front end (`frontend/public`) at `/`, so everything runs from one server.
 
+- **Still missing for the assignment: [TODO.md](TODO.md)**
 - Spec: [docs/SPEC.md](docs/SPEC.md)
 - API contract: [docs/API.md](docs/API.md)
 - Database: [db/schema.sql](db/schema.sql) (tables, follows the report's Data Dictionary) + [db/seed.sql](db/seed.sql) (sample data)

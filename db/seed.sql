@@ -1,5 +1,7 @@
 -- AURA Sukhumvit 36 — sample data (matches the Data Dictionary in the report)
 -- Run after schema.sql (`npm run db:reset` in backend/ does both).
+-- TODO(ยังขาด): ห้องตัวอย่างยังไม่มีรูป (ตาราง RoomImage ว่าง) หน้า Detail จึงเป็นกล่องเทา ต้องอัปโหลดรูปจริง
+-- TODO(ยังขาด): ส่งงานต้อง export ฐานข้อมูลเป็นไฟล์เดียวชื่อ sec2_gr1_database.sql (โครงสร้าง + ข้อมูล)
 -- Admin passwords are bcrypt hashes (cost 10) of:
 --   admin_main   / Admin@1234    (SuperAdmin, can also log in with admin@aura36.co.th)
 --   listing_ploy / Listing@1234  (Admin)

@@ -3,6 +3,7 @@
 -- Additions the wireframe needs (add them to the Data Dictionary in the report too):
 --   RoomUnit.Floor, RoomUnit.ConditionRating  -> search filters + detail page
 --   RoomImage table                           -> room photos (detail page + upload in room management)
+-- TODO(ยังขาด): เพิ่ม Floor, ConditionRating และตาราง RoomImage ลง Data Dictionary + ERD ในเล่มรายงาน ให้ตรงกับไฟล์นี้
 -- Also: CHECK constraints for the "range" column of the dictionary,
 -- and UNIQUE(Email) because admins can log in with their email.
 
