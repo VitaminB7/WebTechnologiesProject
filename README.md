@@ -1,6 +1,6 @@
 # AURA Sukhumvit 36: Room Rental Management
 
-ITDS241 Web Technologies, Phase 2. Node.js (Express) + MySQL 8.4 back end, plain HTML/CSS/JS front end.
+ITDS241 Web Technologies, Phase 2. Node.js (Express) + MySQL 8.4 back end (`npm start` works without installing MySQL), plain HTML/CSS/JS front end.
 Express serves the API at `/api` and the front end (`frontend/public`) at `/`, so everything runs from one server.
 
 - Spec: [docs/SPEC.md](docs/SPEC.md)
@@ -22,49 +22,57 @@ aura-rental/
   docs/               SPEC.md (pages + rules), API.md (contract), REVIEW.md (review + open decisions)
 ```
 
-## Requirements
+## Quick start (no database setup)
 
-- Node.js 20 or newer (developed on Node 24)
-- MySQL 8.x running locally (the default setup assumes `root` with no password on port 3306)
-
-You do **not** need the `mysql` command-line client. The reset script runs the SQL files through Node.
-
-## 1. Install
-
-Open a terminal (PowerShell, cmd or Git Bash) in the project folder:
+Needs only **Node.js 20 or newer**. Open a terminal in the project folder:
 
 ```bash
 cd backend
 npm install
-copy .env.example .env      # Git Bash / macOS / Linux: cp .env.example .env
+npm start
 ```
 
-Edit `backend/.env` if your MySQL user, password or port is different:
+Open http://localhost:3000.
+
+`npm start` looks for MySQL first:
+
+| Your computer | What `npm start` does |
+|---|---|
+| MySQL running, `aura_rental` exists | uses it, your data is kept |
+| MySQL running, no `aura_rental` yet | creates it from `db/schema.sql` + `db/seed.sql` |
+| No MySQL (or wrong login) | starts a **temporary MySQL** with the sample data. Everything you change is lost when you stop the server |
+
+The temporary MySQL is real MySQL 8.4 run by [mysql-memory-server](https://www.npmjs.com/package/mysql-memory-server).
+If MySQL 8.4 is not installed, the first `npm start` downloads it from cdn.mysql.com (a few hundred MB,
+once), so the first start can take a few minutes. Stop the server with `Ctrl + C`; the temporary MySQL stops with it.
+
+## Using your own MySQL (keeps data between runs)
+
+Install MySQL 8.x, then create `backend/.env`:
+
+```bash
+copy .env.example .env      # Git Bash / macOS / Linux: cp .env.example .env
+```
 
 | Variable | Default | Meaning |
 |---|---|---|
 | `DB_HOST` / `DB_PORT` | `localhost` / `3306` | MySQL server |
 | `DB_USER` / `DB_PASSWORD` | `root` / *(empty)* | MySQL login |
 | `DB_NAME` | `aura_rental` | database used by the app |
-| `SESSION_SECRET` | | any long random string |
+| `SESSION_SECRET` | random each start | any long random string (keeps you logged in across restarts) |
 | `PORT` | `3000` | web server port |
 
-## 2. Create the database
+To go back to the sample data at any time:
 
 ```bash
 npm run db:reset
 ```
 
 This **drops and recreates** the database named in `DB_NAME`, loads `db/schema.sql`, then `db/seed.sql`
-(20 rooms on floors 2-30, 3 admins, 3 bookings). Run it again any time you want fresh sample data.
+(20 rooms on floors 2-30, 3 admins, 3 bookings). You do not need the `mysql` command-line client.
 
-## 3. Run
-
-```bash
-npm start        # or: npm run dev   (restarts automatically when a file changes)
-```
-
-Open http://localhost:3000. Quick check: http://localhost:3000/api/rooms should return JSON rooms.
+Other commands: `npm run dev` restarts automatically when a file changes.
+Quick check: http://localhost:3000/api/rooms should return JSON rooms.
 
 ## Test logins
 
@@ -84,16 +92,16 @@ npm test
 
 The tests use a **separate database `aura_rental_test`**. They create it from `schema.sql` + `seed.sql` before
 each test file, so your dev data in `aura_rental` is never touched. Uploaded test images go to a temp folder.
-MySQL must be running.
+The tests need a running MySQL (they do not start the temporary one).
 
 ## Back-end layout
 
 ```
 backend/
   scripts/db-reset.js   npm run db:reset (also used by the tests)
-  src/server.js         loads .env, starts the server
+  src/server.js         loads .env, prepares the database, starts the server
   src/app.js            builds the Express app (exported for tests)
-  src/config/           MySQL pool, upload folder
+  src/config/           MySQL pool, temporary-MySQL fallback (ensure-database.js), upload folder
   src/routes/           URL -> middleware + controller only
   src/controllers/      read request, call service, send response
   src/services/         business rules + SQL (parameterised queries only)
@@ -106,8 +114,9 @@ backend/
 
 ## Troubleshooting
 
-- `ECONNREFUSED 127.0.0.1:3306`: MySQL is not running. Start the MySQL service, then retry.
-- `Access denied for user 'root'`: set `DB_PASSWORD` in `backend/.env`.
+- Data disappears after restarting: you are on the temporary MySQL (the start message says so). Use your own MySQL to keep data.
+- `Access denied for user 'root'` in `npm test`: set `DB_PASSWORD` in `backend/.env`.
+- First `npm start` seems stuck: it is downloading MySQL. Wait, and check your internet connection.
 - `EADDRINUSE :3000`: another server is already on port 3000. Stop it or change `PORT` in `.env`.
 
 ## Working with Git

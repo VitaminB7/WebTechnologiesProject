@@ -4,13 +4,11 @@
 
 ## 1. ลงโปรแกรม (ครั้งเดียว)
 
-| โปรแกรม | โหลดที่ | หมายเหตุ |
+| โปรแกรม | โหลดที่ | จำเป็นไหม |
 |---|---|---|
-| Node.js 20 ขึ้นไป | https://nodejs.org (เลือก LTS) | ลงตามค่าเริ่มต้น |
-| MySQL 8.x | https://dev.mysql.com/downloads/installer/ | ตอนติดตั้งจะให้ตั้งรหัส root **จดไว้** |
-| Git | https://git-scm.com | ลงตามค่าเริ่มต้น |
-
-โปรเจกต์ทดสอบกับ MySQL 8 เท่านั้น ยังไม่ได้ทดสอบกับ XAMPP (MariaDB)
+| Node.js 20 ขึ้นไป | https://nodejs.org (เลือก LTS) | **ต้องมี** |
+| Git | https://git-scm.com | **ต้องมี** |
+| MySQL 8.x | https://dev.mysql.com/downloads/installer/ | ไม่ต้องก็ได้ (ดูข้อ 2) |
 
 ## 2. รันเว็บในเครื่อง
 
@@ -20,13 +18,6 @@
 git clone https://github.com/VitaminB7/WebTechnologiesProject.git
 cd WebTechnologiesProject/backend
 npm install
-copy .env.example .env        # Git Bash / macOS / Linux: cp .env.example .env
-```
-
-เปิดไฟล์ `backend/.env` แล้วใส่รหัส root ของ MySQL ที่บรรทัด `DB_PASSWORD=` จากนั้น
-
-```bash
-npm run db:reset              # สร้างฐานข้อมูล + ข้อมูลตัวอย่าง
 npm start
 ```
 
@@ -40,7 +31,19 @@ cd backend
 npm start                     # ปิดเว็บด้วย Ctrl + C
 ```
 
-`npm run db:reset` ใช้เมื่ออยากล้างข้อมูลกลับเป็นข้อมูลตัวอย่าง (ห้องที่แก้และการจองที่เพิ่มจะหายหมด)
+### ไม่มี MySQL ก็รันได้
+
+ตอน `npm start` โปรแกรมจะหา MySQL ในเครื่องก่อน
+
+| เครื่องคุณ | สิ่งที่เกิดขึ้น |
+|---|---|
+| ไม่มี MySQL | เปิด **MySQL ชั่วคราว** พร้อมข้อมูลตัวอย่างให้เอง ปิดเว็บแล้วข้อมูลที่แก้จะหาย เปิดใหม่ได้ข้อมูลตัวอย่างชุดเดิม |
+| มี MySQL | ใช้ตัวในเครื่อง ข้อมูลที่แก้ยังอยู่ ถ้ายังไม่มีฐานข้อมูล `aura_rental` จะสร้างให้เอง |
+
+- ถ้าไม่มี MySQL การ `npm start` ครั้งแรกจะโหลด MySQL มาก่อน (หลายร้อย MB ครั้งเดียว) อาจรอหลายนาที ครั้งต่อไปเร็ว
+- ถ้ามี MySQL ที่ตั้งรหัส root ไว้ ให้ก๊อป `.env.example` เป็น `.env` แล้วใส่รหัสที่ `DB_PASSWORD=`
+- อยากล้างข้อมูลกลับเป็นข้อมูลตัวอย่าง (เฉพาะตอนใช้ MySQL ในเครื่อง): `npm run db:reset`
+- `npm test` ต้องใช้ MySQL ในเครื่องเท่านั้น
 
 ## 3. แก้โค้ดแล้วส่งขึ้น GitHub
 
@@ -66,7 +69,7 @@ git checkout -b feature/team-page
 
 ```bash
 cd backend
-npm test                      # ต้องผ่านทั้งหมดก่อนส่ง
+npm test                      # ต้องผ่านทั้งหมดก่อนส่ง (ต้องมี MySQL ในเครื่อง)
 git add .
 git commit -m "feat(frontend): add real team members"
 git push -u origin feature/team-page
@@ -109,7 +112,8 @@ git push -u origin feature/team-page
 
 | ข้อความ | สาเหตุ | แก้ |
 |---|---|---|
-| `Access denied for user 'root'` | รหัสใน `.env` ไม่ตรงกับ MySQL | แก้ `DB_PASSWORD` ใน `backend/.env` |
-| `ECONNREFUSED 127.0.0.1:3306` | MySQL ยังไม่เปิด | เปิด MySQL (Services → MySQL80 → Start) |
+| ปิดเว็บแล้วข้อมูลที่แก้หาย | กำลังใช้ MySQL ชั่วคราว (ตอนเปิดจะขึ้นข้อความ `Temporary MySQL ready`) | ปกติของโหมดนี้ ถ้าอยากให้ข้อมูลอยู่ต้องลง MySQL |
+| `npm start` ครั้งแรกค้างนาน | กำลังโหลด MySQL | รอ และเช็กว่าเน็ตต่ออยู่ |
+| `npm test` ขึ้น `ECONNREFUSED` หรือ `Access denied` | เทสต์ต้องใช้ MySQL ในเครื่อง | ลง/เปิด MySQL แล้วใส่รหัสใน `backend/.env` |
 | `EADDRINUSE :3000` | มีเว็บรันค้างอยู่แล้ว | ปิดหน้าต่างเก่า หรือเปลี่ยน `PORT` ใน `.env` |
 | `npm warn install-scripts ... bcrypt` | npm ข้ามสคริปต์ของ bcrypt | ไม่ต้องทำอะไร bcrypt ใช้ได้ปกติ |
