@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Login · AURA Sukhumvit 36</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+  <main class="login-page">
+    <div class="card login-card">
+      <div class="login-card__head">
+        <a class="brand" href="index.html">
+          <span class="brand__logo" aria-hidden="true">N</span>
+          <span>
+            <span class="brand__name">AURA SUKHUMVIT 36</span>
+            <span class="brand__tagline">Admin login</span>
+          </span>
+        </a>
+      </div>
+
+      <form id="login-form" class="login-card__body" novalidate>
+        <div class="field">
+          <label for="username">Username / Email</label>
+          <input id="username" name="username" type="text" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button id="login-submit" class="btn btn--dark btn--block" type="submit">Login</button>
+        <p class="form-error hidden" role="alert"></p>
+        <a href="index.html" class="muted">← Back to home</a>
+      </form>
+    </div>
+  </main>
+  <script type="module" src="js/pages/login.js"></script>
+</body>
+</html>

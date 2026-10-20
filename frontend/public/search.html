@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Search Rooms · AURA Sukhumvit 36</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+  <header id="site-header" class="site-header"></header>
+
+  <main class="page">
+    <div class="container">
+      <p class="eyebrow">Find your room</p>
+      <h1>Search rooms</h1>
+
+      <form id="filter-form" class="card filter-bar" novalidate>
+        <div class="filter-grid">
+          <div class="field">
+            <label for="f-type">Room type</label>
+            <select id="f-type" name="type">
+              <option value="">Any type</option>
+              <option value="Standard">Standard</option>
+              <option value="Deluxe">Deluxe</option>
+              <option value="Suite">Suite</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-floor">Floor number</label>
+            <input id="f-floor" name="floor" type="number" min="1" max="99" step="1" inputmode="numeric" placeholder="Any">
+          </div>
+          <div class="field">
+            <label for="f-condition">Room condition</label>
+            <select id="f-condition" name="minCondition">
+              <option value="">Any condition</option>
+              <option value="1">1★ แย่ or better</option>
+              <option value="2">2★ พอใช้ or better</option>
+              <option value="3">3★ สภาพดี or better</option>
+              <option value="4">4★ ดีมาก or better</option>
+              <option value="5">5★ ใหม่มาก</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-min-price">Min price</label>
+            <input id="f-min-price" name="minPrice" type="number" min="0" step="500" inputmode="numeric" placeholder="฿0">
+          </div>
+          <div class="field">
+            <label for="f-max-price">Max price</label>
+            <input id="f-max-price" name="maxPrice" type="number" min="0" step="500" inputmode="numeric" placeholder="No limit">
+          </div>
+          <div class="field">
+            <label for="f-bedrooms">Bedrooms</label>
+            <select id="f-bedrooms" name="bedrooms">
+              <option value="">Any</option>
+              <option value="0">Studio</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-actions">
+          <div class="filter-actions__left">
+            <label class="chip">
+              <input type="checkbox" name="available" value="true">
+              Available only
+            </label>
+            <button type="button" id="clear-filters" class="link-button">Clear all filters</button>
+          </div>
+          <button type="submit" class="btn btn--green">Search Room</button>
+        </div>
+        <p class="form-error hidden" role="alert"></p>
+      </form>
+
+      <div class="results-head">
+        <h2 id="results-title">Rooms</h2>
+        <span id="results-count" class="muted" aria-live="polite"></span>
+      </div>
+      <div id="results" class="card-grid" aria-busy="false"></div>
+      <nav id="pagination" class="pagination" aria-label="Search results pages"></nav>
+    </div>
+  </main>
+
+  <footer id="site-footer" class="site-footer"></footer>
+  <script type="module" src="js/pages/search.js"></script>
+</body>
+</html>

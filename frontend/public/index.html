@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home · AURA Sukhumvit 36</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+  <header id="site-header" class="site-header"></header>
+
+  <main class="page">
+    <div class="container hero">
+      <section>
+        <p class="eyebrow">One condo. Selected with care.</p>
+        <h1>Your next room at AURA Sukhumvit 36.</h1>
+        <p class="hero__lead">
+          Browse every available unit in one trusted building, compare clear monthly rents,
+          and book a viewing in minutes.
+        </p>
+        <a class="btn btn--primary" href="search.html">View Available Rooms</a>
+
+        <ul class="checks">
+          <li>One trusted property</li>
+          <li>Clear monthly rent</li>
+          <li>Viewing support</li>
+        </ul>
+
+        <div class="stats" aria-live="polite">
+          <div class="card stat">
+            <p class="stat__value" id="stat-total-rooms">…</p>
+            <p class="stat__label">Rental rooms</p>
+          </div>
+          <div class="card stat">
+            <p class="stat__value" id="stat-room-types">…</p>
+            <p class="stat__label">Room layouts</p>
+          </div>
+          <div class="card stat">
+            <p class="stat__value">24/7</p>
+            <p class="stat__label">Building security</p>
+          </div>
+        </div>
+        <p class="muted" id="stat-available"></p>
+      </section>
+
+      <aside class="card about">
+        <div class="about__image img-placeholder">Residence photo</div>
+        <div class="about__body">
+          <p class="eyebrow">About the residence</p>
+          <p>
+            AURA Sukhumvit 36 is a low-rise residence a short walk from BTS Thong Lo.
+            Every unit is inspected and rated before it is listed, so what you see is what you rent.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer id="site-footer" class="site-footer"></footer>
+  <script type="module" src="js/pages/home.js"></script>
+</body>
+</html>

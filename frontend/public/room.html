@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Room · AURA Sukhumvit 36</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+  <header id="site-header" class="site-header"></header>
+
+  <main class="page">
+    <div class="container">
+      <a href="search.html" class="muted">← Back to search</a>
+      <div id="room-state"></div>
+
+      <article id="room" class="hidden">
+        <div id="gallery" class="gallery" aria-label="Room photos"></div>
+
+        <div class="detail">
+          <div>
+            <section>
+              <h1 id="room-title"></h1>
+              <p id="room-building" class="muted"></p>
+              <ul id="room-facts" class="facts"></ul>
+              <div class="condition-box">
+                <span>สภาพห้อง</span>
+                <span id="room-condition"></span>
+              </div>
+            </section>
+
+            <section>
+              <h2>Room owner</h2>
+              <dl id="owner-card" class="card owner-card"></dl>
+            </section>
+
+            <section>
+              <h2>About this room</h2>
+              <p id="room-description"></p>
+            </section>
+
+            <section>
+              <h2>Appliances</h2>
+              <ul id="appliances" class="appliances"></ul>
+            </section>
+          </div>
+
+          <aside class="card rent-box" aria-label="Rent and booking">
+            <p class="eyebrow">Monthly rent</p>
+            <p class="rent-box__price"><span id="room-price"></span> <span class="rent-box__unit">/ month</span></p>
+            <span id="room-status"></span>
+            <p id="room-lease" class="muted"></p>
+            <button id="book-now" type="button" class="btn btn--primary btn--block">BOOK NOW</button>
+          </aside>
+        </div>
+
+        <section>
+          <h2>Similar rooms</h2>
+          <div id="similar" class="card-grid"></div>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <footer id="site-footer" class="site-footer"></footer>
+  <script type="module" src="js/pages/room.js"></script>
+</body>
+</html>
