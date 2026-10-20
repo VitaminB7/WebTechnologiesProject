@@ -1,7 +1,7 @@
 const { describe, it, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const {
-  app, request, LOGINS, resetTestDb, closeDb, lastLog,
+  app, pool, request, LOGINS, resetTestDb, closeDb, lastLog,
 } = require('./helpers');
 
 before(resetTestDb);
@@ -11,9 +11,9 @@ describe('POST /api/auth/login', () => {
   it('logs in with username, returns the admin without password, and writes a Log row', async () => {
     const res = await request(app).post('/api/auth/login').send(LOGINS.super).expect(200);
     assert.equal(res.body.data.username, 'admin_main');
-    assert.equal(res.body.data.role, 'super_admin');
+    assert.equal(res.body.data.role, 'SuperAdmin');
     assert.equal(res.body.data.displayName, 'Somchai Jaidee');
-    assert.ok(Array.isArray(res.body.data.emails));
+    assert.equal(res.body.data.email, 'admin@aura36.co.th');
     assert.ok(!('password' in res.body.data));
     assert.ok(!JSON.stringify(res.body).includes('$2b$'));
     const cookie = res.headers['set-cookie'].join(';');
@@ -23,28 +23,29 @@ describe('POST /api/auth/login', () => {
     assert.deepEqual(await lastLog(), { Username: 'admin_main', Changed: 'LOGIN admin_main' });
   });
 
-  it('logs in with one of the admin emails', async () => {
+  it('logs in with the admin email', async () => {
     const res = await request(app).post('/api/auth/login')
       .send({ username: 'admin@aura36.co.th', password: 'Admin@1234' }).expect(200);
     assert.equal(res.body.data.username, 'admin_main');
   });
 
-  it('rejects a wrong password with 401', async () => {
+  it('logs in an Admin that has no email', async () => {
+    const res = await request(app).post('/api/auth/login').send(LOGINS.ops).expect(200);
+    assert.equal(res.body.data.role, 'Admin');
+    assert.equal(res.body.data.email, null);
+  });
+
+  it('rejects a wrong password with 401 and writes no Log row', async () => {
+    const [[before]] = await pool.execute('SELECT COUNT(*) AS n FROM Log');
     const res = await request(app).post('/api/auth/login')
       .send({ username: 'admin_main', password: 'wrong-password' }).expect(401);
     assert.equal(typeof res.body.error.message, 'string');
+    const [[after]] = await pool.execute('SELECT COUNT(*) AS n FROM Log');
+    assert.equal(after.n, before.n);
   });
 
   it('rejects an unknown user with 401', async () => {
     await request(app).post('/api/auth/login').send({ username: 'ghost', password: 'whatever1' }).expect(401);
-  });
-
-  it('rejects an inactive account with 403', async () => {
-    await request(app).post('/api/auth/login').send(LOGINS.inactive).expect(403);
-  });
-
-  it('rejects an inactive account with a wrong password as 401 (does not reveal status)', async () => {
-    await request(app).post('/api/auth/login').send({ username: 'ops_niran', password: 'nope-nope' }).expect(401);
   });
 
   it('returns 400 with fields when username/password are missing or not strings', async () => {

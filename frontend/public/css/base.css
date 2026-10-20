@@ -390,11 +390,6 @@ h3 {
   color: #1e40af;
 }
 
-.badge--inactive {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
 /* ---------- Forms ---------- */
 .form-grid {
   display: grid;
@@ -730,7 +725,7 @@ input[readonly] {
 
 .filter-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -861,17 +856,6 @@ input[readonly] {
   color: var(--text);
 }
 
-.condition-box {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border: 1px solid #fde68a;
-  background: #fffbeb;
-  border-radius: var(--radius);
-  font-weight: 600;
-}
-
 .owner-card {
   padding: 16px;
   display: grid;
@@ -961,59 +945,6 @@ input[readonly] {
   }
 }
 
-/* ---------- Booking ---------- */
-.booking-layout {
-  max-width: 720px;
-  margin: 0 auto;
-}
-
-.booking-card {
-  padding: 24px;
-}
-
-.booking-room {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 12px 14px;
-  margin-bottom: 20px;
-  background: #f1f5f9;
-  border-radius: var(--radius);
-  font-size: 0.9rem;
-}
-
-.confirmation {
-  padding: 32px 24px;
-  text-align: center;
-}
-
-.confirmation__id {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--primary);
-  margin: 8px 0 16px;
-}
-
-.confirmation dl {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 6px 16px;
-  text-align: left;
-  max-width: 360px;
-  margin: 0 auto 24px;
-}
-
-.confirmation dt {
-  color: var(--muted);
-}
-
-.confirmation dd {
-  margin: 0;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-
 /* ---------- Team ---------- */
 .team-grid {
   display: grid;
@@ -1064,18 +995,6 @@ input[readonly] {
   flex-wrap: wrap;
   gap: 10px;
   font-size: 0.85rem;
-}
-
-.booking-card .form-error {
-  margin-top: 16px;
-}
-
-.booking-card .form-actions {
-  margin-top: 20px;
-}
-
-.confirmation .form-actions {
-  justify-content: center;
 }
 
 .team-card__name {

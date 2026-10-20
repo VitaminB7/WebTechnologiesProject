@@ -6,7 +6,7 @@ import {
   renderState, roomCard, setQueryParams, showApiError, toPositiveInt,
 } from '../ui.js';
 
-const FILTER_NAMES = ['type', 'floor', 'minCondition', 'minPrice', 'maxPrice', 'bedrooms'];
+const FILTER_NAMES = ['type', 'minPrice', 'maxPrice', 'bedrooms', 'sort'];
 
 const form = document.getElementById('filter-form');
 const results = document.getElementById('results');
@@ -31,8 +31,6 @@ function readForm() {
 
 function validate(filters) {
   const fields = {};
-  const floor = toPositiveInt(filters.floor);
-  if (filters.floor && (!floor || floor > 99)) fields.floor = 'Floor must be a whole number from 1 to 99';
   for (const name of ['minPrice', 'maxPrice']) {
     if (filters[name] && !(Number(filters[name]) >= 0)) fields[name] = 'Price must be 0 or more';
   }

@@ -1,27 +1,25 @@
 const pool = require('../config/db');
 const HttpError = require('../utils/http-error');
 const withTransaction = require('../utils/transaction');
-const { toRoom, toRoomImage } = require('../utils/mappers');
+const { toRoom, toAppliance } = require('../utils/mappers');
 const { logAction, describeChanges } = require('../utils/log-action');
 const { isDuplicateKey, placeholders, escapeLike } = require('../utils/sql-helpers');
-const { removeUploadedFiles } = require('../utils/files');
 
 // Whitelisted ORDER BY clauses; the user only ever picks a key, never SQL text.
 const SORT_SQL = {
   roomId: 'RoomID ASC',
   price_asc: 'Price ASC, RoomID ASC',
   price_desc: 'Price DESC, RoomID ASC',
-  newest: 'CreatedAt DESC, RoomID DESC',
 };
 
-const ROOM_COLUMNS_SQL = `Building = ?, Floor = ?, RoomType = ?, NumberOfBedroom = ?, RoomSize = ?,
-  Price = ?, RoomConditions = ?, ConditionRating = ?, MinimumLeases = ?, Availability = ?,
+const ROOM_COLUMNS_SQL = `Building = ?, RoomType = ?, NumberOfBedroom = ?, RoomSize = ?,
+  Price = ?, RoomConditions = ?, MinimumLeases = ?, Availability = ?,
   OwnerName = ?, OwnerPhoneNumber = ?, OwnerEmail = ?, OwnerLineID = ?`;
 
 function roomColumnValues(room) {
   return [
-    room.building, room.floor, room.roomType, room.bedrooms, room.size,
-    room.price, room.description, room.conditionRating, room.minimumLease, room.available ? 1 : 0,
+    room.building, room.roomType, room.bedrooms, room.size,
+    room.price, room.description, room.minimumLease, room.available ? 1 : 0,
     room.owner.name, room.owner.phone, room.owner.email, room.owner.lineId,
   ];
 }
@@ -30,21 +28,17 @@ function notFound(roomId) {
   return new HttpError(404, `Room ${roomId} not found`);
 }
 
-/** Load appliances and images for many rooms with two queries, then map to API objects. */
-async function attachDetails(db, rows) {
+/** Load appliances for many rooms with one query, then map to API objects. */
+async function attachAppliances(db, rows) {
   if (rows.length === 0) return [];
   const ids = rows.map((row) => row.RoomID);
-  const inList = placeholders(ids.length);
   const [applianceRows] = await db.execute(
-    `SELECT RoomID, Appliance FROM RoomAppliance WHERE RoomID IN (${inList}) ORDER BY Appliance`, ids,
+    `SELECT RoomID, Serial_number, Name_appliance FROM Appliance
+     WHERE RoomID IN (${placeholders(ids.length)}) ORDER BY Name_appliance, Serial_number`,
+    ids,
   );
-  const [imageRows] = await db.execute(
-    `SELECT RoomID, ImageID, FilePath FROM RoomImage WHERE RoomID IN (${inList}) ORDER BY SortOrder, ImageID`, ids,
-  );
-  const rowsOf = (list, id) => list.filter((r) => r.RoomID === id);
-  const appliancesOf = (id) => rowsOf(applianceRows, id).map((r) => r.Appliance);
-  const imagesOf = (id) => rowsOf(imageRows, id).map(toRoomImage);
-  return rows.map((row) => toRoom(row, appliancesOf(row.RoomID), imagesOf(row.RoomID)));
+  const appliancesOf = (id) => applianceRows.filter((r) => r.RoomID === id).map(toAppliance);
+  return rows.map((row) => toRoom(row, appliancesOf(row.RoomID)));
 }
 
 async function findRoomRow(db, roomId, { lock = false } = {}) {
@@ -56,7 +50,7 @@ async function findRoomRow(db, roomId, { lock = false } = {}) {
 async function getRoom(roomId, db = pool) {
   const row = await findRoomRow(db, roomId);
   if (!row) throw notFound(roomId);
-  const [room] = await attachDetails(db, [row]);
+  const [room] = await attachAppliances(db, [row]);
   return room;
 }
 
@@ -65,15 +59,13 @@ function buildSearchWhere(filters) {
   const params = [];
   const add = (clause, ...values) => { clauses.push(clause); params.push(...values); };
   if (filters.type !== null) add('RoomType = ?', filters.type);
-  if (filters.floor !== null) add('Floor = ?', filters.floor);
   if (filters.minPrice !== null) add('Price >= ?', filters.minPrice);
   if (filters.maxPrice !== null) add('Price <= ?', filters.maxPrice);
   if (filters.bedrooms !== null) add('NumberOfBedroom = ?', filters.bedrooms);
-  if (filters.minCondition !== null) add('ConditionRating >= ?', filters.minCondition);
   if (filters.available !== null) add('Availability = ?', filters.available ? 1 : 0);
   if (filters.q !== null) {
     const like = `%${escapeLike(filters.q)}%`;
-    add('(CAST(RoomID AS CHAR) LIKE ? OR OwnerName LIKE ?)', like, like);
+    add('(RoomID LIKE ? OR OwnerName LIKE ?)', like, like);
   }
   return { where: clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '', params };
 }
@@ -87,7 +79,7 @@ async function searchRooms(filters) {
     `SELECT * FROM RoomUnit ${where} ORDER BY ${SORT_SQL[filters.sort]} LIMIT ? OFFSET ?`,
     [...params, String(filters.pageSize), String(offset)],
   );
-  const rooms = await attachDetails(pool, rows);
+  const rooms = await attachAppliances(pool, rows);
   return { rooms, meta: { page: filters.page, pageSize: filters.pageSize, total } };
 }
 
@@ -99,7 +91,7 @@ async function getSimilarRooms(roomId) {
      ORDER BY Availability DESC, ABS(Price - ?), RoomID LIMIT 3`,
     [row.RoomType, roomId, row.Price],
   );
-  return attachDetails(pool, rows);
+  return attachAppliances(pool, rows);
 }
 
 async function getStats() {
@@ -116,9 +108,22 @@ async function getStats() {
 }
 
 async function replaceAppliances(db, roomId, appliances) {
-  await db.execute('DELETE FROM RoomAppliance WHERE RoomID = ?', [roomId]);
-  for (const appliance of appliances) {
-    await db.execute('INSERT INTO RoomAppliance (RoomID, Appliance) VALUES (?, ?)', [roomId, appliance]);
+  await db.execute('DELETE FROM Appliance WHERE RoomID = ?', [roomId]);
+  for (const [index, appliance] of appliances.entries()) {
+    try {
+      await db.execute(
+        'INSERT INTO Appliance (Serial_number, RoomID, Name_appliance) VALUES (?, ?, ?)',
+        [appliance.serialNumber, roomId, appliance.name],
+      );
+    } catch (err) {
+      // The validator already rejects repeats; this catches serials the DB collation treats as equal.
+      if (isDuplicateKey(err)) {
+        throw new HttpError(409, `Serial number ${appliance.serialNumber} is used twice`, {
+          [`appliances.${index}.serialNumber`]: 'is used twice in this room',
+        });
+      }
+      throw err;
+    }
   }
 }
 
@@ -143,10 +148,10 @@ async function createRoom(room, actor) {
 
 // Flat view of the editable fields, used only to describe changes in the Log.
 function loggableFields(room) {
-  const { roomId, images, updatedAt, owner, appliances, ...rest } = room;
+  const { roomId, owner, appliances, ...rest } = room;
   return {
     ...rest,
-    appliances: [...appliances].sort(),
+    appliances: appliances.map((a) => `${a.serialNumber} ${a.name}`).sort(),
     ownerName: owner.name,
     ownerPhone: owner.phone,
     ownerEmail: owner.email,
@@ -158,39 +163,33 @@ async function updateRoom(roomId, room, actor) {
   await withTransaction(async (db) => {
     const row = await findRoomRow(db, roomId, { lock: true });
     if (!row) throw notFound(roomId);
-    const [before] = await attachDetails(db, [row]);
+    const [before] = await attachAppliances(db, [row]);
     await db.execute(
-      `UPDATE RoomUnit SET ${ROOM_COLUMNS_SQL}, UpdatedAt = CURRENT_TIMESTAMP WHERE RoomID = ?`,
+      `UPDATE RoomUnit SET ${ROOM_COLUMNS_SQL} WHERE RoomID = ?`,
       [...roomColumnValues(room), roomId],
     );
     await replaceAppliances(db, roomId, room.appliances);
-    const changes = describeChanges(loggableFields(before), loggableFields({ ...room, roomId }));
+    const changes = describeChanges(loggableFields(before), loggableFields(room));
     await logAction(db, actor, `UPDATE RoomUnit ${roomId}: ${changes || 'no changes'}`);
   });
   return getRoom(roomId);
 }
 
+/** Appliance rows go with the room (FK ON DELETE CASCADE). */
 async function deleteRoom(roomId, actor) {
-  const imagePaths = await withTransaction(async (db) => {
-    const row = await findRoomRow(db, roomId, { lock: true });
-    if (!row) throw notFound(roomId);
-    const [images] = await db.execute('SELECT FilePath FROM RoomImage WHERE RoomID = ?', [roomId]);
-    await db.execute('DELETE FROM RoomUnit WHERE RoomID = ?', [roomId]);
+  await withTransaction(async (db) => {
+    const [result] = await db.execute('DELETE FROM RoomUnit WHERE RoomID = ?', [roomId]);
+    if (result.affectedRows === 0) throw notFound(roomId);
     await logAction(db, actor, `DELETE RoomUnit ${roomId}`);
-    return images.map((image) => image.FilePath);
   });
-  // Files are removed only after the commit, so a failed delete never loses images.
-  await removeUploadedFiles(imagePaths);
 }
 
 module.exports = {
   getRoom,
-  findRoomRow,
   searchRooms,
   getSimilarRooms,
   getStats,
   createRoom,
   updateRoom,
   deleteRoom,
-  notFound,
 };

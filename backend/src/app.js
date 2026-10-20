@@ -4,7 +4,6 @@ const express = require('express');
 const session = require('express-session');
 const apiRoutes = require('./routes');
 const { errorHandler } = require('./middleware/error-handler');
-const { uploadDir, publicPrefix } = require('./config/uploads');
 
 const SESSION_COOKIE = 'aura.sid';
 const EIGHT_HOURS = 8 * 60 * 60 * 1000;
@@ -35,7 +34,6 @@ app.use(session({
 }));
 
 app.use('/api', apiRoutes);
-app.use(publicPrefix, express.static(uploadDir));
 app.use(express.static(frontendDir));
 app.use(errorHandler);
 

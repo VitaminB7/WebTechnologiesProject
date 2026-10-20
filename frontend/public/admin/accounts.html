@@ -29,23 +29,14 @@
         <form id="admin-filters" class="card filters" role="search" novalidate>
           <div class="field">
             <label for="a-q">Search</label>
-            <input id="a-q" name="q" type="search" placeholder="Username or name">
+            <input id="a-q" name="q" type="search" placeholder="Username, name or email">
           </div>
           <div class="field">
             <label for="a-role">Role</label>
             <select id="a-role" name="role">
               <option value="">All roles</option>
-              <option value="super_admin">Super admin</option>
-              <option value="listing_admin">Listing admin</option>
-              <option value="operations">Operations</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="a-status">Status</label>
-            <select id="a-status" name="status">
-              <option value="">All statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="Admin">Admin</option>
+              <option value="SuperAdmin">Super admin</option>
             </select>
           </div>
         </form>
@@ -58,8 +49,7 @@
                   <th scope="col">Username</th>
                   <th scope="col">Display name</th>
                   <th scope="col">Role</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Updated</th>
+                  <th scope="col">Email</th>
                   <th scope="col">Actions</th>
                 </tr>
               </thead>
@@ -83,9 +73,11 @@
                 <input id="p-username" name="username" type="text" maxlength="50" autocomplete="off" required>
               </div>
               <div class="field">
-                <label for="p-emails">Email</label>
-                <input id="p-emails" name="emails" type="text" maxlength="255" autocomplete="off"
-                       placeholder="name@example.com (separate several with commas)">
+                <label for="p-role">Role <span class="required">*</span></label>
+                <select id="p-role" name="role" required>
+                  <option value="Admin">Admin</option>
+                  <option value="SuperAdmin">Super admin</option>
+                </select>
               </div>
               <div class="field">
                 <label for="p-first-name">First name <span class="required">*</span></label>
@@ -96,23 +88,24 @@
                 <input id="p-last-name" name="lastName" type="text" maxlength="100" required>
               </div>
               <div class="field">
-                <label for="p-role">Role <span class="required">*</span></label>
-                <select id="p-role" name="role" required>
-                  <option value="listing_admin">Listing admin</option>
-                  <option value="operations">Operations</option>
-                  <option value="super_admin">Super admin</option>
-                </select>
+                <label for="p-email">Email</label>
+                <input id="p-email" name="email" type="email" maxlength="100" autocomplete="off" placeholder="name@example.com">
               </div>
               <div class="field">
-                <label for="p-status">Status <span class="required">*</span></label>
-                <select id="p-status" name="status" required>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
+                <label for="p-confirm-email">Confirm email</label>
+                <input id="p-confirm-email" name="confirmEmail" type="email" maxlength="100" autocomplete="off">
               </div>
-              <div id="password-field" class="field">
+              <div class="field field--full">
+                <label for="p-address">Address</label>
+                <input id="p-address" name="address" type="text" maxlength="255">
+              </div>
+              <div class="field password-field">
                 <label for="p-password">Password <span class="required">*</span></label>
                 <input id="p-password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+              </div>
+              <div class="field password-field">
+                <label for="p-confirm-password">Confirm password <span class="required">*</span></label>
+                <input id="p-confirm-password" name="confirmPassword" type="password" minlength="8" autocomplete="new-password" required>
               </div>
             </div>
 

@@ -23,24 +23,10 @@
             <label for="f-type">Room type</label>
             <select id="f-type" name="type">
               <option value="">Any type</option>
-              <option value="Standard">Standard</option>
-              <option value="Deluxe">Deluxe</option>
-              <option value="Suite">Suite</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="f-floor">Floor number</label>
-            <input id="f-floor" name="floor" type="number" min="1" max="99" step="1" inputmode="numeric" placeholder="Any">
-          </div>
-          <div class="field">
-            <label for="f-condition">Room condition</label>
-            <select id="f-condition" name="minCondition">
-              <option value="">Any condition</option>
-              <option value="1">1★ แย่ or better</option>
-              <option value="2">2★ พอใช้ or better</option>
-              <option value="3">3★ สภาพดี or better</option>
-              <option value="4">4★ ดีมาก or better</option>
-              <option value="5">5★ ใหม่มาก</option>
+              <option value="Studio">Studio</option>
+              <option value="1 Bedroom">1 Bedroom</option>
+              <option value="2 Bedroom">2 Bedroom</option>
+              <option value="Deluxe room">Deluxe room</option>
             </select>
           </div>
           <div class="field">
@@ -60,6 +46,14 @@
               <option value="2">2</option>
               <option value="3">3</option>
               <option value="4">4</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-sort">Sort by</label>
+            <select id="f-sort" name="sort">
+              <option value="">Room number</option>
+              <option value="price_asc">Price: low to high</option>
+              <option value="price_desc">Price: high to low</option>
             </select>
           </div>
         </div>

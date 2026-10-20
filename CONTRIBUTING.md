@@ -62,7 +62,7 @@ git checkout -b feature/team-page
 | ขึ้นต้นด้วย | ใช้เมื่อ | ตัวอย่าง |
 |---|---|---|
 | `feature/` | เพิ่มของใหม่ | `feature/team-page` |
-| `fix/` | แก้บั๊ก | `fix/booking-date` |
+| `fix/` | แก้บั๊ก | `fix/search-price` |
 | `docs/` | แก้เอกสาร | `docs/report-diagram` |
 
 ### แก้เสร็จแล้ว
@@ -96,7 +96,7 @@ git push -u origin feature/team-page
 
 - push ตรงเข้า `main`
 - commit ไฟล์ `backend/.env` (มีรหัสผ่าน MySQL ของเครื่องคุณ)
-- commit `node_modules/` หรือรูปใน `backend/uploads/` (`.gitignore` กันไว้แล้ว)
+- commit `node_modules/` (`.gitignore` กันไว้แล้ว)
 
 ## 4. ก่อนแก้โค้ด อ่านอะไร
 

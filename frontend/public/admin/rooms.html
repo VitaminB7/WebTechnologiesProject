@@ -37,9 +37,10 @@
               <label for="s-type">Room Type</label>
               <select id="s-type" name="type">
                 <option value="">All types</option>
-                <option value="Standard">Standard</option>
-                <option value="Deluxe">Deluxe</option>
-                <option value="Suite">Suite</option>
+                <option value="Studio">Studio</option>
+                <option value="1 Bedroom">1 Bedroom</option>
+                <option value="2 Bedroom">2 Bedroom</option>
+                <option value="Deluxe room">Deluxe room</option>
               </select>
             </div>
             <div class="field">
@@ -59,7 +60,6 @@
               <table class="table">
                 <thead>
                   <tr>
-                    <th scope="col">Room image</th>
                     <th scope="col">Room ID</th>
                     <th scope="col">Type</th>
                     <th scope="col">Price/Month</th>
@@ -90,28 +90,29 @@
               <div class="form-grid form-grid--3">
                 <div class="field">
                   <label for="r-room-id">Room ID <span class="required">*</span></label>
-                  <input id="r-room-id" name="roomId" type="number" min="1" max="99999" step="1" required>
+                  <input id="r-room-id" name="roomId" type="text" maxlength="6" placeholder="L-1203" autocomplete="off" required>
                 </div>
                 <div class="field">
-                  <label for="r-floor">Floor <span class="required">*</span></label>
-                  <input id="r-floor" name="floor" type="number" min="1" max="99" step="1" required>
+                  <label for="r-building">Building <span class="required">*</span></label>
+                  <input id="r-building" name="building" type="text" maxlength="100" placeholder="Building A" required>
                 </div>
                 <div class="field">
                   <label for="r-type">Room Type <span class="required">*</span></label>
                   <select id="r-type" name="roomType" required>
                     <option value="">Select type</option>
-                    <option value="Standard">Standard</option>
-                    <option value="Deluxe">Deluxe</option>
-                    <option value="Suite">Suite</option>
+                    <option value="Studio">Studio</option>
+                    <option value="1 Bedroom">1 Bedroom</option>
+                    <option value="2 Bedroom">2 Bedroom</option>
+                    <option value="Deluxe room">Deluxe room</option>
                   </select>
                 </div>
                 <div class="field">
-                  <label for="r-size">Size (m²) <span class="required">*</span></label>
-                  <input id="r-size" name="size" type="number" min="0.01" step="0.01" required>
+                  <label for="r-size">Size (m²)</label>
+                  <input id="r-size" name="size" type="number" min="1" max="500" step="0.01">
                 </div>
                 <div class="field">
                   <label for="r-price">Monthly Rent (฿) <span class="required">*</span></label>
-                  <input id="r-price" name="price" type="number" min="0" step="0.01" required>
+                  <input id="r-price" name="price" type="number" min="0" max="999999.99" step="0.01" required>
                 </div>
                 <div class="field">
                   <label for="r-available">Status <span class="required">*</span></label>
@@ -125,25 +126,16 @@
                   <input id="r-bedrooms" name="bedrooms" type="number" min="0" max="10" step="1" value="1" required>
                 </div>
                 <div class="field">
-                  <label for="r-lease">Minimum lease (months) <span class="required">*</span></label>
-                  <input id="r-lease" name="minimumLease" type="number" min="1" step="1" value="12" required>
-                </div>
-                <div class="field">
-                  <label for="r-condition">Condition rating <span class="required">*</span></label>
-                  <select id="r-condition" name="conditionRating" required>
-                    <option value="1">1 – แย่</option>
-                    <option value="2">2 – พอใช้</option>
-                    <option value="3" selected>3 – สภาพดี</option>
-                    <option value="4">4 – ดีมาก</option>
-                    <option value="5">5 – ใหม่มาก</option>
-                  </select>
+                  <label for="r-lease">Minimum lease (months)</label>
+                  <input id="r-lease" name="minimumLease" type="number" min="1" max="36" step="1" value="12">
                 </div>
               </div>
             </fieldset>
 
             <fieldset class="form-section">
               <legend>Appliances</legend>
-              <div id="appliance-options" class="checkbox-grid"></div>
+              <p class="muted">Tick each appliance in the room and enter its serial number.</p>
+              <div id="appliance-options" class="appliance-grid"></div>
             </fieldset>
 
             <fieldset class="form-section">
@@ -154,8 +146,8 @@
                   <input id="r-owner-name" name="owner.name" type="text" maxlength="150" required>
                 </div>
                 <div class="field">
-                  <label for="r-owner-phone">Phone</label>
-                  <input id="r-owner-phone" name="owner.phone" type="tel" maxlength="20">
+                  <label for="r-owner-phone">Phone <span class="required">*</span></label>
+                  <input id="r-owner-phone" name="owner.phone" type="tel" maxlength="12" placeholder="080-123-1234" required>
                 </div>
                 <div class="field">
                   <label for="r-owner-email">Email</label>
@@ -172,18 +164,9 @@
               <legend>Room Description</legend>
               <div class="field">
                 <label for="r-description" class="visually-hidden">Room description</label>
-                <textarea id="r-description" name="description" rows="4"
+                <textarea id="r-description" name="description" rows="4" maxlength="5000"
                           placeholder="Describe the room, view, furniture..."></textarea>
               </div>
-            </fieldset>
-
-            <fieldset class="form-section">
-              <legend>Room Images</legend>
-              <div class="field">
-                <label for="r-images">Add images (jpg, png, webp · max 5 per upload · ≤ 2 MB each)</label>
-                <input id="r-images" name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple>
-              </div>
-              <div id="image-list" class="image-list"></div>
             </fieldset>
 
             <p class="form-error hidden" role="alert"></p>

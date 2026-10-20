@@ -25,12 +25,11 @@ function checkInt(raw, min, max) {
   return { value: n };
 }
 
-function checkNumber(raw, { min, max, greaterThan }) {
+function checkNumber(raw, { min, max }) {
   if (isBlank(raw)) return { error: 'is required' };
   const n = readNumber(raw);
   if (!Number.isFinite(n)) return { error: 'must be a number' };
-  if (greaterThan !== undefined && n <= greaterThan) return { error: `must be > ${greaterThan}` };
-  if (min !== undefined && n < min) return { error: `must be >= ${min}` };
+  if (n < min) return { error: `must be >= ${min}` };
   if (n > max) return { error: `must be <= ${max}` };
   return { value: n };
 }

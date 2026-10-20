@@ -5,14 +5,14 @@ Express serves the API at `/api` and the front end (`frontend/public`) at `/`, s
 
 - Spec: [docs/SPEC.md](docs/SPEC.md)
 - API contract: [docs/API.md](docs/API.md)
-- Database: [db/schema.sql](db/schema.sql) (tables) + [db/seed.sql](db/seed.sql) (sample data)
+- Database: [db/schema.sql](db/schema.sql) (tables, follows the report's Data Dictionary) + [db/seed.sql](db/seed.sql) (sample data)
 
 ## Project layout
 
 ```
 aura-rental/
   backend/            Express API + serves the front end (see "Back-end layout" below)
-  frontend/public/    8 pages: plain HTML + CSS + JS, no build step
+  frontend/public/    7 pages: plain HTML + CSS + JS, no build step
     css/              base.css (all pages), admin.css (admin pages)
     js/api.js         the only file that calls fetch()
     js/ui.js          shared UI helpers (header, cards, messages)
@@ -69,18 +69,18 @@ npm run db:reset
 ```
 
 This **drops and recreates** the database named in `DB_NAME`, loads `db/schema.sql`, then `db/seed.sql`
-(20 rooms on floors 2-30, 3 admins, 3 bookings). You do not need the `mysql` command-line client.
+(20 rooms L-0203 … L-3001 with 115 appliances, 3 admins). You do not need the `mysql` command-line client.
 
 Other commands: `npm run dev` restarts automatically when a file changes.
 Quick check: http://localhost:3000/api/rooms should return JSON rooms.
 
 ## Test logins
 
-| Username | Password | Role | Status |
+| Username | Password | Role | Can do |
 |---|---|---|---|
-| `admin_main` | `Admin@1234` | super_admin | active (can manage admin accounts) |
-| `listing_ploy` | `Listing@1234` | listing_admin | active |
-| `ops_niran` | `Ops@12345` | operations | **inactive**, login is refused (403) |
+| `admin_main` | `Admin@1234` | SuperAdmin | rooms + admin accounts + logs |
+| `listing_ploy` | `Listing@1234` | Admin | rooms |
+| `ops_niran` | `Ops@12345` | Admin | rooms (has no email) |
 
 You can also log in with an email instead of the username, e.g. `admin@aura36.co.th` / `Admin@1234`.
 
@@ -101,15 +101,14 @@ backend/
   scripts/db-reset.js   npm run db:reset (also used by the tests)
   src/server.js         loads .env, prepares the database, starts the server
   src/app.js            builds the Express app (exported for tests)
-  src/config/           MySQL pool, temporary-MySQL fallback (ensure-database.js), upload folder
+  src/config/           MySQL pool, temporary-MySQL fallback (ensure-database.js)
   src/routes/           URL -> middleware + controller only
   src/controllers/      read request, call service, send response
   src/services/         business rules + SQL (parameterised queries only)
   src/validators/       pure functions: input -> { value, errors }
-  src/middleware/       requireAuth / requireRole, requireRoomId, upload (multer), errorHandler
+  src/middleware/       requireAuth / requireRole, requireRoomId, errorHandler
   src/utils/            HttpError, mappers (DB row -> API object), logAction, transaction helper
   tests/                node:test + supertest
-  uploads/              room images (served at /uploads, not committed)
 ```
 
 ## Troubleshooting
@@ -126,6 +125,6 @@ Step-by-step guide for group members (Thai): [CONTRIBUTING.md](CONTRIBUTING.md)
 - `main` always runs: `npm test` passes before anything is merged.
 - New work goes on a branch: `feature/<short-name>`, `fix/<short-name>` or `docs/<short-name>`,
   then a pull request into `main`.
-- Commit messages: `type(scope): what changed`, e.g. `feat(frontend): add booking form`,
+- Commit messages: `type(scope): what changed`, e.g. `feat(frontend): add room filter`,
   `fix(backend): reject past move-in dates`. Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`.
-- Never commit `backend/.env`, `node_modules/` or uploaded images (already in `.gitignore`).
+- Never commit `backend/.env` or `node_modules/` (already in `.gitignore`).

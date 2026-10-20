@@ -3,17 +3,16 @@ const asyncHandler = require('../utils/async-handler');
 const { findAdmin } = require('../services/admin.service');
 
 /**
- * Reload the admin on every request so a deleted or deactivated account
- * (or a changed role) takes effect immediately, not at next login.
+ * Reload the admin on every request so a deleted account (or a changed role)
+ * takes effect immediately, not at next login.
  */
 const requireAuth = asyncHandler(async (req, res, next) => {
   const username = req.session && req.session.username;
   if (!username) throw new HttpError(401, 'Please log in');
   const admin = await findAdmin(username);
-  if (!admin || admin.status !== 'active') {
+  if (!admin) {
     req.session.destroy(() => {});
-    if (!admin) throw new HttpError(401, 'Please log in');
-    throw new HttpError(403, 'This account is inactive');
+    throw new HttpError(401, 'Please log in');
   }
   req.admin = admin;
   next();

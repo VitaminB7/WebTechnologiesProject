@@ -2,16 +2,14 @@ const {
   isPlainObject, isBlank, checkString, checkEnum, checkEmail, optional, collect,
 } = require('./common');
 
-const ROLES = ['super_admin', 'listing_admin', 'operations'];
-const STATUSES = ['active', 'inactive'];
-const USERNAME_PATTERN = /^[A-Za-z0-9_.-]{3,50}$/;
-const MAX_EMAILS = 5;
+const ROLES = ['Admin', 'SuperAdmin'];
+const USERNAME_PATTERN = /^[A-Za-z0-9_.]{3,50}$/;
 
 function checkUsername(raw) {
   const result = checkString(raw, 50);
   if (result.error) return result;
   if (!USERNAME_PATTERN.test(result.value)) {
-    return { error: 'must be 3-50 letters, digits, dot, dash or underscore' };
+    return { error: 'must be 3-50 letters, digits, dot or underscore' };
   }
   return result;
 }
@@ -25,19 +23,6 @@ function checkPassword(raw) {
   return { value: raw };
 }
 
-function checkEmails(raw) {
-  if (!Array.isArray(raw)) return { error: 'must be a list' };
-  const emails = [];
-  for (const item of raw) {
-    const result = checkEmail(item);
-    if (result.error) return { error: `${String(item)} ${result.error}` };
-    const seen = emails.some((e) => e.toLowerCase() === result.value.toLowerCase());
-    if (!seen) emails.push(result.value);
-  }
-  if (emails.length > MAX_EMAILS) return { error: `at most ${MAX_EMAILS} emails` };
-  return { value: emails };
-}
-
 /** Create: username + password required. Update: no username, blank password = keep current. */
 function validateAdmin(body, { isCreate }) {
   const b = isPlainObject(body) ? body : {};
@@ -46,8 +31,7 @@ function validateAdmin(body, { isCreate }) {
     lastName: checkString(b.lastName, 100),
     address: optional(b.address, (v) => checkString(v, 255), null),
     role: checkEnum(b.role, ROLES),
-    status: checkEnum(b.status, STATUSES),
-    emails: optional(b.emails, checkEmails, []),
+    email: optional(b.email, checkEmail, null),
     password: isCreate ? checkPassword(b.password) : optional(b.password, checkPassword, null),
   };
   if (isCreate) rules.username = checkUsername(b.username);
@@ -59,7 +43,6 @@ function validateAdminFilters(query) {
   return collect({
     q: optional(q.q, (v) => checkString(v, 100), null),
     role: optional(q.role, (v) => checkEnum(v, ROLES), null),
-    status: optional(q.status, (v) => checkEnum(v, STATUSES), null),
   });
 }
 

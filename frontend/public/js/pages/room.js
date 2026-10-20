@@ -1,7 +1,7 @@
 import { getRoom, getSimilarRooms } from '../api.js';
 import {
-  availabilityBadge, bedroomText, conditionText, formatPrice, getQueryParams, h, imageOrPlaceholder,
-  renderFooter, renderPublicHeader, renderState, roomCard, toImage, toPositiveInt,
+  availabilityBadge, bedroomText, formatPrice, getQueryParams, h, imagePlaceholder,
+  renderFooter, renderPublicHeader, renderState, roomCard, sizeText,
 } from '../ui.js';
 
 const APPLIANCE_ICONS = {
@@ -17,6 +17,7 @@ const APPLIANCE_ICONS = {
   'Induction stove': '🍳',
 };
 const GALLERY_SLOTS = 4;
+const ROOM_ID_PATTERN = /^L-\d{4}$/;
 
 const stateBox = document.getElementById('room-state');
 const roomView = document.getElementById('room');
@@ -29,11 +30,9 @@ function showNotFound() {
 }
 
 function renderGallery(room) {
-  const images = (room.images || []).map(toImage);
   const slots = [];
   for (let i = 0; i < GALLERY_SLOTS; i += 1) {
-    const src = images[i] ? images[i].src : null;
-    slots.push(h('div', {}, [imageOrPlaceholder(src, `Room ${room.roomId} photo ${i + 1}`)]));
+    slots.push(h('div', {}, [imagePlaceholder(`Room ${room.roomId} photo ${i + 1}`)]));
   }
   byId('gallery').replaceChildren(...slots);
 }
@@ -43,11 +42,9 @@ function renderSummary(room) {
   byId('room-building').textContent = room.building;
   byId('room-facts').replaceChildren(
     h('li', { text: bedroomText(room.bedrooms) }),
-    h('li', { text: `${room.size} m²` }),
-    h('li', { text: `Floor ${room.floor}` }),
+    h('li', { text: sizeText(room.size) }),
     h('li', { text: room.roomType }),
   );
-  byId('room-condition').textContent = conditionText(room.conditionRating);
   byId('room-description').textContent = room.description || 'No description yet.';
 }
 
@@ -58,13 +55,14 @@ function renderOwner(owner = {}) {
   );
 }
 
+/** Appliances arrive as `{ serialNumber, name }`; visitors only need the name. */
 function renderAppliances(appliances = []) {
   const list = byId('appliances');
   if (!appliances.length) {
     list.replaceChildren(h('li', { className: 'muted', text: 'No appliances listed.' }));
     return;
   }
-  list.replaceChildren(...appliances.map((name) => h('li', {}, [
+  list.replaceChildren(...appliances.map(({ name }) => h('li', {}, [
     h('span', { className: 'appliances__icon', text: APPLIANCE_ICONS[name] || '•', 'aria-hidden': 'true' }),
     h('span', { text: name }),
   ])));
@@ -73,13 +71,10 @@ function renderAppliances(appliances = []) {
 function renderRentBox(room) {
   byId('room-price').textContent = formatPrice(room.price);
   byId('room-status').replaceChildren(availabilityBadge(room.available, 'Available now'));
-  byId('room-lease').textContent = `Minimum lease ${room.minimumLease} month${room.minimumLease === 1 ? '' : 's'}`;
-  const bookButton = byId('book-now');
-  bookButton.disabled = !room.available;
-  bookButton.textContent = room.available ? 'BOOK NOW' : 'NOT AVAILABLE';
-  bookButton.addEventListener('click', () => {
-    window.location.href = `/booking.html?roomId=${encodeURIComponent(room.roomId)}`;
-  });
+  const lease = room.minimumLease;
+  byId('room-lease').textContent = lease === null || lease === undefined
+    ? 'Minimum lease –'
+    : `Minimum lease ${lease} month${lease === 1 ? '' : 's'}`;
 }
 
 async function loadSimilar(roomId) {
@@ -116,6 +111,6 @@ async function loadRoom(roomId) {
 renderPublicHeader('search');
 renderFooter();
 
-const requestedId = toPositiveInt(getQueryParams().id);
-if (requestedId) loadRoom(requestedId);
+const requestedId = (getQueryParams().id || '').trim();
+if (ROOM_ID_PATTERN.test(requestedId)) loadRoom(requestedId);
 else showNotFound();

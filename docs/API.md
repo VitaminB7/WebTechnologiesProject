@@ -1,112 +1,127 @@
 # API Contract — AURA Sukhumvit 36
 
 **This file is the contract between front end and back end. Neither side may change field names without updating this file.**
+The database follows the group's Data Dictionary (report section 3.2): `AdminAccount`, `RoomUnit`, `Log`, `Appliance` — see `db/schema.sql`.
 
 - Base URL: same origin, prefix `/api` (Express serves the front end from `frontend/public` too → no CORS)
-- Body: JSON (`Content-Type: application/json`) except image upload (multipart)
+- Body: JSON (`Content-Type: application/json`)
 - Auth: cookie session (`express-session`). Front end calls `fetch(url, { credentials: 'same-origin' })`
-- JSON field names are **camelCase** (back end maps from DB PascalCase)
+- JSON field names are **camelCase** (back end maps from DB column names)
 
 ## Response format (every endpoint)
 
 Success: `{ "data": <payload> }` (list endpoints add `"meta": { "page", "pageSize", "total" }`)
-Error:   `{ "error": { "message": "human readable", "fields": { "price": "must be >= 0" } } }` (`fields` optional)
+Error:   `{ "error": { "message": "human readable", "fields": { "price": "must be 0 - 999999.99" } } }` (`fields` optional)
 
 | Status | When |
 |---|---|
 | 200 / 201 | ok / created |
 | 400 | validation failed (`fields` filled) |
 | 401 | not logged in |
-| 403 | logged in but role not allowed / account inactive |
+| 403 | logged in but role not allowed |
 | 404 | not found |
-| 409 | duplicate key (RoomID / Username already exists) |
+| 409 | duplicate key (RoomID / Username / Email / serial number already exists) |
 | 500 | unexpected (never leak SQL/stack to client) |
 
 ## Objects
 
-### Room
+### Room  (table `RoomUnit` + `Appliance`)
 ```json
 {
-  "roomId": 1201, "building": "AURA Sukhumvit 36", "floor": 12,
-  "roomType": "Deluxe", "bedrooms": 1, "size": 34.0, "price": 15000,
-  "description": "A bright, fully furnished...", "conditionRating": 3,
+  "roomId": "L-1201", "building": "Building A",
+  "roomType": "Deluxe room", "bedrooms": 1, "size": 34.0, "price": 15000,
+  "description": "A bright, fully furnished...",
   "minimumLease": 12, "available": true,
-  "appliances": ["Sofa", "Fridge"],
-  "images": [{ "imageId": 7, "url": "/uploads/1201-a1b2.jpg" }],
-  "owner": { "name": "...", "phone": "080-123-1234", "email": "...", "lineId": "..." },
-  "updatedAt": "2026-10-20T10:00:00.000Z"
+  "appliances": [{ "serialNumber": "SF-1201-01", "name": "Sofa" }],
+  "owner": { "name": "...", "phone": "080-123-1234", "email": "...", "lineId": "..." }
 }
 ```
-- `roomType` ∈ `Standard | Deluxe | Suite`
-- `appliances` ⊂ `Sofa, Water heater, Fridge, TV, HomePhone, Air conditioner, Heater, Washing machine, Microwave, Induction stove`
+| JSON | Column | Rule (from the Data Dictionary) |
+|---|---|---|
+| `roomId` | RoomID | required, format `L-` + 4 digits (`^L-\d{4}$`), e.g. `L-0203`, `L-1201` |
+| `building` | Building | required, ≤ 100 chars |
+| `roomType` | RoomType | required, one of `Studio`, `1 Bedroom`, `2 Bedroom`, `Deluxe room` |
+| `bedrooms` | NumberOfBedroom | required, integer 0–10 |
+| `size` | RoomSize | optional (`null`), number 1.00–500.00 |
+| `price` | Price | required, number 0.00–999999.99 |
+| `description` | RoomConditions | optional, ≤ 5000 chars |
+| `minimumLease` | MinimumLeases | optional (`null`), integer 1–36 (months) |
+| `available` | Availability | required, boolean |
+| `owner.name` | OwnerName | required, ≤ 150 chars |
+| `owner.phone` | OwnerPhoneNumber | required, format `000-000-0000` (`^\d{3}-\d{3}-\d{4}$`) |
+| `owner.email` | OwnerEmail | optional, valid email, ≤ 100 chars |
+| `owner.lineId` | OwnerLineID | optional, ≤ 50 chars |
+| `appliances[].serialNumber` | Appliance.Serial_number | required, ≤ 50 chars, unique within the room |
+| `appliances[].name` | Appliance.Name_appliance | required, ≤ 100 chars |
+
+- `appliances` is ordered by name then serial number; `[]` when none. The admin form offers these names:
+  `Sofa, Water heater, Fridge, TV, HomePhone, Air conditioner, Heater, Washing machine, Microwave, Induction stove`.
+- Rooms have **no images** in the database: the front end always shows a placeholder.
 - Public endpoints return `owner` too (detail page shows owner contact).
-- `images` is ordered by SortOrder then imageId; `[]` when none.
-- Validation error keys for nested owner fields use dot notation: `owner.name`, `owner.phone`, `owner.email`, `owner.lineId`.
+- Validation error keys for nested fields use dot notation: `owner.phone`, `appliances.0.serialNumber`.
 - Optional text fields may be sent as `null` or `""` — both mean empty (stored as NULL).
 
-### Admin
+### Admin  (table `AdminAccount`)
 ```json
 { "username": "admin_main", "firstName": "Somchai", "lastName": "Jaidee",
-  "displayName": "Somchai J.", "address": null, "role": "super_admin",
-  "status": "active", "emails": ["a@x.com"], "updatedAt": "..." }
+  "displayName": "Somchai Jaidee", "address": null, "role": "SuperAdmin",
+  "email": "admin@aura36.co.th" }
 ```
-- `displayName` is computed by the back end = `firstName + " " + lastName` (read-only, not stored)
-- `role` ∈ `super_admin | listing_admin | operations`; `status` ∈ `active | inactive`
-- **Password is never returned.**
+| JSON | Column | Rule |
+|---|---|---|
+| `username` | Username | required on create, 3–50 chars, letters/digits/underscore/dot; cannot be changed |
+| `password` | Password | create: required ≥ 8 chars; update: optional (blank = keep). Stored as bcrypt hash, **never returned** |
+| `firstName` / `lastName` | Fname / Lname | required, ≤ 100 chars |
+| `address` | Address | optional, ≤ 255 chars |
+| `role` | Role | required, `Admin` or `SuperAdmin` |
+| `email` | Email | optional, valid email, ≤ 100 chars, unique |
 
-### Booking
+- `displayName` = `firstName + " " + lastName`, computed by the back end (read-only).
+- `Admin` can manage rooms. `SuperAdmin` can also manage admin accounts and read logs.
+
+### Log  (table `Log`)
 ```json
-{ "bookingId": 1, "roomId": 1201, "fullName": "...", "identityNumber": "1103700000000",
-  "phone": "0801231234", "email": "...", "moveInDate": "2026-11-01",
-  "status": "pending", "createdAt": "..." }
+{ "logId": "L-12", "username": "admin_main", "changed": "UPDATE RoomUnit L-1201: price 15000 -> 16000",
+  "dateTime": "2026-10-20T10:00:00.000Z" }
 ```
+- `LogID` is assigned by the back end: `L-` + (largest existing number + 1), inside the same transaction as the change.
 
 ## Endpoints
 
 ### Auth
 | Method | Path | Auth | Body / Query | Returns |
 |---|---|---|---|---|
-| POST | `/api/auth/login` | – | `{ username, password }` (username OR an email in AdminEmail) | `{ data: Admin }` 401 on wrong creds, 403 if inactive |
+| POST | `/api/auth/login` | – | `{ username, password }` (username OR the admin's email) | `{ data: Admin }`, 401 on wrong creds |
 | POST | `/api/auth/logout` | – | – | `{ data: { ok: true } }` |
 | GET | `/api/auth/me` | – | – | `{ data: Admin }` or 401 |
 
 ### Rooms (public read)
-| Method | Path | Auth | Notes |
-|---|---|---|---|
-| GET | `/api/rooms` | – | Query (all optional): `type`, `floor`, `minPrice`, `maxPrice`, `bedrooms`, `minCondition`, `available` (`true`/`false`), `q` (matches roomId or owner name), `page` (default 1), `pageSize` (default 12, max 50), `sort` (`price_asc`, `price_desc`, `newest`; default `roomId`). Returns `Room[]` + `meta`. |
-| GET | `/api/rooms/:id` | – | `Room`, 404 if not found |
-| GET | `/api/rooms/:id/similar` | – | up to 3 rooms, same `roomType`, excluding itself |
-| GET | `/api/stats` | – | `{ totalRooms, roomTypes, availableRooms }` for the home page |
-
-### Rooms (admin)
-| Method | Path | Auth | Notes |
-|---|---|---|---|
-| POST | `/api/rooms` | login | body = Room fields (without `images`, `updatedAt`) → 201 `Room`. 409 if `roomId` exists |
-| PUT | `/api/rooms/:id` | login | full update (same body; `roomId` in body ignored) → `Room` |
-| DELETE | `/api/rooms/:id` | login | → `{ data: { ok: true } }`, also deletes image files |
-| POST | `/api/rooms/:id/images` | login | multipart field `images` (max 5 files, jpg/png/webp, ≤ 2 MB each) → `Room` |
-| DELETE | `/api/rooms/:id/images/:imageId` | login | → `Room` |
-
-Validation for room body: `roomId` int 1–99999, `floor` int 1–99, `roomType` enum, `bedrooms` int 0–10, `size` > 0, `price` ≥ 0, `conditionRating` int 1–5, `minimumLease` int ≥ 1, `owner.name` required, `owner.email` valid email if present, `appliances` only allowed values.
-
-### Admin accounts (super_admin only)
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/api/admins` | Query: `q` (username/name), `role`, `status`. Returns `Admin[]` |
+| GET | `/api/rooms` | Query (all optional): `type` (roomType), `minPrice`, `maxPrice`, `bedrooms`, `available` (`true`/`false`), `q` (matches roomId or owner name), `page` (default 1), `pageSize` (default 12, max 50), `sort` (`price_asc`, `price_desc`; default `roomId`). Returns `Room[]` + `meta`. 400 on bad values |
+| GET | `/api/rooms/:id` | `Room`, 404 if not found (400 if `:id` is not `L-` + 4 digits) |
+| GET | `/api/rooms/:id/similar` | up to 3 rooms, same `roomType`, excluding itself, available first, closest price |
+| GET | `/api/stats` | `{ totalRooms, roomTypes, availableRooms }` for the home page |
+
+### Rooms (login: Admin or SuperAdmin)
+| Method | Path | Notes |
+|---|---|---|
+| POST | `/api/rooms` | body = Room → 201 `Room`. 409 if `roomId` exists |
+| PUT | `/api/rooms/:id` | full update (same body; `roomId` in body ignored; appliances replaced) → `Room` |
+| DELETE | `/api/rooms/:id` | → `{ data: { ok: true } }` (its appliances are deleted too) |
+
+### Admin accounts (SuperAdmin only)
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/admins` | Query: `q` (username/name/email), `role`. Returns `Admin[]` |
 | GET | `/api/admins/:username` | `Admin` |
-| POST | `/api/admins` | `{ username, password, firstName, lastName, address?, role, status, emails[] }` → 201. password ≥ 8 chars. 409 on duplicate |
-| PUT | `/api/admins/:username` | same body minus `username`; `password` optional (blank = keep) → `Admin` |
-| DELETE | `/api/admins/:username` | cannot delete yourself (400) |
+| POST | `/api/admins` | `{ username, password, firstName, lastName, address?, role, email? }` → 201. 409 on duplicate username/email |
+| PUT | `/api/admins/:username` | same body minus `username`; `password` optional (blank = keep) → `Admin`. Cannot change your own role (400) |
+| DELETE | `/api/admins/:username` | cannot delete yourself (400). The admin's Log rows are deleted with it (FK `ON DELETE CASCADE`) |
 | POST | `/api/admins/:username/reset-password` | `{ password }` |
 
-### Bookings
-| Method | Path | Auth | Notes |
-|---|---|---|---|
-| POST | `/api/bookings` | – | `{ roomId, fullName, identityNumber, phone, email, moveInDate }` → 201. 400 if room not available. identityNumber = 13 digits; phone = 9–15 digits after removing spaces/dashes; email valid; moveInDate `YYYY-MM-DD` not before today (server local date, Asia/Bangkok) |
-| GET | `/api/bookings` | login | list newest first |
-| PATCH | `/api/bookings/:id` | login | `{ status }` |
+### Logs (SuperAdmin only)
+| GET | `/api/logs` | latest 100, newest first |
 
-### Logs
-| GET | `/api/logs` | super_admin | latest 100 |
-
-Every create/update/delete of room/admin/booking-status, plus login, writes one `Log` row: e.g. `"UPDATE RoomUnit 1201: price 15000 -> 16000"`.
+Every create/update/delete of a room or an admin, plus each successful login, writes one `Log` row, e.g.
+`"UPDATE RoomUnit L-1201: price 15000 -> 16000"`.

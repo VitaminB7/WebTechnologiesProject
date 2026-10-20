@@ -1,8 +1,6 @@
 const roomService = require('../services/room.service');
-const roomImageService = require('../services/room-image.service');
 const assertValid = require('../utils/assert-valid');
-const HttpError = require('../utils/http-error');
-const { validateRoom, validateRoomSearch, parseImageId } = require('../validators/room.validator');
+const { validateRoom, validateRoomSearch } = require('../validators/room.validator');
 
 // req.roomId is set by the requireRoomId middleware on every /rooms/:id route.
 
@@ -40,15 +38,4 @@ async function remove(req, res) {
   res.json({ data: { ok: true } });
 }
 
-async function addImages(req, res) {
-  res.json({ data: await roomImageService.addImages(req.roomId, req.files, req.admin.username) });
-}
-
-async function removeImage(req, res) {
-  const imageId = parseImageId(req.params.imageId);
-  if (imageId === null) throw new HttpError(404, 'Image not found');
-  const room = await roomImageService.removeImage(req.roomId, imageId, req.admin.username);
-  res.json({ data: room });
-}
-
-module.exports = { list, getOne, similar, stats, create, update, remove, addImages, removeImage };
+module.exports = { list, getOne, similar, stats, create, update, remove };

@@ -5,7 +5,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.use('/admins', requireAuth, requireRole('super_admin'));
+router.use('/admins', requireAuth, requireRole('SuperAdmin'));
 
 router.get('/admins', asyncHandler(controller.list));
 router.get('/admins/:username', asyncHandler(controller.getOne));

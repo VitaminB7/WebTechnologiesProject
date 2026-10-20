@@ -1,8 +1,7 @@
 // Shared UI helpers. All API/user text reaches the DOM through textContent (via `h`); no HTML strings are built.
 import { getMe, logout } from './api.js';
 
-export const CONDITION_LABELS = { 1: 'แย่', 2: 'พอใช้', 3: 'สภาพดี', 4: 'ดีมาก', 5: 'ใหม่มาก' };
-export const ROOM_TYPES = ['Standard', 'Deluxe', 'Suite'];
+export const ROOM_TYPES = ['Studio', '1 Bedroom', '2 Bedroom', 'Deluxe room'];
 export const APPLIANCES = [
   'Sofa', 'Water heater', 'Fridge', 'TV', 'HomePhone',
   'Air conditioner', 'Heater', 'Washing machine', 'Microwave', 'Induction stove',
@@ -15,34 +14,9 @@ export function formatPrice(value) {
   return `฿${amount.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
 }
 
-export function formatDate(value) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-export function conditionText(rating) {
-  const value = Number(rating);
-  const label = CONDITION_LABELS[value] || '';
-  return `${Number.isFinite(value) ? value.toFixed(1) : '-'}★ ${label}`.trim();
-}
-
-/** Local calendar date as YYYY-MM-DD (not UTC, so "today" matches the user's clock). */
-export function todayIso() {
-  const now = new Date();
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-}
-
-// ---------- Images ----------
-/** Only same-origin upload paths are ever used as <img src>. */
-export function safeImageSrc(path) {
-  return typeof path === 'string' && path.startsWith('/uploads/') && !path.includes('..') ? path : null;
-}
-
-/** API image `{ imageId, url }` → `{ id, src }` with a vetted src. */
-export function toImage(image) {
-  return { id: image.imageId, src: safeImageSrc(image.url) };
+/** Room size (nullable in the API) as "34 m²", or "–" when unknown. */
+export function sizeText(size) {
+  return size === null || size === undefined ? '–' : `${Number(size)} m²`;
 }
 
 // ---------- DOM ----------
@@ -63,14 +37,9 @@ export function h(tag, props = {}, children = []) {
   return element;
 }
 
-const placeholder = () => h('div', { className: 'img-placeholder', text: 'No image' });
-
-/** <img> for `src`, or a grey placeholder when there is no src or the file fails to load. */
-export function imageOrPlaceholder(src, alt) {
-  if (!src) return placeholder();
-  const img = h('img', { src, alt, loading: 'lazy' });
-  img.addEventListener('error', () => img.replaceWith(placeholder()), { once: true });
-  return img;
+/** Rooms have no images in the database, so every photo slot is this grey box. */
+export function imagePlaceholder(label) {
+  return h('div', { className: 'img-placeholder', role: 'img', 'aria-label': label, text: 'No image' });
 }
 
 export function bedroomText(bedrooms) {
@@ -87,17 +56,16 @@ export function availabilityBadge(available, availableText = 'Available') {
 
 /** Result card used by search and "similar rooms". */
 export function roomCard(room) {
-  const cover = room.images && room.images.length ? toImage(room.images[0]).src : null;
   return h('a', { className: 'card room-card', href: `/room.html?id=${encodeURIComponent(room.roomId)}` }, [
     h('div', { className: 'room-card__media' }, [
-      imageOrPlaceholder(cover, `Room ${room.roomId}`),
+      imagePlaceholder(`Room ${room.roomId}`),
       h('span', { className: 'room-card__fav', text: '♡', 'aria-hidden': 'true' }),
     ]),
     h('div', { className: 'room-card__body' }, [
       h('p', { className: 'room-card__title', text: `Room ${room.roomId}` }),
       h('p', { className: 'room-card__owner', text: room.owner ? room.owner.name : '' }),
       h('p', { className: 'room-card__price', text: `${formatPrice(room.price)} / month` }),
-      h('p', { className: 'room-card__meta', text: `${bedroomText(room.bedrooms)} · ${room.size} m²` }),
+      h('p', { className: 'room-card__meta', text: `${bedroomText(room.bedrooms)} · ${sizeText(room.size)}` }),
     ]),
   ]);
 }
@@ -285,17 +253,17 @@ export async function renderPublicHeader(active) {
   }
 }
 
-const ADMIN_LINKS = [
-  ['rooms', 'Product management', '/admin/rooms.html'],
-  ['accounts', 'User management', '/admin/accounts.html'],
-];
+const ROOM_LINK = ['rooms', 'Product management', '/admin/rooms.html'];
+const ACCOUNTS_LINK = ['accounts', 'User management', '/admin/accounts.html'];
 
 export function renderAdminHeader(active, admin) {
   const user = h('span', { className: 'admin-user', text: admin ? `${admin.displayName} (${admin.role})` : '' });
+  // Only a SuperAdmin can open account management, so plain Admins never see the link.
+  const links = admin?.role === 'SuperAdmin' ? [ROOM_LINK, ACCOUNTS_LINK] : [ROOM_LINK];
   document.getElementById('site-header').replaceChildren(
     h('div', { className: 'container site-header__inner' }, [
       brand('/admin/rooms.html', 'ADMIN PAGE', 'AURA Sukhumvit 36'),
-      navLinks(ADMIN_LINKS, active),
+      navLinks(links, active),
       h('div', { className: 'header-actions' }, [user, logoutButton('btn btn--outline btn--sm')]),
     ]),
   );

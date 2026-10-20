@@ -1,15 +1,16 @@
-// Admin "User management" (super_admin only): list/filter admins, add/edit panel, reset password, delete.
+// Admin "User management" (SuperAdmin only): list/filter admins, add/edit panel, reset password, delete.
 import {
   createAdmin, deleteAdmin, getAdmin, listAdmins, resetAdminPassword, updateAdmin,
 } from '../api.js';
 import { requireAdmin } from '../auth-guard.js';
 import {
-  clearFieldErrors, formatDate, h, renderAdminHeader, renderFooter, renderState, setBusy,
+  clearFieldErrors, h, renderAdminHeader, renderFooter, renderState, setBusy,
   showApiError, showToast,
 } from '../ui.js';
 
-const ROLE_LABELS = { super_admin: 'Super admin', listing_admin: 'Listing admin', operations: 'Operations' };
-const STATUSES = ['active', 'inactive'];
+const ROLE_LABELS = { Admin: 'Admin', SuperAdmin: 'Super admin' };
+const SUPER_ADMIN = 'SuperAdmin';
+const USERNAME_PATTERN = /^[A-Za-z0-9_.]{3,50}$/;
 const MIN_PASSWORD_LENGTH = 8;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FILTER_DELAY_MS = 300;
@@ -35,11 +36,6 @@ function showNoPermission() {
 
 // ================= Table =================
 
-function statusBadge(status) {
-  const active = status === 'active';
-  return h('span', { className: `badge ${active ? 'badge--available' : 'badge--inactive'}`, text: active ? 'Active' : 'Inactive' });
-}
-
 function actionButton(label, className, onClick) {
   const button = h('button', { type: 'button', className: `btn btn--sm ${className}`, text: label });
   button.addEventListener('click', () => onClick(button));
@@ -52,8 +48,7 @@ function adminRow(admin) {
     h('td', {}, [h('strong', { text: admin.username }), isSelf ? h('span', { className: 'muted', text: ' (you)' }) : null]),
     h('td', { text: admin.displayName }),
     h('td', { text: ROLE_LABELS[admin.role] || admin.role }),
-    h('td', {}, [statusBadge(admin.status)]),
-    h('td', { text: formatDate(admin.updatedAt) }),
+    h('td', { text: admin.email || '–' }),
     h('td', {}, [h('div', { className: 'row-actions' }, [
       actionButton('Edit', 'btn--outline', (button) => startEdit(admin.username, button)),
       actionButton('Reset password', 'btn--outline', () => openResetDialog(admin.username)),
@@ -66,7 +61,6 @@ function readFilters() {
   return {
     q: filtersForm.elements.q.value.trim(),
     role: filtersForm.elements.role.value,
-    status: filtersForm.elements.status.value,
   };
 }
 
@@ -110,7 +104,6 @@ function bindFilters() {
     filterTimer = setTimeout(loadAdmins, FILTER_DELAY_MS);
   });
   filtersForm.elements.role.addEventListener('change', loadAdmins);
-  filtersForm.elements.status.addEventListener('change', loadAdmins);
 }
 
 // ================= Add / Edit panel =================
@@ -122,16 +115,19 @@ function openPanel(admin) {
   const isEdit = Boolean(admin);
   $('panel-title').textContent = isEdit ? `Edit administrator: ${admin.username}` : 'Add administrator';
   form.elements.username.readOnly = isEdit;
-  form.elements.password.disabled = isEdit;
-  $('password-field').classList.toggle('hidden', isEdit);
+  form.querySelectorAll('.password-field').forEach((field) => {
+    field.classList.toggle('hidden', isEdit);
+    field.querySelector('input').disabled = isEdit;
+  });
   $('panel-reset-password').classList.toggle('hidden', !isEdit);
   if (isEdit) {
     form.elements.username.value = admin.username;
     form.elements.firstName.value = admin.firstName;
     form.elements.lastName.value = admin.lastName;
-    form.elements.emails.value = (admin.emails || []).join(', ');
+    form.elements.email.value = admin.email || '';
+    form.elements.confirmEmail.value = admin.email || '';
+    form.elements.address.value = admin.address || '';
     form.elements.role.value = admin.role;
-    form.elements.status.value = admin.status;
   }
   panel.classList.remove('hidden');
   panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -156,43 +152,51 @@ async function startEdit(username, button) {
   }
 }
 
-function parseEmails(text) {
-  return [...new Set(text.split(/[,\s]+/).filter(Boolean))];
-}
-
 function readAdminForm() {
   const fields = form.elements;
   return {
     username: fields.username.value.trim(),
     firstName: fields.firstName.value.trim(),
     lastName: fields.lastName.value.trim(),
-    emails: parseEmails(fields.emails.value),
+    email: fields.email.value.trim(),
+    confirmEmail: fields.confirmEmail.value.trim(),
+    address: fields.address.value.trim(),
     role: fields.role.value,
-    status: fields.status.value,
     password: fields.password.value,
+    confirmPassword: fields.confirmPassword.value,
   };
 }
 
 function validateAdmin(values, isEdit) {
   const fields = {};
-  if (!values.username) fields.username = 'Username is required';
+  if (!isEdit && !USERNAME_PATTERN.test(values.username)) {
+    fields.username = 'Username must be 3-50 letters, digits, underscores or dots';
+  }
   if (!values.firstName) fields.firstName = 'First name is required';
   if (!values.lastName) fields.lastName = 'Last name is required';
-  const badEmail = values.emails.find((email) => !EMAIL_PATTERN.test(email));
-  if (badEmail) fields.emails = `"${badEmail}" is not a valid email address`;
+  if (values.email && !EMAIL_PATTERN.test(values.email)) fields.email = 'Enter a valid email address';
+  else if (values.email !== values.confirmEmail) fields.confirmEmail = 'Emails do not match';
   if (!ROLE_LABELS[values.role]) fields.role = 'Choose a role';
-  if (!STATUSES.includes(values.status)) fields.status = 'Choose a status';
-  if (!isEdit && values.password.length < MIN_PASSWORD_LENGTH) {
+  if (isEdit) return fields;
+  if (values.password.length < MIN_PASSWORD_LENGTH) {
     fields.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters`;
+  } else if (values.password !== values.confirmPassword) {
+    fields.confirmPassword = 'Passwords do not match';
   }
   return fields;
 }
 
 function saveRequest(values) {
-  const { username, password, ...profile } = values;
-  if (!editing) return createAdmin({ username, password, ...profile });
-  // PUT is a full update: keep the address we do not edit here; omit password to keep it.
-  return updateAdmin(editing.username, { ...profile, address: editing.address ?? null });
+  const profile = {
+    firstName: values.firstName,
+    lastName: values.lastName,
+    email: values.email || null,
+    address: values.address || null,
+    role: values.role,
+  };
+  if (!editing) return createAdmin({ username: values.username, password: values.password, ...profile });
+  // Password is left out on purpose: blank = keep (it is changed through "Reset password").
+  return updateAdmin(editing.username, profile);
 }
 
 async function saveAdmin(event) {
@@ -271,7 +275,7 @@ renderFooter('admin');
 currentAdmin = await requireAdmin($('page-state'));
 if (currentAdmin) {
   renderAdminHeader('accounts', currentAdmin);
-  if (currentAdmin.role !== 'super_admin') {
+  if (currentAdmin.role !== SUPER_ADMIN) {
     showNoPermission();
   } else {
     bindFilters();

@@ -5,6 +5,6 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.get('/logs', requireAuth, requireRole('super_admin'), asyncHandler(controller.list));
+router.get('/logs', requireAuth, requireRole('SuperAdmin'), asyncHandler(controller.list));
 
 module.exports = router;
