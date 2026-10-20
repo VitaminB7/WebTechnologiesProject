@@ -19,9 +19,11 @@ CREATE TABLE AdminAccount (
   Address  VARCHAR(255) NULL,
   Role     VARCHAR(30)  NOT NULL,
   Email    VARCHAR(100) NULL,
+  Status   VARCHAR(10)  NOT NULL DEFAULT 'Active',  -- added for the Figma design: Active / Inactive (Inactive = cannot log in)
   PRIMARY KEY (Username),
   UNIQUE KEY uq_admin_email (Email),
-  CHECK (Role IN ('Admin', 'SuperAdmin'))
+  CHECK (Role IN ('Admin', 'SuperAdmin')),
+  CHECK (Status IN ('Active', 'Inactive'))
 );
 
 CREATE TABLE RoomUnit (

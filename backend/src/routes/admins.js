@@ -16,6 +16,7 @@ const { writeLog, describeChanges } = require('../helpers/log');
 const router = express.Router();
 
 const ROLES = ['Admin', 'SuperAdmin'];
+const STATUSES = ['Active', 'Inactive'];
 const USERNAME_PATTERN = /^[A-Za-z0-9_.]{3,50}$/; // ตัวอักษร ตัวเลข _ . ยาว 3-50
 const BCRYPT_COST = 10;
 
@@ -57,17 +58,26 @@ function checkAdminBody(body, isCreate) {
   if (!isBlank(body.email) && !isEmail(body.email)) {
     errors.email = 'must be a valid email (at most 100 characters)';
   }
+  if (!isBlank(body.status) && !isOneOf(body.status, STATUSES)) {
+    errors.status = 'must be Active or Inactive';
+  }
   return errors;
 }
 
 // body ที่ตรวจผ่านแล้ว -> ข้อมูลที่สะอาด (ไม่รวม username / password)
+// status ไม่ส่งมา = null (เพิ่มใหม่ -> Active, แก้ไข -> ใช้ค่าเดิม)
 function readAdminBody(body) {
+  let status = null;
+  if (!isBlank(body.status)) {
+    status = body.status;
+  }
   return {
     firstName: body.firstName.trim(),
     lastName: body.lastName.trim(),
     address: textOrNull(body.address),
     role: body.role,
     email: textOrNull(body.email),
+    status: status,
   };
 }
 
@@ -98,13 +108,16 @@ function sendEmailTaken(res) {
 }
 
 // ---------------------------------------------------------------
-// GET /api/admins — รายชื่อแอดมิน ค้นได้ 3 แบบ (ใส่กี่อันก็ได้ ไม่ใส่ = ทั้งหมด)
-//   q = username หรือชื่อ/นามสกุลมีคำนี้, role = Admin / SuperAdmin, email = อีเมลมีคำนี้
+// GET /api/admins — รายชื่อแอดมิน ค้นได้ 4 แบบ (ใส่กี่อันก็ได้ ไม่ใส่ = ทั้งหมด)
+//   q = username หรือชื่อ/นามสกุลมีคำนี้, role = Admin / SuperAdmin, email = อีเมลมีคำนี้,
+//   status = Active / Inactive
 // ต้องล็อกอินก่อน (POST /api/auth/login) — Postman เก็บ cookie ให้เอง (ต้องเป็น SuperAdmin)
 // Postman ตัวอย่างที่ 1 (สำเร็จ → 200 { "data": [Admin...] })
 //   method: GET    URL: http://localhost:3000/api/admins?q=ploy&role=Admin&email=aura36
 // Postman ตัวอย่างที่ 2 (role ผิด → 400 fields.role)
 //   method: GET    URL: http://localhost:3000/api/admins?role=root
+// Postman ตัวอย่างที่ 2.1 (เฉพาะบัญชีที่ถูกปิด → 200)
+//   method: GET    URL: http://localhost:3000/api/admins?status=Inactive
 // Postman ตัวอย่างที่ 3 (ล็อกอินเป็น Admin ธรรมดา เช่น listing_ploy → 403)
 //   method: GET    URL: http://localhost:3000/api/admins
 // ---------------------------------------------------------------
@@ -121,6 +134,9 @@ router.get('/admins', superAdminOnly, async (req, res, next) => {
     }
     if (!isBlank(query.email) && !isText(query.email, 100)) {
       errors.email = 'must be text, at most 100 characters';
+    }
+    if (!isBlank(query.status) && !isOneOf(query.status, STATUSES)) {
+      errors.status = 'must be Active or Inactive';
     }
     if (hasErrors(errors)) {
       return res.status(400).json({ error: { message: 'Invalid search values', fields: errors } });
@@ -141,6 +157,10 @@ router.get('/admins', superAdminOnly, async (req, res, next) => {
     if (!isBlank(query.email)) {
       conditions.push('Email LIKE ?');
       values.push(toLikePattern(query.email.trim()));
+    }
+    if (!isBlank(query.status)) {
+      conditions.push('Status = ?');
+      values.push(query.status);
     }
     let where = '';
     if (conditions.length > 0) {
@@ -191,7 +211,8 @@ router.get('/admins/:username', superAdminOnly, async (req, res, next) => {
 // Postman ตัวอย่างที่ 1 (สำเร็จ → 201 { "data": Admin })
 //   method: POST   URL: http://localhost:3000/api/admins
 //   body (raw JSON): { "username": "staff_new", "password": "Staff@1234", "firstName": "Mana",
-//                      "lastName": "Deejai", "address": "", "role": "Admin", "email": "mana@example.com" }
+//                      "lastName": "Deejai", "address": "", "role": "Admin", "email": "mana@example.com",
+//                      "status": "Active" }
 // Postman ตัวอย่างที่ 2 (ข้อมูลผิด → 400)
 //   method: POST   URL: http://localhost:3000/api/admins
 //   body (raw JSON): { "username": "a-b", "password": "short", "role": "root" }
@@ -211,6 +232,9 @@ router.post('/admins', superAdminOnly, async (req, res, next) => {
     }
     const username = body.username.trim();
     const admin = readAdminBody(body);
+    if (admin.status === null) {
+      admin.status = 'Active';
+    }
     const hash = await bcrypt.hash(body.password, BCRYPT_COST);
 
     // 2) เช็กซ้ำ แล้วบันทึก + เขียน Log
@@ -223,9 +247,9 @@ router.post('/admins', superAdminOnly, async (req, res, next) => {
         return 'email-taken';
       }
       await connection.execute(
-        `INSERT INTO AdminAccount (Username, Password, Fname, Lname, Address, Role, Email)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [username, hash, admin.firstName, admin.lastName, admin.address, admin.role, admin.email],
+        `INSERT INTO AdminAccount (Username, Password, Fname, Lname, Address, Role, Email, Status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [username, hash, admin.firstName, admin.lastName, admin.address, admin.role, admin.email, admin.status],
       );
       await writeLog(connection, req.admin.username, `CREATE AdminAccount ${username} (${admin.role})`);
       return 'created';
@@ -247,7 +271,8 @@ router.post('/admins', superAdminOnly, async (req, res, next) => {
   }
 });
 
-// แก้ไขแอดมินใน transaction: คืน 'not-found' / 'own-role' / 'email-taken' หรือ Username ตัวจริงเมื่อสำเร็จ
+// แก้ไขแอดมินใน transaction: คืน 'not-found' / 'own-role' / 'own-status' / 'email-taken'
+// หรือ Username ตัวจริงเมื่อสำเร็จ
 async function updateAdmin(username, admin, hash, actor) {
   return runInTransaction(async (connection) => {
     const [rows] = await connection.execute(
@@ -258,19 +283,25 @@ async function updateAdmin(username, admin, hash, actor) {
       return 'not-found';
     }
     const before = rowToAdmin(rows[0]);
-    // ห้ามเปลี่ยน role ตัวเอง (กันกรณีไม่เหลือใครจัดการบัญชีได้)
+    if (admin.status === null) {
+      admin.status = before.status; // ไม่ได้ส่ง status มา = ใช้ค่าเดิม
+    }
+    // ห้ามเปลี่ยน role ตัวเอง และห้ามปิดบัญชีตัวเอง (กันกรณีไม่เหลือใครจัดการบัญชีได้)
     if (isSameUser(before.username, actor) && admin.role !== before.role) {
       return 'own-role';
+    }
+    if (isSameUser(before.username, actor) && admin.status !== 'Active') {
+      return 'own-status';
     }
     if (await isEmailTaken(connection, admin.email, before.username)) {
       return 'email-taken';
     }
     // COALESCE(?, Password) = ถ้าไม่ได้ส่งรหัสใหม่ (null) ก็ใช้รหัสเดิม
     await connection.execute(
-      `UPDATE AdminAccount SET Fname = ?, Lname = ?, Address = ?, Role = ?, Email = ?,
+      `UPDATE AdminAccount SET Fname = ?, Lname = ?, Address = ?, Role = ?, Email = ?, Status = ?,
          Password = COALESCE(?, Password)
        WHERE Username = ?`,
-      [admin.firstName, admin.lastName, admin.address, admin.role, admin.email, hash, before.username],
+      [admin.firstName, admin.lastName, admin.address, admin.role, admin.email, admin.status, hash, before.username],
     );
     const oldValues = {
       firstName: before.firstName,
@@ -278,6 +309,7 @@ async function updateAdmin(username, admin, hash, actor) {
       address: before.address,
       role: before.role,
       email: before.email,
+      status: before.status,
     };
     let changes = describeChanges(oldValues, admin);
     if (hash !== null && changes === 'no changes') {
@@ -292,7 +324,8 @@ async function updateAdmin(username, admin, hash, actor) {
 
 // ---------------------------------------------------------------
 // PUT /api/admins/:username — แก้ไขแอดมิน (SuperAdmin เท่านั้น) เปลี่ยน username ไม่ได้
-// password เว้นว่าง = ใช้รหัสเดิม / เปลี่ยน role ของตัวเองไม่ได้ (400)
+// password เว้นว่าง = ใช้รหัสเดิม / status ไม่ส่ง = ใช้ค่าเดิม
+// เปลี่ยน role ของตัวเอง หรือปิดบัญชีตัวเอง (Inactive) ไม่ได้ (400)
 // ต้องล็อกอินก่อน (POST /api/auth/login) — Postman เก็บ cookie ให้เอง
 // Postman ตัวอย่างที่ 1 (สำเร็จ → 200 { "data": Admin })
 //   method: PUT    URL: http://localhost:3000/api/admins/listing_ploy
@@ -301,6 +334,9 @@ async function updateAdmin(username, admin, hash, actor) {
 // Postman ตัวอย่างที่ 2 (ล็อกอินเป็น admin_main แล้วเปลี่ยน role ตัวเอง → 400 fields.role)
 //   method: PUT    URL: http://localhost:3000/api/admins/admin_main
 //   body (raw JSON): { "firstName": "Somchai", "lastName": "Jaidee", "role": "Admin" }
+// Postman ตัวอย่างที่ 3 (ปิดบัญชีคนอื่น → 200, คนนั้นล็อกอินไม่ได้จนกว่าจะเปิดกลับเป็น Active)
+//   method: PUT    URL: http://localhost:3000/api/admins/ops_niran
+//   body (raw JSON): { "firstName": "Niran", "lastName": "Thongdee", "role": "Admin", "status": "Inactive" }
 // ---------------------------------------------------------------
 router.put('/admins/:username', superAdminOnly, async (req, res, next) => {
   try {
@@ -327,6 +363,11 @@ router.put('/admins/:username', superAdminOnly, async (req, res, next) => {
     if (result === 'own-role') {
       return res.status(400).json({
         error: { message: 'You cannot change your own role', fields: { role: 'cannot change your own role' } },
+      });
+    }
+    if (result === 'own-status') {
+      return res.status(400).json({
+        error: { message: 'You cannot deactivate your own account', fields: { status: 'cannot deactivate your own account' } },
       });
     }
     if (result === 'email-taken') {

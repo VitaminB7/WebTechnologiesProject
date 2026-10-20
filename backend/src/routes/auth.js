@@ -27,7 +27,7 @@ function checkLoginBody(body) {
 
 // ---------------------------------------------------------------
 // POST /api/auth/login — ล็อกอินด้วย username หรืออีเมล + รหัสผ่าน (ทุกคนเรียกได้)
-// สำเร็จ -> { data: Admin } และได้ cookie "aura.sid" / ผิด -> 401
+// สำเร็จ -> { data: Admin } และได้ cookie "aura.sid" / ผิด -> 401 / บัญชีถูกปิด (Inactive) -> 403
 // Postman ตัวอย่างที่ 1 (สำเร็จ → 200)
 //   method: POST   URL: http://localhost:3000/api/auth/login
 //   body (raw JSON): { "username": "admin_main", "password": "Admin@1234" }
@@ -40,6 +40,9 @@ function checkLoginBody(body) {
 // Postman ตัวอย่างที่ 4 (ไม่กรอก → 400)
 //   method: POST   URL: http://localhost:3000/api/auth/login
 //   body (raw JSON): { "username": "" }
+// Postman ตัวอย่างที่ 5 (บัญชีที่ SuperAdmin ตั้งเป็น Inactive ไว้ → 403)
+//   method: POST   URL: http://localhost:3000/api/auth/login
+//   body (raw JSON): { "username": "ops_niran", "password": "Ops@12345" }
 // ---------------------------------------------------------------
 router.post('/auth/login', async (req, res, next) => {
   try {
@@ -56,7 +59,7 @@ router.post('/auth/login', async (req, res, next) => {
 
     // 2) หาแอดมินจาก username ก่อน ถ้าไม่เจอค่อยหาจากอีเมล
     const [rows] = await pool.execute(
-      `SELECT Username, Password FROM AdminAccount
+      `SELECT Username, Password, Status FROM AdminAccount
        WHERE Username = ? OR Email = ?
        ORDER BY Username = ? DESC
        LIMIT 1`,
@@ -69,6 +72,10 @@ router.post('/auth/login', async (req, res, next) => {
     const passwordOk = await bcrypt.compare(body.password, savedHash);
     if (rows.length === 0 || !passwordOk) {
       return res.status(401).json({ error: { message: 'Invalid username or password' } });
+    }
+    // รหัสถูกแต่บัญชีถูกปิด -> ไม่ให้เข้า (เช็กหลังรหัสผ่าน คนที่ไม่รู้รหัสจะไม่รู้ว่าบัญชีถูกปิด)
+    if (rows[0].Status !== 'Active') {
+      return res.status(403).json({ error: { message: 'This account is inactive. Please contact a super admin.' } });
     }
     const username = rows[0].Username;
 

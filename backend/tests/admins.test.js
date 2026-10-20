@@ -6,7 +6,7 @@ const {
 const { runInTransaction } = require('../src/helpers/transaction');
 const { writeLog } = require('../src/helpers/log');
 
-const ADMIN_KEYS = ['username', 'firstName', 'lastName', 'displayName', 'address', 'role', 'email'].sort();
+const ADMIN_KEYS = ['username', 'firstName', 'lastName', 'displayName', 'address', 'role', 'email', 'status'].sort();
 
 function newAdmin(overrides = {}) {
   return {
@@ -188,6 +188,50 @@ describe('create / update / delete admins', () => {
     await superAdmin.put('/api/admins/admin_main').send({
       firstName: 'Somchai', lastName: 'Jaidee', role: 'SuperAdmin', email: 'admin@aura36.co.th',
     }).expect(200);
+    await superAdmin.get('/api/auth/me').expect(200);
+  });
+
+  it('Inactive status: blocks login (403), ends the session, can be filtered, kept when not sent, and reopened', async () => {
+    const created = await superAdmin.get('/api/admins/staff_test').expect(200);
+    assert.equal(created.body.data.status, 'Active'); // default on create
+    const staff = request.agent(app);
+    await staff.post('/api/auth/login').send({ username: 'staff_test', password: 'Staff@1234' }).expect(200);
+
+    const res = await superAdmin.put('/api/admins/staff_test').send({
+      firstName: 'Manee', lastName: 'Deejai', role: 'Admin', status: 'Inactive',
+    }).expect(200);
+    assert.equal(res.body.data.status, 'Inactive');
+    assert.match((await lastLog()).Changed, /status Active -> Inactive/);
+    await staff.get('/api/auth/me').expect(401);
+    const login = await request(app).post('/api/auth/login').send({ username: 'staff_test', password: 'Staff@1234' }).expect(403);
+    assert.match(login.body.error.message, /inactive/i);
+    await request(app).post('/api/auth/login').send({ username: 'staff_test', password: 'wrong-password' }).expect(401);
+
+    const inactive = await superAdmin.get('/api/admins').query({ status: 'Inactive' }).expect(200);
+    assert.deepEqual(inactive.body.data.map((a) => a.username), ['staff_test']);
+    const bad = await superAdmin.get('/api/admins').query({ status: 'Sleeping' }).expect(400);
+    assert.ok(bad.body.error.fields.status);
+    const badBody = await superAdmin.put('/api/admins/staff_test').send({
+      firstName: 'Manee', lastName: 'Deejai', role: 'Admin', status: 'Sleeping',
+    }).expect(400);
+    assert.ok(badBody.body.error.fields.status);
+
+    const kept = await superAdmin.put('/api/admins/staff_test').send({
+      firstName: 'Manee', lastName: 'Deejai', role: 'Admin',
+    }).expect(200);
+    assert.equal(kept.body.data.status, 'Inactive'); // status not sent = keep
+
+    await superAdmin.put('/api/admins/staff_test').send({
+      firstName: 'Manee', lastName: 'Deejai', role: 'Admin', status: 'Active',
+    }).expect(200);
+    await request(app).post('/api/auth/login').send({ username: 'staff_test', password: 'Staff@1234' }).expect(200);
+  });
+
+  it('cannot deactivate yourself (400)', async () => {
+    const res = await superAdmin.put('/api/admins/admin_main').send({
+      firstName: 'Somchai', lastName: 'Jaidee', role: 'SuperAdmin', email: 'admin@aura36.co.th', status: 'Inactive',
+    }).expect(400);
+    assert.ok(res.body.error.fields.status);
     await superAdmin.get('/api/auth/me').expect(200);
   });
 

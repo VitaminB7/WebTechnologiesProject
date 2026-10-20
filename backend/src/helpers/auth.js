@@ -5,7 +5,7 @@
 const pool = require('../db');
 
 // คอลัมน์ที่อ่านได้ — ตั้งใจ "ไม่ใส่" Password เพื่อไม่ให้รหัสผ่านหลุดออกไปทาง API
-const ADMIN_COLUMNS = 'Username, Fname, Lname, Address, Role, Email';
+const ADMIN_COLUMNS = 'Username, Fname, Lname, Address, Role, Email, Status';
 
 // แปลงแถวจาก DB (ชื่อคอลัมน์) -> object ที่ส่งให้หน้าเว็บ (ชื่อแบบ camelCase)
 function rowToAdmin(row) {
@@ -17,11 +17,12 @@ function rowToAdmin(row) {
     address: row.Address,
     role: row.Role,
     email: row.Email,
+    status: row.Status,
   };
 }
 
 // อ่านข้อมูลแอดมินจาก DB ใหม่ทุกครั้งที่มี request
-// เหตุผล: ถ้าแอดมินถูกลบหรือถูกเปลี่ยน role ระหว่างที่ยังล็อกอินอยู่ จะมีผลทันที
+// เหตุผล: ถ้าแอดมินถูกลบ ถูกเปลี่ยน role หรือถูกปิดบัญชี (Inactive) ระหว่างที่ยังล็อกอินอยู่ จะมีผลทันที
 async function requireLogin(req, res, next) {
   try {
     const username = req.session.username;
@@ -32,8 +33,8 @@ async function requireLogin(req, res, next) {
       `SELECT ${ADMIN_COLUMNS} FROM AdminAccount WHERE Username = ?`,
       [username],
     );
-    if (rows.length === 0) {
-      // บัญชีถูกลบไปแล้ว -> ล้าง session ทิ้ง
+    if (rows.length === 0 || rows[0].Status !== 'Active') {
+      // บัญชีถูกลบหรือถูกปิดไปแล้ว -> ล้าง session ทิ้ง
       req.session.destroy(() => {});
       return res.status(401).json({ error: { message: 'Please log in' } });
     }

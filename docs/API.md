@@ -69,7 +69,7 @@ Error:   `{ "error": { "message": "human readable", "fields": { "price": "must b
 ```json
 { "username": "admin_main", "firstName": "Somchai", "lastName": "Jaidee",
   "displayName": "Somchai Jaidee", "address": null, "role": "SuperAdmin",
-  "email": "admin@aura36.co.th" }
+  "email": "admin@aura36.co.th", "status": "Active" }
 ```
 | JSON | Column | Rule |
 |---|---|---|
@@ -79,9 +79,11 @@ Error:   `{ "error": { "message": "human readable", "fields": { "price": "must b
 | `address` | Address | optional, ≤ 255 chars |
 | `role` | Role | required, `Admin` or `SuperAdmin` |
 | `email` | Email | optional, valid email, ≤ 100 chars, unique |
+| `status` | Status | optional, `Active` or `Inactive`. Create: blank = `Active`. Update: blank = keep. Added for the Figma design |
 
 - `displayName` = `firstName + " " + lastName`, computed by the back end (read-only).
 - `Admin` can manage rooms. `SuperAdmin` can also manage admin accounts and read logs.
+- An `Inactive` admin cannot log in (403) and an existing session stops working (401). You cannot set yourself `Inactive` (400).
 
 ### Log  (table `Log`)
 ```json
@@ -119,7 +121,7 @@ Error:   `{ "error": { "message": "human readable", "fields": { "price": "must b
 ### Admin accounts (SuperAdmin only)
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/api/admins` | Query (all optional, combine any): `q` (username or first/last name contains), `role` (`Admin`/`SuperAdmin`), `email` (contains). No query = all admins. Returns `Admin[]` |
+| GET | `/api/admins` | Query (all optional, combine any): `q` (username or first/last name contains), `role` (`Admin`/`SuperAdmin`), `email` (contains), `status` (`Active`/`Inactive`). No query = all admins. Returns `Admin[]` |
 | GET | `/api/admins/:username` | `Admin` |
 | POST | `/api/admins` | `{ username, password, firstName, lastName, address?, role, email? }` → 201. 409 on duplicate username/email |
 | PUT | `/api/admins/:username` | same body minus `username`; `password` optional (blank = keep) → `Admin`. Cannot change your own role (400) |
