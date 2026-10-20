@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- admin/accounts.html — หน้าจัดการบัญชีผู้ดูแล (User management) เฉพาะ SuperAdmin: ค้นหา เพิ่ม แก้ไข รีเซ็ตรหัส ลบ -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -7,11 +8,30 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body class="admin-body">
-  <header id="site-header" class="site-header"></header>
+  <header id="site-header" class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="rooms.html">
+        <span class="brand__logo" aria-hidden="true">N</span>
+        <span>
+          <span class="brand__name">ADMIN PAGE</span>
+          <span class="brand__tagline">AURA Sukhumvit 36</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="rooms.html">Product management</a>
+        <!-- ซ่อนไว้ก่อน common.js จะโชว์ให้เฉพาะ SuperAdmin -->
+        <a id="nav-accounts" href="accounts.html" class="hidden is-active" aria-current="page">User management</a>
+      </nav>
+      <div class="header-actions">
+        <span id="admin-user" class="admin-user"></span>
+        <button id="logout-button" type="button" class="btn btn--outline btn--sm">Logout</button>
+      </div>
+    </div>
+  </header>
 
   <main class="page">
     <div class="container">
@@ -27,9 +47,10 @@
         </div>
 
         <form id="admin-filters" class="card filters" role="search" novalidate>
+          <!-- ตัวกรอง 3 ช่อง ใช้พร้อมกันได้ (ส่งไป API เป็น q, role, email) -->
           <div class="field">
-            <label for="a-q">Search</label>
-            <input id="a-q" name="q" type="search" placeholder="Username, name or email">
+            <label for="a-q">Username / name</label>
+            <input id="a-q" name="q" type="search" placeholder="Username, first or last name">
           </div>
           <div class="field">
             <label for="a-role">Role</label>
@@ -38,6 +59,14 @@
               <option value="Admin">Admin</option>
               <option value="SuperAdmin">Super admin</option>
             </select>
+          </div>
+          <div class="field">
+            <label for="a-email">Email</label>
+            <input id="a-email" name="email" type="search" placeholder="Email contains...">
+          </div>
+          <div class="filters__actions">
+            <button type="submit" class="btn btn--green">Search</button>
+            <button type="reset" class="link-button">Clear</button>
           </div>
         </form>
 
@@ -142,7 +171,15 @@
     </form>
   </dialog>
 
-  <footer id="site-footer" class="site-footer"></footer>
-  <script type="module" src="../js/pages/admin-accounts.js"></script>
+  <footer id="site-footer" class="site-footer">
+    <div class="container">
+      <strong>AURA CONDO</strong>
+      <span> · Admin</span>
+    </div>
+  </footer>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../js/admin-accounts.js"></script>
 </body>
 </html>

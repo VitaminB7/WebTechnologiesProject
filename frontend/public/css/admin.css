@@ -1,4 +1,4 @@
-/* Admin pages: Product management + User management */
+/* admin.css — สไตล์เฉพาะหน้าแอดมิน (จัดการห้อง + จัดการบัญชีผู้ดูแล) ใช้คู่กับ style.css */
 
 .admin-body {
   background: #f1f5f9;
@@ -67,6 +67,23 @@
 
 .table-footer .pagination {
   margin-top: 0;
+}
+
+.thumb {
+  width: 64px;
+  height: 44px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--placeholder);
+}
+
+.thumb img,
+.thumb .img-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+  font-size: 0.6rem;
 }
 
 .row-actions {
@@ -187,13 +204,69 @@
   grid-column: 1 / -1;
 }
 
+/* Room images (upload + list) */
+.image-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.image-item {
+  position: relative;
+  width: 120px;
+  height: 90px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--placeholder);
+}
+
+.image-item img,
+.image-item .img-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+}
+
+.image-item__remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(17, 24, 39, 0.75);
+  color: #fff;
+  cursor: pointer;
+}
+
+.image-item__tag {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  font-size: 0.65rem;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+}
+
 /* Accounts */
 .filters {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 2fr) auto;
+  align-items: end;
   gap: 12px;
   padding: 16px;
   margin-bottom: 16px;
+}
+
+.filters__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 @media (max-width: 640px) {

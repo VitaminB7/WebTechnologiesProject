@@ -13,10 +13,10 @@ Express serves the API at `/api` and the front end (`frontend/public`) at `/`, s
 aura-rental/
   backend/            Express API + serves the front end (see "Back-end layout" below)
   frontend/public/    7 pages: plain HTML + CSS + JS, no build step
-    css/              base.css (all pages), admin.css (admin pages)
+    css/              style.css (all pages), admin.css (admin pages)
     js/api.js         the only file that calls fetch()
-    js/ui.js          shared UI helpers (header, cards, messages)
-    js/pages/         one script per page
+    js/common.js      shared helpers (header/nav, footer, room card, escapeHtml)
+    js/<page>.js      one script per page (home.js, search.js, room.js, ...)
     admin/            room management + account management (login required)
   db/                 schema.sql (tables) + seed.sql (sample data)
   docs/               SPEC.md (pages + rules), API.md (contract), REVIEW.md (review + open decisions)
@@ -96,19 +96,29 @@ The tests need a running MySQL (they do not start the temporary one).
 
 ## Back-end layout
 
+Written for a year-1 reader: every route has the same shape
+(comment with Postman examples -> check input -> SQL with `?` placeholders -> send JSON).
+
 ```
 backend/
-  scripts/db-reset.js   npm run db:reset (also used by the tests)
-  src/server.js         loads .env, prepares the database, starts the server
-  src/app.js            builds the Express app (exported for tests)
-  src/config/           MySQL pool, temporary-MySQL fallback (ensure-database.js)
-  src/routes/           URL -> middleware + controller only
-  src/controllers/      read request, call service, send response
-  src/services/         business rules + SQL (parameterised queries only)
-  src/validators/       pure functions: input -> { value, errors }
-  src/middleware/       requireAuth / requireRole, requireRoomId, errorHandler
-  src/utils/            HttpError, mappers (DB row -> API object), logAction, transaction helper
-  tests/                node:test + supertest
+  scripts/db-reset.js       npm run db:reset (also used by the tests and by database-setup.js)
+  src/server.js             loads .env, prepares the database, starts the server
+  src/app.js                builds the Express app: middleware + routes + the one error handler (exported for tests)
+  src/db.js                 the MySQL connection pool
+  src/database-setup.js     npm start without MySQL -> temporary MySQL (mysql-memory-server)
+  src/routes/               one file per topic; validation + SQL live in the route
+    auth.js                 /api/auth/login, /logout, /me
+    rooms.js                /api/rooms, /api/rooms/:id, /similar, /api/stats
+    room-images.js          /api/rooms/:id/images (upload with multer, content checked by magic bytes)
+    admins.js               /api/admins* (SuperAdmin only)
+    logs.js                 /api/logs (SuperAdmin only)
+  src/helpers/              small functions shared by several routes
+    auth.js                 requireLogin, requireSuperAdmin, rowToAdmin
+    validate.js             isBlank, isText, isIntBetween, isEmail, isOneOf, ...
+    log.js                  writeLog() -> one row in table Log (+ describeChanges)
+    transaction.js          runInTransaction(): begin / commit / rollback, retry on deadlock
+  uploads/                  room photos, served at /uploads (gitignored except .gitkeep)
+  tests/                    node:test + supertest against the test DB aura_rental_test
 ```
 
 ## Troubleshooting

@@ -3,8 +3,8 @@ const assert = require('node:assert/strict');
 const {
   app, pool, request, resetTestDb, closeDb, loginAs, lastLog,
 } = require('./helpers');
-const withTransaction = require('../src/utils/transaction');
-const { logAction } = require('../src/utils/log-action');
+const { runInTransaction } = require('../src/helpers/transaction');
+const { writeLog } = require('../src/helpers/log');
 
 const ADMIN_KEYS = ['username', 'firstName', 'lastName', 'displayName', 'address', 'role', 'email'].sort();
 
@@ -57,18 +57,27 @@ describe('GET /api/admins', () => {
     assert.equal(res.body.data.find((a) => a.username === 'ops_niran').email, null);
   });
 
-  it('filters by q (username, name or email) and role, and validates them', async () => {
-    const byName = await superAdmin.get('/api/admins?q=Ploy').expect(200);
-    assert.deepEqual(byName.body.data.map((a) => a.username), ['listing_ploy']);
-    const byFullName = await superAdmin.get('/api/admins').query({ q: 'Niran Thong' }).expect(200);
-    assert.deepEqual(byFullName.body.data.map((a) => a.username), ['ops_niran']);
-    const byEmail = await superAdmin.get('/api/admins').query({ q: 'admin@aura36' }).expect(200);
-    assert.deepEqual(byEmail.body.data.map((a) => a.username), ['admin_main']);
-    const admins = await superAdmin.get('/api/admins?role=Admin').expect(200);
-    assert.deepEqual(admins.body.data.map((a) => a.username), ['listing_ploy', 'ops_niran']);
-    const injection = await superAdmin.get('/api/admins').query({ q: "' OR '1'='1" }).expect(200);
-    assert.deepEqual(injection.body.data, []);
-    await superAdmin.get('/api/admins?role=root').expect(400);
+  it('searches by 3 criteria (q = username / first / last name, role, email) in any combination', async () => {
+    const names = (res) => res.body.data.map((a) => a.username);
+    const search = (query) => superAdmin.get('/api/admins').query(query).expect(200);
+
+    assert.deepEqual(names(await search({ q: 'ploy' })), ['listing_ploy']); // username and first name
+    assert.deepEqual(names(await search({ q: 'Thongdee' })), ['ops_niran']); // last name
+    assert.deepEqual(names(await search({ q: 'Niran Thong' })), ['ops_niran']); // "first last"
+    assert.deepEqual(names(await search({ q: 'aura36.co.th' })), [], 'q does not search email');
+    assert.deepEqual(names(await search({ role: 'Admin' })), ['listing_ploy', 'ops_niran']);
+    assert.deepEqual(names(await search({ role: 'SuperAdmin' })), ['admin_main']);
+    assert.deepEqual(names(await search({ email: 'AURA36.co' })), ['admin_main', 'listing_ploy']);
+    assert.deepEqual(names(await search({ q: 's', role: 'Admin', email: 'ploy' })), ['listing_ploy']);
+    assert.deepEqual(names(await search({ q: 'Somchai', role: 'Admin' })), []);
+    assert.equal(names(await search({ q: '', role: '', email: '' })).length, 3, 'blank = no filter');
+    assert.deepEqual(names(await search({ q: "' OR '1'='1" })), []);
+    assert.deepEqual(names(await search({ email: '%' })), [], 'wildcards are plain text');
+
+    const bad = await superAdmin.get('/api/admins?role=root').expect(400);
+    assert.ok(bad.body.error.fields.role);
+    const tooLong = await superAdmin.get('/api/admins').query({ email: 'x'.repeat(101) }).expect(400);
+    assert.ok(tooLong.body.error.fields.email);
   });
 
   it('gets one admin or 404', async () => {
@@ -226,8 +235,8 @@ describe('Log ids and GET /api/logs', () => {
     const [[{ maxNumber }]] = await pool.execute(
       'SELECT MAX(CAST(SUBSTRING(LogID, 3) AS UNSIGNED)) AS maxNumber FROM Log',
     );
-    const writers = Array.from({ length: 8 }, (_, i) => withTransaction(
-      (db) => logAction(db, 'admin_main', `CONCURRENT ${i}`),
+    const writers = Array.from({ length: 8 }, (_, i) => runInTransaction(
+      (db) => writeLog(db, 'admin_main', `CONCURRENT ${i}`),
     ));
     await Promise.all(writers);
     const [rows] = await pool.execute("SELECT LogID FROM Log WHERE Changed LIKE 'CONCURRENT %'");

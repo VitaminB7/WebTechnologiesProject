@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- login.html — หน้าเข้าสู่ระบบของผู้ดูแล (Admin / SuperAdmin) -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -7,16 +8,35 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <header id="site-header" class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html">
+        <span class="brand__logo" aria-hidden="true">N</span>
+        <span>
+          <span class="brand__name">AURA SUKHUMVIT 36</span>
+          <span class="brand__tagline">One residence. Better renting.</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html">Home</a>
+        <a href="search.html">Search</a>
+        <a href="team.html">Team</a>
+      </nav>
+      <!-- หน้านี้ไม่มีปุ่ม Login ซ้ำ (ถ้าล็อกอินอยู่แล้ว login.js จะพาไปหน้าแอดมินเลย) -->
+      <div id="header-actions" class="header-actions"></div>
+    </div>
+  </header>
+
   <main class="login-page">
-    <div class="card login-card">
+    <section class="card login-card" aria-labelledby="login-title">
       <div class="login-card__head">
         <a class="brand" href="index.html">
           <span class="brand__logo" aria-hidden="true">N</span>
           <span>
-            <span class="brand__name">AURA SUKHUMVIT 36</span>
+            <span id="login-title" class="brand__name">AURA SUKHUMVIT 36</span>
             <span class="brand__tagline">Admin login</span>
           </span>
         </a>
@@ -35,8 +55,18 @@
         <p class="form-error hidden" role="alert"></p>
         <a href="index.html" class="muted">← Back to home</a>
       </form>
-    </div>
+    </section>
   </main>
-  <script type="module" src="js/pages/login.js"></script>
+
+  <footer id="site-footer" class="site-footer">
+    <div class="container">
+      <strong>AURA SUKHUMVIT 36</strong>
+      <span> · One residence. Better renting.</span>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/login.js"></script>
 </body>
 </html>

@@ -60,6 +60,12 @@ describe('POST /api/auth/login', () => {
     assert.ok(res.body.error.message);
   });
 
+  it('returns 413 for a body larger than 100 KB', async () => {
+    const res = await request(app).post('/api/auth/login')
+      .send({ username: 'x'.repeat(150 * 1024), password: 'whatever1' }).expect(413);
+    assert.ok(res.body.error.message);
+  });
+
   it('treats SQL-looking usernames as plain text', async () => {
     await request(app).post('/api/auth/login')
       .send({ username: "admin_main' OR '1'='1", password: "' OR '1'='1" }).expect(401);
@@ -95,7 +101,7 @@ describe('session: /api/auth/me and logout', () => {
 describe('unknown API routes', () => {
   it('answers 404 in the contract error shape', async () => {
     const res = await request(app).get('/api/does-not-exist').expect(404);
-    assert.equal(typeof res.body.error.message, 'string');
+    assert.equal(res.body.error.message, 'No API route for GET /api/does-not-exist');
   });
 });
 

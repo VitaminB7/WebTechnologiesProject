@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- search.html — หน้าค้นหาห้อง: ตัวกรอง + การ์ดผลลัพธ์ + แบ่งหน้า (ตัวกรองถูกเก็บใน URL ด้วย) -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -7,10 +8,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header id="site-header" class="site-header"></header>
+  <header id="site-header" class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html">
+        <span class="brand__logo" aria-hidden="true">N</span>
+        <span>
+          <span class="brand__name">AURA SUKHUMVIT 36</span>
+          <span class="brand__tagline">One residence. Better renting.</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html">Home</a>
+        <a href="search.html" class="is-active" aria-current="page">Search</a>
+        <a href="team.html">Team</a>
+      </nav>
+      <!-- ปุ่ม Login หรือ Admin + Logout (common.js เติมให้) -->
+      <div id="header-actions" class="header-actions"></div>
+    </div>
+  </header>
 
   <main class="page">
     <div class="container">
@@ -30,12 +48,19 @@
             </select>
           </div>
           <div class="field">
-            <label for="f-min-price">Min price</label>
-            <input id="f-min-price" name="minPrice" type="number" min="0" step="500" inputmode="numeric" placeholder="฿0">
+            <label for="f-floor">Floor number</label>
+            <input id="f-floor" name="floor" type="number" min="1" max="99" step="1" inputmode="numeric" placeholder="Any floor">
           </div>
           <div class="field">
-            <label for="f-max-price">Max price</label>
-            <input id="f-max-price" name="maxPrice" type="number" min="0" step="500" inputmode="numeric" placeholder="No limit">
+            <label for="f-condition">Room condition</label>
+            <select id="f-condition" name="minCondition">
+              <option value="">Any condition</option>
+              <option value="1">1★ ขึ้นไป (แย่)</option>
+              <option value="2">2★ ขึ้นไป (พอใช้)</option>
+              <option value="3">3★ ขึ้นไป (สภาพดี)</option>
+              <option value="4">4★ ขึ้นไป (ดีมาก)</option>
+              <option value="5">5★ (ใหม่มาก)</option>
+            </select>
           </div>
           <div class="field">
             <label for="f-bedrooms">Bedrooms</label>
@@ -47,6 +72,14 @@
               <option value="3">3</option>
               <option value="4">4</option>
             </select>
+          </div>
+          <div class="field">
+            <label for="f-min-price">Min price</label>
+            <input id="f-min-price" name="minPrice" type="number" min="0" step="500" inputmode="numeric" placeholder="฿0">
+          </div>
+          <div class="field">
+            <label for="f-max-price">Max price</label>
+            <input id="f-max-price" name="maxPrice" type="number" min="0" step="500" inputmode="numeric" placeholder="No limit">
           </div>
           <div class="field">
             <label for="f-sort">Sort by</label>
@@ -71,16 +104,26 @@
         <p class="form-error hidden" role="alert"></p>
       </form>
 
-      <div class="results-head">
-        <h2 id="results-title">Rooms</h2>
-        <span id="results-count" class="muted" aria-live="polite"></span>
-      </div>
-      <div id="results" class="card-grid" aria-busy="false"></div>
-      <nav id="pagination" class="pagination" aria-label="Search results pages"></nav>
+      <section aria-labelledby="results-title">
+        <div class="results-head">
+          <h2 id="results-title">Rooms</h2>
+          <span id="results-count" class="muted" aria-live="polite"></span>
+        </div>
+        <div id="results" class="card-grid"></div>
+        <nav id="pagination" class="pagination" aria-label="Search results pages"></nav>
+      </section>
     </div>
   </main>
 
-  <footer id="site-footer" class="site-footer"></footer>
-  <script type="module" src="js/pages/search.js"></script>
+  <footer id="site-footer" class="site-footer">
+    <div class="container">
+      <strong>AURA SUKHUMVIT 36</strong>
+      <span> · One residence. Better renting.</span>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/search.js"></script>
 </body>
 </html>

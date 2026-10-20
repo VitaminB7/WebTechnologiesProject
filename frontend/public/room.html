@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- room.html — หน้ารายละเอียดห้อง (room.html?id=L-1201): รูป, ข้อมูลห้อง, เจ้าของ, ค่าเช่า, ห้องที่คล้ายกัน -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -7,18 +8,39 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header id="site-header" class="site-header"></header>
+  <header id="site-header" class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html">
+        <span class="brand__logo" aria-hidden="true">N</span>
+        <span>
+          <span class="brand__name">AURA SUKHUMVIT 36</span>
+          <span class="brand__tagline">One residence. Better renting.</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html">Home</a>
+        <a href="search.html" class="is-active" aria-current="page">Search</a>
+        <a href="team.html">Team</a>
+      </nav>
+      <!-- ปุ่ม Login หรือ Admin + Logout (common.js เติมให้) -->
+      <div id="header-actions" class="header-actions"></div>
+    </div>
+  </header>
 
   <main class="page">
     <div class="container">
       <a href="search.html" class="muted">← Back to search</a>
+      <!-- ข้อความ กำลังโหลด / ไม่พบห้อง / ผิดพลาด -->
       <div id="room-state"></div>
 
       <article id="room" class="hidden">
+        <!-- รูป 1 ใหญ่ + 3 เล็ก (room.js เติมให้) -->
         <div id="gallery" class="gallery" aria-label="Room photos"></div>
+        <!-- กลุ่มแก้ข้อความเครดิตรูปตรงนี้ได้ -->
+        <p class="photo-credit">Photo source: room owner / AURA Sukhumvit 36</p>
 
         <div class="detail">
           <div>
@@ -26,6 +48,10 @@
               <h1 id="room-title"></h1>
               <p id="room-building" class="muted"></p>
               <ul id="room-facts" class="facts"></ul>
+              <div class="condition-box">
+                <span>สภาพห้อง</span>
+                <span id="room-condition" class="condition-box__value"></span>
+              </div>
             </section>
 
             <section>
@@ -60,7 +86,15 @@
     </div>
   </main>
 
-  <footer id="site-footer" class="site-footer"></footer>
-  <script type="module" src="js/pages/room.js"></script>
+  <footer id="site-footer" class="site-footer">
+    <div class="container">
+      <strong>AURA SUKHUMVIT 36</strong>
+      <span> · One residence. Better renting.</span>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/room.js"></script>
 </body>
 </html>

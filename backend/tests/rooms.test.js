@@ -5,8 +5,8 @@ const {
 } = require('./helpers');
 
 const ROOM_KEYS = [
-  'roomId', 'building', 'roomType', 'bedrooms', 'size', 'price', 'description',
-  'minimumLease', 'available', 'appliances', 'owner',
+  'roomId', 'building', 'floor', 'roomType', 'bedrooms', 'size', 'price', 'description',
+  'conditionRating', 'minimumLease', 'available', 'appliances', 'images', 'owner',
 ].sort();
 
 let admin;
@@ -29,6 +29,9 @@ describe('GET /api/rooms (public search)', () => {
     assert.equal(typeof room.price, 'number');
     assert.equal(typeof room.size, 'number');
     assert.equal(typeof room.available, 'boolean');
+    assert.ok(Number.isInteger(room.floor));
+    assert.ok(Number.isInteger(room.conditionRating));
+    assert.deepEqual(room.images, []);
     assert.ok(room.appliances.length > 0);
     for (const appliance of room.appliances) {
       assert.deepEqual(Object.keys(appliance).sort(), ['name', 'serialNumber']);
@@ -57,6 +60,10 @@ describe('GET /api/rooms (public search)', () => {
       ['minPrice=15000&maxPrice=25000', (r) => r.price >= 15000 && r.price <= 25000],
       ['available=false', (r) => r.available === false],
       ['type=2%20Bedroom&available=true', (r) => r.roomType === '2 Bedroom' && r.available],
+      ['floor=12', (r) => r.floor === 12],
+      ['minCondition=4', (r) => r.conditionRating >= 4],
+      ['minCondition=5&type=Deluxe%20room', (r) => r.conditionRating === 5 && r.roomType === 'Deluxe room'],
+      ['floor=2&minCondition=3', (r) => r.floor === 2 && r.conditionRating >= 3],
     ];
     for (const [query, matches] of cases) {
       const res = await request(app).get(`/api/rooms?${query}&pageSize=50`).expect(200);
@@ -108,6 +115,12 @@ describe('GET /api/rooms (public search)', () => {
       'sort=newest': 'sort',
       'sort=RoomID%3BDROP': 'sort',
       'type=Studio&type=Deluxe%20room': 'type',
+      'floor=0': 'floor',
+      'floor=100': 'floor',
+      'floor=2.5': 'floor',
+      'minCondition=0': 'minCondition',
+      'minCondition=6': 'minCondition',
+      'minCondition=good': 'minCondition',
     };
     for (const [query, field] of Object.entries(bad)) {
       const res = await request(app).get(`/api/rooms?${query}`).expect(400);
@@ -126,6 +139,8 @@ describe('GET /api/rooms/:id, /similar and /api/stats', () => {
     assert.deepEqual(res.body.data.appliances.map((a) => a.name),
       ['Air conditioner', 'Fridge', 'Sofa', 'TV', 'Water heater']);
     assert.deepEqual(res.body.data.appliances[2], { serialNumber: 'SF-1201-01', name: 'Sofa' });
+    assert.equal(res.body.data.floor, 12);
+    assert.equal(res.body.data.conditionRating, 3);
   });
 
   it('returns 404 for a missing room and 400 for an id that is not L- + 4 digits', async () => {
@@ -170,6 +185,9 @@ describe('room admin CRUD', () => {
     assert.equal(room.roomId, 'L-9901');
     assert.equal(room.building, 'Building C');
     assert.equal(room.size, 34.5);
+    assert.equal(room.floor, 9);
+    assert.equal(room.conditionRating, 4);
+    assert.deepEqual(room.images, []);
     assert.deepEqual(room.appliances, [
       { serialNumber: 'FR-9901-02', name: 'Fridge' },
       { serialNumber: 'SF-9901-01', name: 'Sofa' },
@@ -198,11 +216,12 @@ describe('room admin CRUD', () => {
 
   it('returns 400 with a message per invalid field', async () => {
     const res = await admin.post('/api/rooms').send({
-      roomId: '9901', building: '', roomType: 'Suite', bedrooms: 11, size: 0.5, price: 1000000,
-      minimumLease: 37, available: 'maybe',
+      roomId: '9901', building: '', floor: 0, roomType: 'Suite', bedrooms: 11, size: 0.5, price: 1000000,
+      conditionRating: 6, minimumLease: 37, available: 'maybe',
       owner: { name: '', phone: '0800000000', email: 'not-an-email', lineId: 'x'.repeat(51) },
     }).expect(400);
-    const expected = ['roomId', 'building', 'roomType', 'bedrooms', 'size', 'price', 'minimumLease',
+    const expected = ['roomId', 'building', 'floor', 'roomType', 'bedrooms', 'size', 'price',
+      'conditionRating', 'minimumLease',
       'available', 'owner.name', 'owner.phone', 'owner.email', 'owner.lineId'];
     assert.deepEqual(Object.keys(res.body.error.fields).sort(), expected.sort());
   });
@@ -211,6 +230,18 @@ describe('room admin CRUD', () => {
     const edges = [
       [{ size: 500, price: 999999.99, minimumLease: 36, bedrooms: 10 }, 201],
       [{ size: 1, price: 0, minimumLease: 1, bedrooms: 0 }, 201],
+      [{ floor: 1, conditionRating: 1 }, 201],
+      [{ floor: 99, conditionRating: 5 }, 201],
+      [{ floor: '12', conditionRating: '3' }, 201],
+      [{ floor: 0 }, 400],
+      [{ floor: 100 }, 400],
+      [{ floor: 1.5 }, 400],
+      [{ floor: undefined }, 400],
+      [{ floor: null }, 400],
+      [{ conditionRating: 0 }, 400],
+      [{ conditionRating: 6 }, 400],
+      [{ conditionRating: 3.5 }, 400],
+      [{ conditionRating: undefined }, 400],
       [{ size: 500.01 }, 400],
       [{ price: -0.01 }, 400],
       [{ minimumLease: 1.5 }, 400],
@@ -252,18 +283,22 @@ describe('room admin CRUD', () => {
 
   it('updates a room (body roomId ignored), replaces appliances and logs the diff', async () => {
     const res = await admin.put('/api/rooms/L-9901').send(validRoom({
-      roomId: 'L-0001', price: 16000, available: false,
+      roomId: 'L-0001', price: 16000, available: false, floor: 14, conditionRating: 2,
       appliances: [{ serialNumber: 'TV-9901-03', name: 'TV' }],
     })).expect(200);
     assert.equal(res.body.data.roomId, 'L-9901');
     assert.equal(res.body.data.price, 16000);
     assert.equal(res.body.data.available, false);
+    assert.equal(res.body.data.floor, 14);
+    assert.equal(res.body.data.conditionRating, 2);
     assert.deepEqual(res.body.data.appliances, [{ serialNumber: 'TV-9901-03', name: 'TV' }]);
     const [rows] = await pool.execute("SELECT Serial_number FROM Appliance WHERE RoomID = 'L-9901'");
     assert.deepEqual(rows.map((r) => r.Serial_number), ['TV-9901-03']);
     const log = await lastLog();
     assert.match(log.Changed, /^UPDATE RoomUnit L-9901: /);
     assert.match(log.Changed, /price 15000 -> 16000/);
+    assert.match(log.Changed, /floor 9 -> 14/);
+    assert.match(log.Changed, /conditionRating 4 -> 2/);
     await request(app).get('/api/rooms/L-0001').expect(404);
   });
 

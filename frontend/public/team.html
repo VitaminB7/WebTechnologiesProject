@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- team.html — หน้าทีมผู้จัดทำ (About Us): การ์ดสมาชิก 5 คน มาจาก js/team.js -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -7,21 +8,46 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header id="site-header" class="site-header"></header>
+  <header id="site-header" class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html">
+        <span class="brand__logo" aria-hidden="true">N</span>
+        <span>
+          <span class="brand__name">AURA SUKHUMVIT 36</span>
+          <span class="brand__tagline">One residence. Better renting.</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html">Home</a>
+        <a href="search.html">Search</a>
+        <a href="team.html" class="is-active" aria-current="page">Team</a>
+      </nav>
+      <!-- ปุ่ม Login หรือ Admin + Logout (common.js เติมให้) -->
+      <div id="header-actions" class="header-actions"></div>
+    </div>
+  </header>
 
   <main class="page">
-    <div class="container">
+    <section class="container">
       <p class="eyebrow">Our team</p>
       <h1>The People Behind the Work</h1>
       <p class="muted">ITDS241 Web Technologies — AURA Sukhumvit 36 room rental management system.</p>
       <div id="team" class="team-grid"></div>
-    </div>
+    </section>
   </main>
 
-  <footer id="site-footer" class="site-footer"></footer>
-  <script type="module" src="js/pages/team.js"></script>
+  <footer id="site-footer" class="site-footer">
+    <div class="container">
+      <strong>AURA SUKHUMVIT 36</strong>
+      <span> · One residence. Better renting.</span>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/team.js"></script>
 </body>
 </html>

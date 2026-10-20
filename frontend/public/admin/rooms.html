@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- admin/rooms.html — หน้าจัดการห้อง (Product management): ค้นหา/ตารางห้อง + ฟอร์มเพิ่ม/แก้ไขห้อง (ต้องล็อกอิน) -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -7,14 +8,34 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body class="admin-body">
-  <header id="site-header" class="site-header"></header>
+  <header id="site-header" class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="rooms.html">
+        <span class="brand__logo" aria-hidden="true">N</span>
+        <span>
+          <span class="brand__name">ADMIN PAGE</span>
+          <span class="brand__tagline">AURA Sukhumvit 36</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="rooms.html" class="is-active" aria-current="page">Product management</a>
+        <!-- ซ่อนไว้ก่อน common.js จะโชว์ให้เฉพาะ SuperAdmin -->
+        <a id="nav-accounts" href="accounts.html" class="hidden">User management</a>
+      </nav>
+      <div class="header-actions">
+        <span id="admin-user" class="admin-user"></span>
+        <button id="logout-button" type="button" class="btn btn--outline btn--sm">Logout</button>
+      </div>
+    </div>
+  </header>
 
   <main class="page">
     <div class="container">
+      <!-- ข้อความตอนตรวจการล็อกอิน -->
       <div id="page-state"></div>
 
       <div id="page-content" class="hidden">
@@ -60,6 +81,7 @@
               <table class="table">
                 <thead>
                   <tr>
+                    <th scope="col">Room image</th>
                     <th scope="col">Room ID</th>
                     <th scope="col">Type</th>
                     <th scope="col">Price/Month</th>
@@ -97,6 +119,10 @@
                   <input id="r-building" name="building" type="text" maxlength="100" placeholder="Building A" required>
                 </div>
                 <div class="field">
+                  <label for="r-floor">Floor <span class="required">*</span></label>
+                  <input id="r-floor" name="floor" type="number" min="1" max="99" step="1" required>
+                </div>
+                <div class="field">
                   <label for="r-type">Room Type <span class="required">*</span></label>
                   <select id="r-type" name="roomType" required>
                     <option value="">Select type</option>
@@ -129,12 +155,23 @@
                   <label for="r-lease">Minimum lease (months)</label>
                   <input id="r-lease" name="minimumLease" type="number" min="1" max="36" step="1" value="12">
                 </div>
+                <div class="field">
+                  <label for="r-condition">Condition rating <span class="required">*</span></label>
+                  <select id="r-condition" name="conditionRating" required>
+                    <option value="1">1 – แย่</option>
+                    <option value="2">2 – พอใช้</option>
+                    <option value="3" selected>3 – สภาพดี</option>
+                    <option value="4">4 – ดีมาก</option>
+                    <option value="5">5 – ใหม่มาก</option>
+                  </select>
+                </div>
               </div>
             </fieldset>
 
             <fieldset class="form-section">
               <legend>Appliances</legend>
               <p class="muted">Tick each appliance in the room and enter its serial number.</p>
+              <!-- เช็กบ็อกซ์ 10 อัน + ช่องเลขซีเรียล (admin-rooms.js สร้างจากรายการ APPLIANCES) -->
               <div id="appliance-options" class="appliance-grid"></div>
             </fieldset>
 
@@ -169,6 +206,17 @@
               </div>
             </fieldset>
 
+            <fieldset class="form-section">
+              <legend>Room Images</legend>
+              <div class="field">
+                <label for="r-images">Add images (jpg, png, webp · max 5 per save · ≤ 2 MB each)</label>
+                <input id="r-images" name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+              </div>
+              <p class="muted">New images are uploaded when you press Save Room. Recommended: 4–6 images per room.</p>
+              <!-- รูปที่บันทึกแล้ว (Saved) + รูปที่เพิ่งเลือก (New) -->
+              <div id="image-list" class="image-list"></div>
+            </fieldset>
+
             <p class="form-error hidden" role="alert"></p>
 
             <div class="form-actions">
@@ -181,7 +229,15 @@
     </div>
   </main>
 
-  <footer id="site-footer" class="site-footer"></footer>
-  <script type="module" src="../js/pages/admin-rooms.js"></script>
+  <footer id="site-footer" class="site-footer">
+    <div class="container">
+      <strong>AURA CONDO</strong>
+      <span> · Admin</span>
+    </div>
+  </footer>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../js/admin-rooms.js"></script>
 </body>
 </html>

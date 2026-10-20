@@ -1,17 +1,20 @@
-// Shared test setup: point the app at a separate database BEFORE anything
-// requires src/config/db.js, so dev data is never touched.
+// Shared test setup: point the app at a separate database and a temp upload folder
+// BEFORE anything requires src/db.js, so dev data and real room photos are never touched.
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
 
 const TEST_DB = 'aura_rental_test';
 process.env.DB_NAME = TEST_DB;
 process.env.SESSION_SECRET = 'test-only-secret';
+process.env.UPLOAD_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-uploads-'));
 // Fills DB_HOST/DB_USER/... from .env if present; never overrides the values set above.
 require('dotenv').config({ path: path.join(__dirname, '..', '.env'), quiet: true });
 
 const request = require('supertest');
 const { resetDatabase } = require('../scripts/db-reset');
 const app = require('../src/app');
-const pool = require('../src/config/db');
+const pool = require('../src/db');
 
 const LOGINS = {
   super: { username: 'admin_main', password: 'Admin@1234' },
@@ -20,11 +23,12 @@ const LOGINS = {
 };
 
 async function resetTestDb() {
-  await resetDatabase({ dbName: TEST_DB });
+  await resetDatabase(TEST_DB);
 }
 
 async function closeDb() {
   await pool.end();
+  fs.rmSync(process.env.UPLOAD_DIR, { recursive: true, force: true });
 }
 
 /** A supertest agent that keeps the session cookie after logging in. */
@@ -47,11 +51,13 @@ function validRoom(overrides = {}) {
   return {
     roomId: 'L-9901',
     building: 'Building C',
+    floor: 9,
     roomType: 'Deluxe room',
     bedrooms: 1,
     size: 34.5,
     price: 15000,
     description: 'Test room',
+    conditionRating: 4,
     minimumLease: 12,
     available: true,
     appliances: [

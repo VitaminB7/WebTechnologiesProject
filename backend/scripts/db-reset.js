@@ -1,41 +1,48 @@
-// Recreate the database from db/schema.sql + db/seed.sql without needing the mysql CLI.
-// Usage: npm run db:reset            (uses DB_NAME from .env, default aura_rental)
+// db-reset.js — ล้างฐานข้อมูลแล้วสร้างใหม่จาก db/schema.sql + db/seed.sql (ไม่ต้องมีโปรแกรม mysql)
+// ใช้: npm run db:reset   (ใช้ชื่อฐานข้อมูลจาก DB_NAME ใน .env ถ้าไม่ตั้งไว้ = aura_rental)
+// ไฟล์เทสต์และ src/database-setup.js ก็เรียก resetDatabase() จากไฟล์นี้
 const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql2/promise');
 
-const DB_DIR = path.join(__dirname, '..', '..', 'db');
-// schema.sql / seed.sql are written for the database "aura_rental"; tests swap in another name.
-const SCRIPT_DB_NAME = /\baura_rental\b/g;
+const DB_FOLDER = path.join(__dirname, '..', '..', 'db');
 
-function readSql(fileName, dbName) {
-  return fs.readFileSync(path.join(DB_DIR, fileName), 'utf8').replace(SCRIPT_DB_NAME, dbName);
+// อ่านไฟล์ .sql แล้วเปลี่ยนชื่อ aura_rental เป็นชื่อที่ต้องการ (เทสต์ใช้ aura_rental_test)
+function readSqlFile(fileName, dbName) {
+  const text = fs.readFileSync(path.join(DB_FOLDER, fileName), 'utf8');
+  return text.replace(/\baura_rental\b/g, dbName);
 }
 
-async function resetDatabase({ dbName = process.env.DB_NAME || 'aura_rental', seed = true } = {}) {
-  if (!/^\w+$/.test(dbName)) throw new Error(`Unsafe database name: ${dbName}`);
+async function resetDatabase(dbName) {
+  // ชื่อฐานข้อมูลต้องเป็นตัวอักษร/ตัวเลข/_ เท่านั้น (กันชื่อแปลก ๆ หลุดเข้าไปใน SQL)
+  if (!/^\w+$/.test(dbName)) {
+    throw new Error(`Unsafe database name: ${dbName}`);
+  }
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT) || 3306,
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     charset: 'utf8mb4',
-    multipleStatements: true,
+    multipleStatements: true, // ให้รันไฟล์ .sql ทั้งไฟล์ได้ในครั้งเดียว
   });
   try {
-    // Same UTC session time zone as the app pool, so seeded timestamps read back correctly.
     await connection.query("SET time_zone = '+00:00'");
-    await connection.query(readSql('schema.sql', dbName));
-    if (seed) await connection.query(readSql('seed.sql', dbName));
+    await connection.query(readSqlFile('schema.sql', dbName));
+    await connection.query(readSqlFile('seed.sql', dbName));
   } finally {
     await connection.end();
   }
 }
 
+// ส่วนนี้ทำงานเฉพาะตอนสั่ง `node scripts/db-reset.js` ตรง ๆ (ไม่ใช่ตอนไฟล์อื่น require)
 if (require.main === module) {
   require('dotenv').config({ path: path.join(__dirname, '..', '.env'), quiet: true });
-  resetDatabase()
-    .then(() => console.log(`Database ${process.env.DB_NAME || 'aura_rental'} reset with schema + seed data.`))
+  const dbName = process.env.DB_NAME || 'aura_rental';
+  resetDatabase(dbName)
+    .then(() => {
+      console.log(`Database ${dbName} reset with schema + seed data.`);
+    })
     .catch((err) => {
       console.error('Database reset failed:', err.message);
       process.exitCode = 1;
