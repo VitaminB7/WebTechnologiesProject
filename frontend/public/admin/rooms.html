@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Room Management · AURA Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+  <header id="site-header" class="site-header"></header>
+
+  <main class="page">
+    <div class="container">
+      <div id="page-state"></div>
+
+      <div id="page-content" class="hidden">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Product / service management</p>
+            <h1>Room management</h1>
+          </div>
+          <button id="new-room" type="button" class="btn btn--green">+ Add new room</button>
+        </div>
+
+        <div class="admin-layout">
+          <form id="room-search" class="card search-card" novalidate>
+            <h2>Search Room</h2>
+            <div class="field">
+              <label for="s-room-id">Room ID</label>
+              <input id="s-room-id" name="q" type="search" placeholder="Room ID or owner name">
+            </div>
+            <div class="field">
+              <label for="s-type">Room Type</label>
+              <select id="s-type" name="type">
+                <option value="">All types</option>
+                <option value="Standard">Standard</option>
+                <option value="Deluxe">Deluxe</option>
+                <option value="Suite">Suite</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="s-status">Status</label>
+              <select id="s-status" name="available">
+                <option value="">All</option>
+                <option value="true">Available</option>
+                <option value="false">Occupied</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn--green btn--block">Search</button>
+            <button type="reset" class="link-button">Clear</button>
+          </form>
+
+          <section class="card table-card" aria-label="Rooms">
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">Room image</th>
+                    <th scope="col">Room ID</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Price/Month</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="rooms-body"></tbody>
+              </table>
+            </div>
+            <div id="rooms-state"></div>
+            <div class="table-footer">
+              <span id="rooms-range" aria-live="polite"></span>
+              <nav id="rooms-pagination" class="pagination" aria-label="Room pages"></nav>
+            </div>
+          </section>
+        </div>
+
+        <section id="room-editor" class="card">
+          <div class="tabs" role="tablist">
+            <button id="tab-add" type="button" class="tab" role="tab" aria-selected="true">Add New Room</button>
+            <button id="tab-edit" type="button" class="tab" role="tab" aria-selected="false" disabled>Edit Room</button>
+          </div>
+
+          <form id="room-form" class="admin-form" novalidate>
+            <fieldset class="form-section">
+              <legend>Room details</legend>
+              <div class="form-grid form-grid--3">
+                <div class="field">
+                  <label for="r-room-id">Room ID <span class="required">*</span></label>
+                  <input id="r-room-id" name="roomId" type="number" min="1" max="99999" step="1" required>
+                </div>
+                <div class="field">
+                  <label for="r-floor">Floor <span class="required">*</span></label>
+                  <input id="r-floor" name="floor" type="number" min="1" max="99" step="1" required>
+                </div>
+                <div class="field">
+                  <label for="r-type">Room Type <span class="required">*</span></label>
+                  <select id="r-type" name="roomType" required>
+                    <option value="">Select type</option>
+                    <option value="Standard">Standard</option>
+                    <option value="Deluxe">Deluxe</option>
+                    <option value="Suite">Suite</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="r-size">Size (m²) <span class="required">*</span></label>
+                  <input id="r-size" name="size" type="number" min="0.01" step="0.01" required>
+                </div>
+                <div class="field">
+                  <label for="r-price">Monthly Rent (฿) <span class="required">*</span></label>
+                  <input id="r-price" name="price" type="number" min="0" step="0.01" required>
+                </div>
+                <div class="field">
+                  <label for="r-available">Status <span class="required">*</span></label>
+                  <select id="r-available" name="available" required>
+                    <option value="true">Available</option>
+                    <option value="false">Occupied</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="r-bedrooms">Bedrooms <span class="required">*</span></label>
+                  <input id="r-bedrooms" name="bedrooms" type="number" min="0" max="10" step="1" value="1" required>
+                </div>
+                <div class="field">
+                  <label for="r-lease">Minimum lease (months) <span class="required">*</span></label>
+                  <input id="r-lease" name="minimumLease" type="number" min="1" step="1" value="12" required>
+                </div>
+                <div class="field">
+                  <label for="r-condition">Condition rating <span class="required">*</span></label>
+                  <select id="r-condition" name="conditionRating" required>
+                    <option value="1">1 – แย่</option>
+                    <option value="2">2 – พอใช้</option>
+                    <option value="3" selected>3 – สภาพดี</option>
+                    <option value="4">4 – ดีมาก</option>
+                    <option value="5">5 – ใหม่มาก</option>
+                  </select>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+              <legend>Appliances</legend>
+              <div id="appliance-options" class="checkbox-grid"></div>
+            </fieldset>
+
+            <fieldset class="form-section">
+              <legend>Room owner details</legend>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="r-owner-name">Owner name <span class="required">*</span></label>
+                  <input id="r-owner-name" name="owner.name" type="text" maxlength="150" required>
+                </div>
+                <div class="field">
+                  <label for="r-owner-phone">Phone</label>
+                  <input id="r-owner-phone" name="owner.phone" type="tel" maxlength="20">
+                </div>
+                <div class="field">
+                  <label for="r-owner-email">Email</label>
+                  <input id="r-owner-email" name="owner.email" type="email" maxlength="100">
+                </div>
+                <div class="field">
+                  <label for="r-owner-line">LINE ID</label>
+                  <input id="r-owner-line" name="owner.lineId" type="text" maxlength="50">
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+              <legend>Room Description</legend>
+              <div class="field">
+                <label for="r-description" class="visually-hidden">Room description</label>
+                <textarea id="r-description" name="description" rows="4"
+                          placeholder="Describe the room, view, furniture..."></textarea>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+              <legend>Room Images</legend>
+              <div class="field">
+                <label for="r-images">Add images (jpg, png, webp · max 5 per upload · ≤ 2 MB each)</label>
+                <input id="r-images" name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+              </div>
+              <div id="image-list" class="image-list"></div>
+            </fieldset>
+
+            <p class="form-error hidden" role="alert"></p>
+
+            <div class="form-actions">
+              <button id="room-cancel" type="button" class="btn btn--grey">Cancel</button>
+              <button id="room-save" type="submit" class="btn btn--green">Save Room</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer" class="site-footer"></footer>
+  <script type="module" src="../js/pages/admin-rooms.js"></script>
+</body>
+</html>

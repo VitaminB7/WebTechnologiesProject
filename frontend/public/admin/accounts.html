@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>User Management · AURA Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+  <header id="site-header" class="site-header"></header>
+
+  <main class="page">
+    <div class="container">
+      <div id="page-state"></div>
+
+      <div id="page-content" class="hidden">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Administration</p>
+            <h1>User account management</h1>
+          </div>
+          <button id="add-admin" type="button" class="btn btn--green">+ Add administrator</button>
+        </div>
+
+        <form id="admin-filters" class="card filters" role="search" novalidate>
+          <div class="field">
+            <label for="a-q">Search</label>
+            <input id="a-q" name="q" type="search" placeholder="Username or name">
+          </div>
+          <div class="field">
+            <label for="a-role">Role</label>
+            <select id="a-role" name="role">
+              <option value="">All roles</option>
+              <option value="super_admin">Super admin</option>
+              <option value="listing_admin">Listing admin</option>
+              <option value="operations">Operations</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="a-status">Status</label>
+            <select id="a-status" name="status">
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </form>
+
+        <section class="card table-card" aria-label="Administrators">
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Username</th>
+                  <th scope="col">Display name</th>
+                  <th scope="col">Role</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Updated</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admins-body"></tbody>
+            </table>
+          </div>
+          <div id="admins-state"></div>
+          <div class="table-footer">
+            <span id="admins-count" aria-live="polite"></span>
+          </div>
+        </section>
+
+        <section id="admin-panel" class="card panel hidden" aria-labelledby="panel-title">
+          <div class="panel__head">
+            <h2 id="panel-title">Add administrator</h2>
+          </div>
+          <form id="admin-form" class="admin-form" novalidate>
+            <div class="form-grid">
+              <div class="field">
+                <label for="p-username">Username <span class="required">*</span></label>
+                <input id="p-username" name="username" type="text" maxlength="50" autocomplete="off" required>
+              </div>
+              <div class="field">
+                <label for="p-emails">Email</label>
+                <input id="p-emails" name="emails" type="text" maxlength="255" autocomplete="off"
+                       placeholder="name@example.com (separate several with commas)">
+              </div>
+              <div class="field">
+                <label for="p-first-name">First name <span class="required">*</span></label>
+                <input id="p-first-name" name="firstName" type="text" maxlength="100" required>
+              </div>
+              <div class="field">
+                <label for="p-last-name">Last name <span class="required">*</span></label>
+                <input id="p-last-name" name="lastName" type="text" maxlength="100" required>
+              </div>
+              <div class="field">
+                <label for="p-role">Role <span class="required">*</span></label>
+                <select id="p-role" name="role" required>
+                  <option value="listing_admin">Listing admin</option>
+                  <option value="operations">Operations</option>
+                  <option value="super_admin">Super admin</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="p-status">Status <span class="required">*</span></label>
+                <select id="p-status" name="status" required>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div id="password-field" class="field">
+                <label for="p-password">Password <span class="required">*</span></label>
+                <input id="p-password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+              </div>
+            </div>
+
+            <p class="form-error hidden" role="alert"></p>
+
+            <div class="form-actions">
+              <button id="panel-reset-password" type="button" class="btn btn--outline">Reset password</button>
+              <button id="panel-cancel" type="button" class="btn btn--grey">Cancel</button>
+              <button id="panel-save" type="submit" class="btn btn--green">Save changes</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <dialog id="reset-dialog" class="dialog" aria-labelledby="reset-title">
+    <form id="reset-form" novalidate>
+      <h2 id="reset-title">Reset password</h2>
+      <p id="reset-for" class="muted"></p>
+      <div class="field">
+        <label for="r-password">New password <span class="required">*</span></label>
+        <input id="r-password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+      </div>
+      <div class="field">
+        <label for="r-confirm">Confirm new password <span class="required">*</span></label>
+        <input id="r-confirm" name="confirm" type="password" minlength="8" autocomplete="new-password" required>
+      </div>
+      <p class="form-error hidden" role="alert"></p>
+      <div class="form-actions">
+        <button id="reset-cancel" type="button" class="btn btn--grey">Cancel</button>
+        <button id="reset-save" type="submit" class="btn btn--green">Reset password</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer id="site-footer" class="site-footer"></footer>
+  <script type="module" src="../js/pages/admin-accounts.js"></script>
+</body>
+</html>
