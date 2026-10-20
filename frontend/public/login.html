@@ -4,66 +4,56 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin Login · AURA Sukhumvit 36</title>
+  <title>Admin Login · CONDONG condo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;600&family=Open+Sans:wght@600&family=Outfit:wght@700&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header id="site-header" class="site-header">
-    <div class="container site-header__inner">
-      <a class="brand" href="index.html">
-        <span class="brand__logo" aria-hidden="true">N</span>
-        <span>
-          <span class="brand__name">AURA SUKHUMVIT 36</span>
-          <span class="brand__tagline">One residence. Better renting.</span>
-        </span>
+    <div class="site-header__inner">
+      <a class="brand" href="index.html" aria-label="CONDONG condo — home">
+        <span class="brand__logo" aria-hidden="true">CD</span>
+        <span class="brand__text" aria-hidden="true"><span class="brand__name">Condong</span><span class="brand__sub">Condo</span></span>
       </a>
       <nav class="site-nav" aria-label="Main">
         <a href="index.html">Home</a>
         <a href="search.html">Search</a>
         <a href="team.html">Team</a>
       </nav>
-      <!-- หน้านี้ไม่มีปุ่ม Login ซ้ำ (ถ้าล็อกอินอยู่แล้ว login.js จะพาไปหน้าแอดมินเลย) -->
-      <div id="header-actions" class="header-actions"></div>
+      <!-- ถ้าล็อกอินอยู่แล้ว login.js จะพาไปหน้าแอดมินเลย -->
+      <div id="header-actions" class="header-actions">
+        <a class="account-pill" href="login.html" aria-current="page"><img src="img/icon-user.svg" alt=""><span>Login</span></a>
+      </div>
     </div>
   </header>
 
   <main class="login-page">
-    <section class="card login-card" aria-labelledby="login-title">
+    <section class="login-card" aria-labelledby="login-title">
+      <h1 id="login-title" class="visually-hidden">Admin login</h1>
       <div class="login-card__head">
-        <a class="brand" href="index.html">
-          <span class="brand__logo" aria-hidden="true">N</span>
-          <span>
-            <span id="login-title" class="brand__name">AURA SUKHUMVIT 36</span>
-            <span class="brand__tagline">Admin login</span>
-          </span>
+        <a class="brand" href="index.html" aria-label="CONDONG condo — home">
+          <span class="brand__logo" aria-hidden="true">CD</span>
+          <span class="brand__text" aria-hidden="true"><span class="brand__name">Condong</span><span class="brand__sub">Condo</span></span>
         </a>
       </div>
 
       <form id="login-form" class="login-card__body" novalidate>
         <div class="field">
           <label for="username">Username / Email</label>
-          <input id="username" name="username" type="text" autocomplete="username" required>
+          <input id="username" name="username" type="text" autocomplete="username" placeholder="e.g., admin_main" required>
         </div>
         <div class="field">
           <label for="password">Password</label>
-          <input id="password" name="password" type="password" autocomplete="current-password" required>
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
         </div>
+        <hr class="login-card__line">
         <button id="login-submit" class="btn btn--dark btn--block" type="submit">Login</button>
         <p class="form-error hidden" role="alert"></p>
-        <a href="index.html" class="muted">← Back to home</a>
       </form>
     </section>
   </main>
-
-  <footer id="site-footer" class="site-footer">
-    <div class="container">
-      <strong>AURA SUKHUMVIT 36</strong>
-      <span> · One residence. Better renting.</span>
-    </div>
-  </footer>
 
   <script src="js/api.js"></script>
   <script src="js/common.js"></script>

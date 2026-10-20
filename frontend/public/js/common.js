@@ -62,20 +62,11 @@ function bedroomText(bedrooms) {
   return count + ' bedrooms';
 }
 
-// สภาพห้อง เช่น 3 -> "3.0★ สภาพดี"
-function conditionText(rating) {
-  const value = Number(rating);
-  if (!CONDITION_LABELS[value]) {
-    return '-';
-  }
-  return value.toFixed(1) + '★ ' + CONDITION_LABELS[value];
-}
-
 // ================= รูปภาพ =================
 
-// กล่องสีเทาแทนรูป (ใช้เมื่อไม่มีรูป หรือโหลดรูปไม่ขึ้น)
+// กล่องสีเทาแทนรูป (ใช้เมื่อไม่มีรูป หรือโหลดรูปไม่ขึ้น) — ใน Figma เป็นกล่องเทาเปล่า ไม่มีตัวหนังสือ
 function placeholderHtml(label) {
-  return `<div class="img-placeholder" role="img" aria-label="${escapeHtml(label)}">No image</div>`;
+  return `<div class="img-placeholder" role="img" aria-label="${escapeHtml(label)} (no image)"></div>`;
 }
 
 // แท็กรูป ถ้าไม่มี url ใช้กล่องเทาแทน ถ้าโหลดรูปพัง onerror จะเปลี่ยนเป็นกล่องเทา
@@ -110,7 +101,8 @@ function statusBadge(available, availableText) {
   return '<span class="badge badge--occupied">Occupied</span>';
 }
 
-// การ์ดห้อง 1 ใบ (ใช้ในหน้าค้นหาและ "ห้องที่คล้ายกัน") กดแล้วไปหน้ารายละเอียด
+// การ์ดห้อง 1 ใบ (หน้าแรก หน้าค้นหา และ "ห้องที่คล้ายกัน")
+// กดการ์ด = ไปหน้ารายละเอียด, กดหัวใจ = บันทึก/เลิกบันทึกห้อง (ปุ่มอยู่นอกลิงก์ จึงไม่เปลี่ยนหน้า)
 function roomCard(room) {
   let ownerName = '';
   if (room.owner) {
@@ -118,19 +110,115 @@ function roomCard(room) {
   }
   const link = '/room.html?id=' + encodeURIComponent(room.roomId);
   return `
-    <a class="card room-card" href="${escapeHtml(link)}">
-      <div class="room-card__media">
-        ${imageHtml(firstImageUrl(room), 'Room ' + room.roomId)}
-        <span class="room-card__fav" aria-hidden="true">♡</span>
-      </div>
-      <div class="room-card__body">
-        <p class="room-card__title">Room ${escapeHtml(room.roomId)}</p>
-        <p class="room-card__owner">${escapeHtml(ownerName)}</p>
-        <p class="room-card__price">${escapeHtml(formatPrice(room.price))} / month</p>
-        <p class="room-card__meta">${escapeHtml(bedroomText(room.bedrooms))} · ${escapeHtml(sizeText(room.size))}</p>
-      </div>
-    </a>`;
+    <article class="room-card">
+      <a class="room-card__link" href="${escapeHtml(link)}">
+        <div class="room-card__media">
+          ${imageHtml(firstImageUrl(room), 'Room ' + room.roomId)}
+        </div>
+        <div class="room-card__body">
+          <p class="room-card__title">Room ${escapeHtml(room.roomId)}</p>
+          <p class="room-card__owner">${escapeHtml(ownerName)}</p>
+          <p class="room-card__price">${escapeHtml(formatPrice(room.price))} / month</p>
+          <p class="room-card__meta">${escapeHtml(bedroomText(room.bedrooms))} &nbsp;• ${escapeHtml(sizeText(room.size))}</p>
+        </div>
+      </a>
+      ${favoriteButtonHtml(room.roomId)}
+    </article>`;
 }
+
+// ================= ห้องที่ชอบ (ปุ่มหัวใจ) =================
+// ผู้เช่าไม่มีบัญชี จึงเก็บรหัสห้องที่กดหัวใจไว้ใน localStorage ของเบราว์เซอร์ เช่น ["L-1201","L-0508"]
+// ถ้าเบราว์เซอร์ไม่ให้ใช้ localStorage ปุ่มยังกดได้ แค่ไม่จำหลังรีเฟรช
+
+const FAVORITES_KEY = 'condong.favorites';
+let favoritesInMemory = []; // ใช้แทนเมื่อ localStorage ใช้ไม่ได้
+
+// อ่านรายการรหัสห้องที่ชอบ
+function getFavorites() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
+    if (Array.isArray(saved)) {
+      return saved;
+    }
+  } catch (error) {
+    // อ่านไม่ได้ -> ใช้รายการในหน่วยความจำแทน
+  }
+  return favoritesInMemory;
+}
+
+// บันทึกรายการรหัสห้องที่ชอบ
+function saveFavorites(list) {
+  favoritesInMemory = list;
+  try {
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(list));
+  } catch (error) {
+    // บันทึกไม่ได้ -> จำไว้แค่ในหน่วยความจำจนกว่าจะปิดหน้า
+  }
+}
+
+function isFavorite(roomId) {
+  return getFavorites().includes(roomId);
+}
+
+// สลับ ชอบ <-> ไม่ชอบ คืน true ถ้าตอนนี้เป็นห้องที่ชอบแล้ว
+function toggleFavorite(roomId) {
+  const list = getFavorites().slice();
+  const index = list.indexOf(roomId);
+  if (index === -1) {
+    list.push(roomId);
+  } else {
+    list.splice(index, 1);
+  }
+  saveFavorites(list);
+  return index === -1;
+}
+
+// ค่าที่ปุ่มหัวใจต้องแสดง ตามว่าห้องนี้ถูกบันทึกไว้หรือยัง
+function favoriteLook(roomId) {
+  if (isFavorite(roomId)) {
+    return { icon: '♥', className: 'fav-btn is-saved', pressed: 'true', label: 'Remove room ' + roomId + ' from favourites' };
+  }
+  return { icon: '♡', className: 'fav-btn', pressed: 'false', label: 'Save room ' + roomId + ' to favourites' };
+}
+
+// HTML ปุ่มหัวใจของห้อง (ใช้ในการ์ด และหน้ารายละเอียด)
+function favoriteButtonHtml(roomId) {
+  const look = favoriteLook(roomId);
+  return `<button type="button" class="${look.className}" data-favorite="${escapeHtml(roomId)}"
+                  aria-pressed="${look.pressed}" aria-label="${escapeHtml(look.label)}">${look.icon}</button>`;
+}
+
+// เปลี่ยนหน้าตาปุ่มหัวใจที่มีอยู่แล้วในหน้า ให้ตรงกับที่บันทึกไว้
+function showFavoriteLook(button) {
+  const look = favoriteLook(button.dataset.favorite);
+  button.className = look.className;
+  button.textContent = look.icon;
+  button.setAttribute('aria-pressed', look.pressed);
+  button.setAttribute('aria-label', look.label);
+}
+
+// กดปุ่มหัวใจที่ไหนก็ได้ในหน้า: สลับสถานะ แล้วอัปเดตทุกปุ่มของห้องเดียวกัน
+// (ฟังที่ document ครั้งเดียว จึงใช้ได้กับการ์ดที่วาดขึ้นมาทีหลังด้วย)
+function handleFavoriteClick(event) {
+  const button = event.target.closest('[data-favorite]');
+  if (!button) {
+    return;
+  }
+  const roomId = button.dataset.favorite;
+  const saved = toggleFavorite(roomId);
+  for (const other of document.querySelectorAll('[data-favorite]')) {
+    if (other.dataset.favorite === roomId) {
+      showFavoriteLook(other);
+    }
+  }
+  if (saved) {
+    showToast('Room ' + roomId + ' saved to favourites', 'success');
+  } else {
+    showToast('Room ' + roomId + ' removed from favourites', 'info');
+  }
+}
+
+document.addEventListener('click', handleFavoriteClick);
 
 // แสดงข้อความสถานะในกล่อง: type = 'loading' | 'empty' | 'error'
 function showState(container, type, message, title) {
@@ -294,7 +382,7 @@ function toPositiveInt(value) {
 
 // ================= แบ่งหน้า =================
 
-// วาดปุ่ม ‹ Prev 1 2 3 Next › แล้วเรียก onPage(เลขหน้า) เมื่อกด
+// วาดปุ่ม Previous 1 2 3 Next แล้วเรียก onPage(เลขหน้า) เมื่อกด
 function renderPagination(container, meta, onPage) {
   container.innerHTML = '';
   if (!meta || !meta.total) {
@@ -309,12 +397,12 @@ function renderPagination(container, meta, onPage) {
   const first = Math.max(1, Math.min(page - 2, totalPages - 4));
   const last = Math.min(totalPages, first + 4);
 
-  let html = `<button type="button" data-page="${page - 1}" aria-label="Previous page" ${page === 1 ? 'disabled' : ''}>‹ Prev</button>`;
+  let html = `<button type="button" data-page="${page - 1}" aria-label="Previous page" ${page === 1 ? 'disabled' : ''}>Previous</button>`;
   for (let n = first; n <= last; n = n + 1) {
     const current = n === page ? 'aria-current="page"' : '';
     html += `<button type="button" data-page="${n}" ${current}>${n}</button>`;
   }
-  html += `<button type="button" data-page="${page + 1}" aria-label="Next page" ${page === totalPages ? 'disabled' : ''}>Next ›</button>`;
+  html += `<button type="button" data-page="${page + 1}" aria-label="Next page" ${page === totalPages ? 'disabled' : ''}>Next</button>`;
   container.innerHTML = html;
 
   for (const button of container.querySelectorAll('button')) {
@@ -357,26 +445,27 @@ function bindLogoutButton() {
   }
 }
 
-// header หน้าสาธารณะ: ใส่ปุ่ม Login หรือ (ถ้าล็อกอินอยู่) ปุ่ม Admin + Logout
-// showLogin = false ในหน้า login (ไม่ต้องมีปุ่ม Login ซ้ำ)
-async function setupPublicHeader(showLogin) {
+// ปุ่มวงรีขวาบนของ header (ไอคอนคน + ข้อความ) เหมือนใน Figma
+function accountPillHtml(href, label) {
+  return `<a class="account-pill" href="${escapeHtml(href)}"><img src="/img/icon-user.svg" alt=""><span>${escapeHtml(label)}</span></a>`;
+}
+
+// header หน้าสาธารณะ: ปุ่ม Login (ยังไม่ล็อกอิน) หรือปุ่ม Admin ไปหน้าแอดมิน (ล็อกอินอยู่)
+// HTML ของทุกหน้ามีปุ่ม Login ไว้ก่อนแล้ว ถ้าล็อกอินอยู่จะเปลี่ยนเป็นปุ่ม Admin
+async function setupPublicHeader() {
   const actions = document.getElementById('header-actions');
   try {
     await getMe();
-    actions.innerHTML = `
-      <a class="btn btn--outline btn--sm" href="/admin/rooms.html">Admin</a>
-      <button id="logout-button" type="button" class="btn btn--dark btn--sm">Logout</button>`;
-    bindLogoutButton();
+    actions.innerHTML = accountPillHtml('/admin/rooms.html', 'Admin');
   } catch (error) {
-    if (showLogin) {
-      actions.innerHTML = '<a class="btn btn--dark btn--sm" href="/login.html">Login</a>';
-    }
+    actions.innerHTML = accountPillHtml('/login.html', 'Login');
   }
 }
 
-// header หน้าแอดมิน: แสดงชื่อคนที่ล็อกอิน และโชว์ลิงก์ "User management" เฉพาะ SuperAdmin
+// header หน้าแอดมิน: ชื่อคนที่ล็อกอินอยู่ขึ้นเมื่อเอาเมาส์ชี้ปุ่ม Logout
+// และโชว์ลิงก์ "User management" เฉพาะ SuperAdmin
 function setupAdminHeader(admin) {
-  document.getElementById('admin-user').textContent = admin.displayName + ' (' + admin.role + ')';
+  document.getElementById('logout-button').title = 'Logged in as ' + admin.displayName + ' (' + admin.role + ')';
   if (admin.role === 'SuperAdmin') {
     document.getElementById('nav-accounts').classList.remove('hidden');
   }

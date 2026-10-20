@@ -1,16 +1,18 @@
 // room.js — สคริปต์หน้ารายละเอียดห้อง (room.html?id=L-1201)
 // โหลดห้องจาก API แล้วเติมรูป ข้อมูลห้อง สภาพห้อง เจ้าของ เครื่องใช้ไฟฟ้า ค่าเช่า และห้องที่คล้ายกัน
 
-// ไอคอนของเครื่องใช้ไฟฟ้าแต่ละชนิด
-const APPLIANCE_ICONS = {
-  'Sofa': '🛋️',
+// ไอคอนรูปภาพจาก Figma (มี 4 ชนิด) ชนิดอื่นใช้อีโมจิใน APPLIANCE_EMOJI แทน
+const APPLIANCE_IMAGES = {
+  'Sofa': 'img/appliance-sofa.png',
+  'Air conditioner': 'img/appliance-air.png',
+  'Washing machine': 'img/appliance-washing.png',
+  'Fridge': 'img/appliance-fridge.png',
+};
+const APPLIANCE_EMOJI = {
   'Water heater': '🚿',
-  'Fridge': '🧊',
   'TV': '📺',
   'HomePhone': '☎️',
-  'Air conditioner': '❄️',
   'Heater': '🔥',
-  'Washing machine': '🧺',
   'Microwave': '🍲',
   'Induction stove': '🍳',
 };
@@ -21,7 +23,7 @@ const roomState = document.getElementById('room-state');
 
 // แสดง "ไม่พบห้อง" พร้อมปุ่มกลับไปหน้าค้นหา
 function showNotFound() {
-  document.title = 'Room not found · AURA Sukhumvit 36';
+  document.title = 'Room not found · CONDONG condo';
   roomState.innerHTML = `
     <div class="state state--empty" role="status">
       <p class="state__title">Room not found</p>
@@ -43,35 +45,68 @@ function renderGallery(room) {
   document.getElementById('gallery').innerHTML = html;
 }
 
-// ชื่อห้อง ตึก แถวข้อมูล (ห้องนอน · ขนาด · ชั้น · ประเภท) สภาพห้อง และคำอธิบาย
+// ดาวสีเหลืองเท่ากับคะแนนสภาพห้อง เช่น 3 -> "★★★"
+function starsText(rating) {
+  let stars = '';
+  for (let i = 0; i < Number(rating); i = i + 1) {
+    stars += '★';
+  }
+  return stars;
+}
+
+// สภาพห้องตัวใหญ่ เช่น 3 -> "3.0 ★ สภาพดี" (จุดและดาวสีเหลือง)
+function conditionHtml(rating) {
+  const value = Number(rating);
+  if (!CONDITION_LABELS[value]) {
+    return '-';
+  }
+  return `
+    <span class="condition__score">${value}<span class="condition__dot">.</span>0</span>
+    <span class="condition__star" aria-hidden="true">★</span>
+    <span class="condition__text">${escapeHtml(CONDITION_LABELS[value])}</span>`;
+}
+
+// ชื่อห้อง ดาว ตึก กล่องข้อมูล 4 ช่อง (ประเภท · ห้องนอน · ขนาด · ชั้น) สภาพห้อง และคำอธิบาย
 function renderSummary(room) {
   document.getElementById('room-title').textContent = 'Room ' + room.roomId;
-  document.getElementById('room-building').textContent = room.building;
+  document.getElementById('room-favorite').outerHTML = favoriteButtonHtml(room.roomId);
+  const stars = document.getElementById('room-stars');
+  stars.textContent = starsText(room.conditionRating);
+  stars.setAttribute('aria-label', 'Condition ' + room.conditionRating + ' of 5');
+  document.getElementById('room-building').textContent = room.building + ' · CONDONG condo';
   document.getElementById('room-facts').innerHTML = `
-    <li>${escapeHtml(bedroomText(room.bedrooms))}</li>
-    <li>${escapeHtml(sizeText(room.size))}</li>
-    <li>Floor ${escapeHtml(room.floor)}</li>
-    <li>${escapeHtml(room.roomType)}</li>`;
-  document.getElementById('room-condition').textContent = conditionText(room.conditionRating);
+    <li><strong>${escapeHtml(room.roomType)}</strong><span>Room type</span></li>
+    <li><strong>${escapeHtml(bedroomText(room.bedrooms))}</strong><span>Bedrooms</span></li>
+    <li><strong>${escapeHtml(sizeText(room.size))}</strong><span>Usable area</span></li>
+    <li><strong>Floor ${escapeHtml(room.floor)}</strong><span>${escapeHtml(room.building)}</span></li>`;
+  document.getElementById('room-condition').innerHTML = conditionHtml(room.conditionRating);
   document.getElementById('room-description').textContent = room.description || 'No description yet.';
 }
 
-// การ์ดเจ้าของห้อง (ชื่อ เบอร์ อีเมล LINE ID)
+// การ์ดเจ้าของห้อง: ชื่อ + แถวเบอร์ อีเมล LINE ID (มีไอคอนหน้าแต่ละแถว)
 function renderOwner(owner) {
   if (!owner) {
     owner = {};
   }
+  document.getElementById('owner-name').textContent = owner.name || 'Room owner';
   const rows = [
-    { label: 'Name', value: owner.name },
-    { label: 'Phone', value: owner.phone },
-    { label: 'Email', value: owner.email },
-    { label: 'LINE ID', value: owner.lineId },
+    { icon: 'img/icon-phone.png', label: 'เบอร์โทร : ', value: owner.phone },
+    { icon: 'img/icon-email.png', label: 'อีเมล: ', value: owner.email },
+    { icon: 'img/icon-line.png', label: 'LineID: ', value: owner.lineId },
   ];
   let html = '';
   for (const row of rows) {
-    html += `<div><dt>${escapeHtml(row.label)}</dt><dd>${escapeHtml(row.value || '-')}</dd></div>`;
+    html += `<li><img src="${row.icon}" alt=""><span>${escapeHtml(row.label)}${escapeHtml(row.value || '-')}</span></li>`;
   }
-  document.getElementById('owner-card').innerHTML = html;
+  document.getElementById('owner-rows').innerHTML = html;
+}
+
+// ไอคอนของเครื่องใช้ไฟฟ้า 1 ชนิด: รูปจาก Figma ถ้ามี ไม่มีใช้อีโมจิ
+function applianceIconHtml(name) {
+  if (APPLIANCE_IMAGES[name]) {
+    return `<img src="${APPLIANCE_IMAGES[name]}" alt="">`;
+  }
+  return escapeHtml(APPLIANCE_EMOJI[name] || '•');
 }
 
 // รายการเครื่องใช้ไฟฟ้า (ผู้เช่าเห็นแค่ชื่อ ไม่ต้องเห็นเลขซีเรียล)
@@ -83,10 +118,9 @@ function renderAppliances(appliances) {
   }
   let html = '';
   for (const appliance of appliances) {
-    const icon = APPLIANCE_ICONS[appliance.name] || '•';
     html += `
       <li>
-        <span class="appliances__icon" aria-hidden="true">${escapeHtml(icon)}</span>
+        <span class="appliances__icon" aria-hidden="true">${applianceIconHtml(appliance.name)}</span>
         <span>${escapeHtml(appliance.name)}</span>
       </li>`;
   }
@@ -98,11 +132,11 @@ function renderRentBox(room) {
   document.getElementById('room-price').textContent = formatPrice(room.price);
   document.getElementById('room-status').innerHTML = statusBadge(room.available, 'Available now');
   const lease = room.minimumLease;
-  let leaseText = 'Minimum lease –';
+  let leaseText = '–';
   if (lease === 1) {
-    leaseText = 'Minimum lease 1 month';
+    leaseText = '1 month';
   } else if (lease !== null && lease !== undefined) {
-    leaseText = 'Minimum lease ' + lease + ' months';
+    leaseText = lease + ' months';
   }
   document.getElementById('room-lease').textContent = leaseText;
 }
@@ -132,7 +166,7 @@ async function loadRoom(roomId) {
   showState(roomState, 'loading', 'Loading room...');
   try {
     const room = await getRoom(roomId);
-    document.title = 'Room ' + room.roomId + ' · AURA Sukhumvit 36';
+    document.title = 'Room ' + room.roomId + ' · CONDONG condo';
     renderGallery(room);
     renderSummary(room);
     renderOwner(room.owner);
@@ -152,7 +186,7 @@ async function loadRoom(roomId) {
 
 // เริ่มหน้า: อ่าน ?id= จาก URL ถ้ารูปแบบไม่ถูก (ไม่ใช่ L-1234) แสดงไม่พบห้องเลย
 function startRoomPage() {
-  setupPublicHeader(true);
+  setupPublicHeader();
   const roomId = (getQueryParams().id || '').trim();
   if (ROOM_ID_PATTERN.test(roomId)) {
     loadRoom(roomId);

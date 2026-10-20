@@ -4,38 +4,36 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Search Rooms · AURA Sukhumvit 36</title>
+  <title>Search Rooms · CONDONG condo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;600&family=Open+Sans:wght@600&family=Outfit:wght@700&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header id="site-header" class="site-header">
-    <div class="container site-header__inner">
-      <a class="brand" href="index.html">
-        <span class="brand__logo" aria-hidden="true">N</span>
-        <span>
-          <span class="brand__name">AURA SUKHUMVIT 36</span>
-          <span class="brand__tagline">One residence. Better renting.</span>
-        </span>
+    <div class="site-header__inner">
+      <a class="brand" href="index.html" aria-label="CONDONG condo — home">
+        <span class="brand__logo" aria-hidden="true">CD</span>
+        <span class="brand__text" aria-hidden="true"><span class="brand__name">Condong</span><span class="brand__sub">Condo</span></span>
       </a>
       <nav class="site-nav" aria-label="Main">
         <a href="index.html">Home</a>
         <a href="search.html" class="is-active" aria-current="page">Search</a>
         <a href="team.html">Team</a>
       </nav>
-      <!-- ปุ่ม Login หรือ Admin + Logout (common.js เติมให้) -->
-      <div id="header-actions" class="header-actions"></div>
+      <!-- ปุ่ม Login (ถ้าล็อกอินอยู่ common.js เปลี่ยนเป็นปุ่ม Admin) -->
+      <div id="header-actions" class="header-actions">
+        <a class="account-pill" href="login.html"><img src="img/icon-user.svg" alt=""><span>Login</span></a>
+      </div>
     </div>
   </header>
 
   <main class="page">
     <div class="container">
-      <p class="eyebrow">Find your room</p>
-      <h1>Search rooms</h1>
+      <h1 class="visually-hidden">Search rooms</h1>
 
-      <form id="filter-form" class="card filter-bar" novalidate>
+      <form id="filter-form" class="filter-bar" novalidate>
         <div class="filter-grid">
           <div class="field">
             <label for="f-type">Room type</label>
@@ -52,7 +50,7 @@
             <input id="f-floor" name="floor" type="number" min="1" max="99" step="1" inputmode="numeric" placeholder="Any floor">
           </div>
           <div class="field">
-            <label for="f-condition">Room condition</label>
+            <label for="f-condition">Room Condition</label>
             <select id="f-condition" name="minCondition">
               <option value="">Any condition</option>
               <option value="1">1★ ขึ้นไป (แย่)</option>
@@ -63,31 +61,12 @@
             </select>
           </div>
           <div class="field">
-            <label for="f-bedrooms">Bedrooms</label>
-            <select id="f-bedrooms" name="bedrooms">
-              <option value="">Any</option>
-              <option value="0">Studio</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-            </select>
+            <label for="f-min-price">Min rent / month</label>
+            <input id="f-min-price" name="minPrice" type="number" min="0" step="500" inputmode="numeric" placeholder="฿10,000">
           </div>
           <div class="field">
-            <label for="f-min-price">Min price</label>
-            <input id="f-min-price" name="minPrice" type="number" min="0" step="500" inputmode="numeric" placeholder="฿0">
-          </div>
-          <div class="field">
-            <label for="f-max-price">Max price</label>
-            <input id="f-max-price" name="maxPrice" type="number" min="0" step="500" inputmode="numeric" placeholder="No limit">
-          </div>
-          <div class="field">
-            <label for="f-sort">Sort by</label>
-            <select id="f-sort" name="sort">
-              <option value="">Room number</option>
-              <option value="price_asc">Price: low to high</option>
-              <option value="price_desc">Price: high to low</option>
-            </select>
+            <label for="f-max-price">Max rent / month</label>
+            <input id="f-max-price" name="maxPrice" type="number" min="0" step="500" inputmode="numeric" placeholder="฿35,000">
           </div>
         </div>
 
@@ -99,28 +78,18 @@
             </label>
             <button type="button" id="clear-filters" class="link-button">Clear all filters</button>
           </div>
-          <button type="submit" class="btn btn--green">Search Room</button>
+          <button type="submit" class="btn btn--green btn--search">Search Room</button>
         </div>
         <p class="form-error hidden" role="alert"></p>
       </form>
 
-      <section aria-labelledby="results-title">
-        <div class="results-head">
-          <h2 id="results-title">Rooms</h2>
-          <span id="results-count" class="muted" aria-live="polite"></span>
-        </div>
-        <div id="results" class="card-grid"></div>
+      <section aria-label="Search results">
+        <p id="results-count" class="visually-hidden" aria-live="polite"></p>
+        <div id="results" class="card-grid card-grid--search"></div>
         <nav id="pagination" class="pagination" aria-label="Search results pages"></nav>
       </section>
     </div>
   </main>
-
-  <footer id="site-footer" class="site-footer">
-    <div class="container">
-      <strong>AURA SUKHUMVIT 36</strong>
-      <span> · One residence. Better renting.</span>
-    </div>
-  </footer>
 
   <script src="js/api.js"></script>
   <script src="js/common.js"></script>

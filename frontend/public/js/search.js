@@ -3,7 +3,9 @@
 // ดังนั้นกดรีเฟรช / ย้อนกลับ / ส่งลิงก์ให้เพื่อน ก็ได้ผลลัพธ์เดิม
 
 // ชื่อช่องตัวกรอง (ตรงกับ name ใน search.html และชื่อ query ของ API)
-const FILTER_NAMES = ['type', 'floor', 'minCondition', 'minPrice', 'maxPrice', 'bedrooms', 'sort'];
+const FILTER_NAMES = ['type', 'floor', 'minCondition', 'minPrice', 'maxPrice'];
+// ห้องต่อหน้า: แถวแรก 2 ใบ + 3 แถว แถวละ 3 ใบ = 11 ใบ (ตาม Figma)
+const PAGE_SIZE = 11;
 
 const filterForm = document.getElementById('filter-form');
 const results = document.getElementById('results');
@@ -92,6 +94,7 @@ async function runSearch() {
   clearFieldErrors(filterForm);
 
   filters.page = toPositiveInt(params.page) || 1;
+  filters.pageSize = PAGE_SIZE;
   latestRequestId = latestRequestId + 1;
   const requestId = latestRequestId;
   showState(results, 'loading', 'Loading rooms...');
@@ -146,5 +149,5 @@ filterForm.addEventListener('submit', handleFilterSubmit);
 document.getElementById('clear-filters').addEventListener('click', handleClearFilters);
 window.addEventListener('popstate', runSearch); // ปุ่มย้อนกลับ/ไปข้างหน้าของเบราว์เซอร์
 
-setupPublicHeader(true);
+setupPublicHeader();
 runSearch();

@@ -24,20 +24,28 @@ let latestListRequest = 0;
 
 // ================= ส่วนที่ 1: ตารางห้อง =================
 
+// ป้ายสถานะในตาราง: Available (พื้นเทา) / Occupied (พื้นใส)
+function statusPill(available) {
+  if (available) {
+    return '<span class="status-pill status-pill--available">Available</span>';
+  }
+  return '<span class="status-pill">Occupied</span>';
+}
+
 // แถวในตาราง 1 แถว
 function roomRow(room) {
   const id = escapeHtml(room.roomId);
   return `
     <tr>
       <td><div class="thumb">${imageHtml(firstImageUrl(room), 'Room ' + room.roomId)}</div></td>
-      <td><strong>${id}</strong></td>
-      <td><span class="badge badge--type">${escapeHtml(room.roomType)}</span></td>
+      <td class="room-id">${id}</td>
+      <td><span class="pill">${escapeHtml(room.roomType)}</span></td>
       <td>${escapeHtml(formatPrice(room.price))}</td>
-      <td>${statusBadge(room.available)}</td>
+      <td>${statusPill(room.available)}</td>
       <td>
         <div class="row-actions">
-          <button type="button" class="icon-btn" data-action="edit" data-room-id="${id}" title="Edit" aria-label="Edit room ${id}">✎</button>
-          <button type="button" class="icon-btn icon-btn--danger" data-action="delete" data-room-id="${id}" title="Delete" aria-label="Delete room ${id}">🗑</button>
+          <button type="button" class="icon-btn" data-action="edit" data-room-id="${id}" title="Edit" aria-label="Edit room ${id}"><img src="../img/icon-edit.svg" alt=""></button>
+          <button type="button" class="icon-btn" data-action="delete" data-room-id="${id}" title="Delete" aria-label="Delete room ${id}"><img src="../img/icon-trash.svg" alt=""></button>
         </div>
       </td>
     </tr>`;
@@ -152,18 +160,9 @@ function handleSearchSubmit(event) {
   loadRooms();
 }
 
-// กล่องค้นหาด้านซ้าย: กด Clear
-function handleSearchReset() {
-  roomSearch.q = '';
-  roomSearch.type = '';
-  roomSearch.available = '';
-  roomSearch.page = 1;
-  loadRooms();
-}
-
 // ================= ส่วนที่ 2: เครื่องใช้ไฟฟ้า =================
 
-// สร้างเช็กบ็อกซ์ 10 อัน แต่ละอันมีช่องเลขซีเรียล (ชื่อช่อง serial-0, serial-1, ...)
+// สร้างเช็กบ็อกซ์ 10 อัน แต่ละอันมีช่องเลขซีเรียล (ชื่อช่อง serial-0, serial-1, ...) ที่โผล่เมื่อติ๊ก
 function renderApplianceOptions() {
   let html = '';
   for (let i = 0; i < APPLIANCES.length; i = i + 1) {
@@ -206,10 +205,16 @@ function serialInputFor(box) {
   return roomForm.elements['serial-' + box.dataset.index];
 }
 
-// ช่องเลขซีเรียลพิมพ์ได้เฉพาะตอนติ๊กเครื่องใช้ไฟฟ้านั้น
+// ช่องเลขซีเรียลโผล่และพิมพ์ได้เฉพาะตอนติ๊กเครื่องใช้ไฟฟ้านั้น
 function syncSerialInputs() {
   for (const box of getApplianceBoxes()) {
-    serialInputFor(box).disabled = !box.checked;
+    const serialInput = serialInputFor(box);
+    serialInput.disabled = !box.checked;
+    if (box.checked) {
+      serialInput.classList.remove('hidden');
+    } else {
+      serialInput.classList.add('hidden');
+    }
   }
 }
 
@@ -280,6 +285,14 @@ function setMode(room) {
   tabEdit.disabled = !room;
   tabEdit.textContent = room ? 'Edit Room ' + room.roomId : 'Edit Room';
   roomForm.elements.roomId.readOnly = Boolean(room); // แก้รหัสห้องไม่ได้
+  showSaveLabel();
+}
+
+// ข้อความปุ่มบันทึก: โหมดเพิ่ม = "Create Room", โหมดแก้ไข = "Save Room" (ตาม Figma)
+function showSaveLabel() {
+  if (!saveButton.disabled) {
+    saveButton.textContent = editingRoom ? 'Save Room' : 'Create Room';
+  }
 }
 
 // ล้างฟอร์มกลับเป็นโหมดเพิ่มห้องใหม่
@@ -423,6 +436,7 @@ async function saveRoom(event) {
   }
   await finishSave(saved, isEdit);
   setBusy(saveButton, false);
+  showSaveLabel(); // ฟอร์มอาจเปลี่ยนโหมดระหว่างบันทึก
 }
 
 // หลังบันทึกห้องสำเร็จ: อัปโหลดรูปที่เลือกไว้ แล้วล้างฟอร์ม
@@ -446,13 +460,6 @@ async function finishSave(saved, isEdit) {
   showToast('Room ' + saved.roomId + (isEdit ? ' updated' : ' created'), 'success');
   resetEditor();
   loadRooms();
-}
-
-// ปุ่ม "+ Add new room": เปิดฟอร์มเปล่า
-function openAddForm() {
-  resetEditor();
-  document.getElementById('room-editor').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  roomForm.elements.roomId.focus({ preventScroll: true });
 }
 
 // ================= ส่วนที่ 4: รูปห้อง =================
@@ -565,12 +572,10 @@ function handleFilesChosen(event) {
 function bindRoomPage() {
   const searchForm = document.getElementById('room-search');
   searchForm.addEventListener('submit', handleSearchSubmit);
-  searchForm.addEventListener('reset', handleSearchReset);
   roomForm.addEventListener('submit', saveRoom);
   document.getElementById('r-images').addEventListener('change', handleFilesChosen);
   document.getElementById('room-cancel').addEventListener('click', resetEditor);
   document.getElementById('tab-add').addEventListener('click', resetEditor);
-  document.getElementById('new-room').addEventListener('click', openAddForm);
 }
 
 // ตรวจการล็อกอินก่อน แล้วค่อยแสดงหน้า

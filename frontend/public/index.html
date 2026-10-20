@@ -1,88 +1,96 @@
 <!doctype html>
-<!-- index.html — หน้าแรก (Home): แนะนำตึก + ตัวเลขสรุปจาก /api/stats -->
+<!-- index.html — หน้าแรก (Home): แนะนำตึก + ตัวเลขสรุปจาก /api/stats + ห้องแนะนำ 1 ห้อง -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Home · AURA Sukhumvit 36</title>
+  <title>Home · CONDONG condo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;600&family=Open+Sans:wght@600&family=Outfit:wght@700&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header id="site-header" class="site-header">
-    <div class="container site-header__inner">
-      <a class="brand" href="index.html">
-        <span class="brand__logo" aria-hidden="true">N</span>
-        <span>
-          <span class="brand__name">AURA SUKHUMVIT 36</span>
-          <span class="brand__tagline">One residence. Better renting.</span>
-        </span>
+    <div class="site-header__inner">
+      <a class="brand" href="index.html" aria-label="CONDONG condo — home">
+        <span class="brand__logo" aria-hidden="true">CD</span>
+        <span class="brand__text" aria-hidden="true"><span class="brand__name">Condong</span><span class="brand__sub">Condo</span></span>
       </a>
       <nav class="site-nav" aria-label="Main">
         <a href="index.html" class="is-active" aria-current="page">Home</a>
         <a href="search.html">Search</a>
         <a href="team.html">Team</a>
       </nav>
-      <!-- ปุ่ม Login หรือ Admin + Logout (common.js เติมให้) -->
-      <div id="header-actions" class="header-actions"></div>
+      <!-- ปุ่ม Login (ถ้าล็อกอินอยู่ common.js เปลี่ยนเป็นปุ่ม Admin) -->
+      <div id="header-actions" class="header-actions">
+        <a class="account-pill" href="login.html"><img src="img/icon-user.svg" alt=""><span>Login</span></a>
+      </div>
     </div>
   </header>
 
   <main class="page">
-    <div class="container hero">
-      <section>
-        <p class="eyebrow">One condo. Selected with care.</p>
-        <h1>Your next room at AURA Sukhumvit 36.</h1>
-        <p class="hero__lead">
-          Browse every available unit in one trusted building, compare clear monthly rents,
-          and book a viewing in minutes.
-        </p>
-        <a class="btn btn--primary" href="search.html">View Available Rooms</a>
+    <div class="container">
+      <div class="hero">
+        <section>
+          <p class="eyebrow">One condo. Selected with care.</p>
+          <h1>Your next room at<br>CONDONG condo</h1>
+          <p class="hero__lead">
+            Explore available rooms in one trusted residence, with clear pricing, facilities, and viewing support.
+          </p>
+          <a class="btn btn--primary" href="search.html">View Available Rooms</a>
 
-        <ul class="checks">
-          <li>One trusted property</li>
-          <li>Clear monthly rent</li>
-          <li>Viewing support</li>
-        </ul>
+          <ul class="checks">
+            <li>One trusted property</li>
+            <li>Clear monthly rent</li>
+            <li>Viewing support</li>
+          </ul>
 
-        <div class="stats" aria-live="polite">
-          <article class="card stat">
-            <p class="stat__value" id="stat-total-rooms">…</p>
-            <p class="stat__label">Rental rooms</p>
-          </article>
-          <article class="card stat">
-            <p class="stat__value" id="stat-room-types">…</p>
-            <p class="stat__label">Room layouts</p>
-          </article>
-          <article class="card stat">
-            <p class="stat__value">24/7</p>
-            <p class="stat__label">Building security</p>
-          </article>
-        </div>
-        <p class="muted" id="stat-available"></p>
-      </section>
+          <div class="stats" aria-live="polite">
+            <article class="stat">
+              <p class="stat__value" id="stat-total-rooms">…</p>
+              <p class="stat__label">Rental rooms</p>
+            </article>
+            <article class="stat">
+              <p class="stat__value" id="stat-room-types">…</p>
+              <p class="stat__label">Room layouts</p>
+            </article>
+            <article class="stat">
+              <p class="stat__value">24/7</p>
+              <p class="stat__label">Building security</p>
+            </article>
+          </div>
+        </section>
 
-      <aside class="card about">
-        <div class="about__image img-placeholder">Residence photo</div>
-        <div class="about__body">
-          <p class="eyebrow">About the residence</p>
-          <p>
-            AURA Sukhumvit 36 is a low-rise residence a short walk from BTS Thong Lo.
-            Every unit is inspected and rated before it is listed, so what you see is what you rent.
+        <aside>
+          <!-- TODO(ยังขาด): ใส่รูปตึก/ล็อบบี้จริงแทนกล่องนี้ (และเขียนแหล่งที่มาของรูป) -->
+          <div class="residence-photo" role="img" aria-label="Residence exterior / lobby image">
+            <span class="residence-photo__tag">IMAGE PLACEHOLDER · 16:10</span>
+            [ RESIDENCE EXTERIOR / LOBBY IMAGE ]
+          </div>
+          <div class="about-text">
+            <p class="eyebrow">About the residence</p>
+            <p>
+              CONDONG condo offers thoughtfully planned rooms, shared facilities, convenient BTS access,
+              and on-site support. Compare room types, check availability, and arrange a viewing in one place.
+            </p>
+          </div>
+        </aside>
+      </div>
+
+      <section class="feature" aria-labelledby="feature-title">
+        <!-- ห้องแนะนำ 1 ห้อง (home.js เติมจาก API) -->
+        <div id="featured-room"></div>
+        <div>
+          <h2 id="feature-title" class="feature__title">THIS IS THE BEST ROOM IN THAILAND</h2>
+          <p class="feature__text">
+            CONDONG condo offers thoughtfully planned rooms, shared facilities, convenient BTS access,
+            and on-site support. Compare room types, check availability, and arrange a viewing in one place.
           </p>
         </div>
-      </aside>
+      </section>
     </div>
   </main>
-
-  <footer id="site-footer" class="site-footer">
-    <div class="container">
-      <strong>AURA SUKHUMVIT 36</strong>
-      <span> · One residence. Better renting.</span>
-    </div>
-  </footer>
 
   <script src="js/api.js"></script>
   <script src="js/common.js"></script>

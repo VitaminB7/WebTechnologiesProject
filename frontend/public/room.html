@@ -1,38 +1,36 @@
 <!doctype html>
-<!-- room.html — หน้ารายละเอียดห้อง (room.html?id=L-1201): รูป, ข้อมูลห้อง, เจ้าของ, ค่าเช่า, ห้องที่คล้ายกัน -->
+<!-- room.html — หน้ารายละเอียดห้อง (room.html?id=L-1201): รูป ข้อมูลห้อง สภาพห้อง เจ้าของ เครื่องใช้ไฟฟ้า ค่าเช่า ห้องที่คล้ายกัน -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Room · AURA Sukhumvit 36</title>
+  <title>Room · CONDONG condo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;600&family=Open+Sans:wght@600&family=Outfit:wght@700&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header id="site-header" class="site-header">
-    <div class="container site-header__inner">
-      <a class="brand" href="index.html">
-        <span class="brand__logo" aria-hidden="true">N</span>
-        <span>
-          <span class="brand__name">AURA SUKHUMVIT 36</span>
-          <span class="brand__tagline">One residence. Better renting.</span>
-        </span>
+    <div class="site-header__inner">
+      <a class="brand" href="index.html" aria-label="CONDONG condo — home">
+        <span class="brand__logo" aria-hidden="true">CD</span>
+        <span class="brand__text" aria-hidden="true"><span class="brand__name">Condong</span><span class="brand__sub">Condo</span></span>
       </a>
       <nav class="site-nav" aria-label="Main">
         <a href="index.html">Home</a>
         <a href="search.html" class="is-active" aria-current="page">Search</a>
         <a href="team.html">Team</a>
       </nav>
-      <!-- ปุ่ม Login หรือ Admin + Logout (common.js เติมให้) -->
-      <div id="header-actions" class="header-actions"></div>
+      <!-- ปุ่ม Login (ถ้าล็อกอินอยู่ common.js เปลี่ยนเป็นปุ่ม Admin) -->
+      <div id="header-actions" class="header-actions">
+        <a class="account-pill" href="login.html"><img src="img/icon-user.svg" alt=""><span>Login</span></a>
+      </div>
     </div>
   </header>
 
   <main class="page">
-    <div class="container">
-      <a href="search.html" class="muted">← Back to search</a>
+    <div class="container container--detail">
       <!-- ข้อความ กำลังโหลด / ไม่พบห้อง / ผิดพลาด -->
       <div id="room-state"></div>
 
@@ -41,58 +39,63 @@
         <div id="gallery" class="gallery" aria-label="Room photos"></div>
         <!-- กลุ่มแก้ข้อความเครดิตรูปตรงนี้ได้ -->
         <!-- TODO(ยังขาด): ถ้าใช้รูปจากที่อื่น (ไม่ใช่รูปของกลุ่ม) ต้องเขียนแหล่งที่มาให้ถูกต้องตรงนี้ (rubric ข้อ 4) -->
-        <p class="photo-credit">Photo source: room owner / AURA Sukhumvit 36</p>
+        <p class="photo-credit">Photo source: room owner / CONDONG condo</p>
+
+        <div class="title-row">
+          <h1 id="room-title"></h1>
+          <!-- ดาวสีเหลือง = คะแนนสภาพห้อง -->
+          <span id="room-stars" class="stars"></span>
+          <!-- ปุ่มหัวใจ (room.js เติมให้หลังโหลดห้อง) -->
+          <span id="room-favorite"></span>
+        </div>
+        <p id="room-building" class="room-subline"></p>
+
+        <div class="facts-box">
+          <ul id="room-facts" class="facts"></ul>
+          <div class="condition">
+            <span class="condition__label">สภาพห้อง</span>
+            <span id="room-condition"></span>
+          </div>
+        </div>
 
         <div class="detail">
           <div>
-            <section>
-              <h1 id="room-title"></h1>
-              <p id="room-building" class="muted"></p>
-              <ul id="room-facts" class="facts"></ul>
-              <div class="condition-box">
-                <span>สภาพห้อง</span>
-                <span id="room-condition" class="condition-box__value"></span>
+            <section class="detail-block" aria-label="Room owner">
+              <div class="owner">
+                <img class="owner__avatar" src="img/owner-avatar.png" alt="">
+                <div>
+                  <h2 id="owner-name" class="owner__name"></h2>
+                  <ul id="owner-rows" class="owner__rows"></ul>
+                </div>
               </div>
             </section>
 
-            <section>
-              <h2>Room owner</h2>
-              <dl id="owner-card" class="card owner-card"></dl>
-            </section>
-
-            <section>
+            <section class="detail-block">
               <h2>About this room</h2>
               <p id="room-description"></p>
             </section>
 
-            <section>
+            <section class="detail-block">
               <h2>Appliances</h2>
               <ul id="appliances" class="appliances"></ul>
             </section>
           </div>
 
-          <aside class="card rent-box" aria-label="Monthly rent">
+          <aside class="rent-box" aria-label="Monthly rent">
             <p class="eyebrow">Monthly rent</p>
-            <p class="rent-box__price"><span id="room-price"></span> <span class="rent-box__unit">/ month</span></p>
+            <p class="rent-box__price"><strong id="room-price"></strong> <span class="rent-box__unit">/ month</span></p>
             <span id="room-status"></span>
-            <p id="room-lease" class="muted"></p>
+            <p class="rent-box__lease"><span>Minimum lease</span> <strong id="room-lease"></strong></p>
           </aside>
         </div>
 
-        <section>
-          <h2>Similar rooms</h2>
+        <section class="similar" aria-labelledby="similar-title">
+          <h2 id="similar-title" class="visually-hidden">Similar rooms</h2>
           <div id="similar" class="card-grid"></div>
         </section>
       </article>
     </div>
   </main>
-
-  <footer id="site-footer" class="site-footer">
-    <div class="container">
-      <strong>AURA SUKHUMVIT 36</strong>
-      <span> · One residence. Better renting.</span>
-    </div>
-  </footer>
 
   <script src="js/api.js"></script>
   <script src="js/common.js"></script>

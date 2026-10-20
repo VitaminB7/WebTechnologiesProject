@@ -4,47 +4,38 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Our Team · AURA Sukhumvit 36</title>
+  <title>Our Team · CONDONG condo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;600&family=Open+Sans:wght@600&family=Outfit:wght@700&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header id="site-header" class="site-header">
-    <div class="container site-header__inner">
-      <a class="brand" href="index.html">
-        <span class="brand__logo" aria-hidden="true">N</span>
-        <span>
-          <span class="brand__name">AURA SUKHUMVIT 36</span>
-          <span class="brand__tagline">One residence. Better renting.</span>
-        </span>
+    <div class="site-header__inner">
+      <a class="brand" href="index.html" aria-label="CONDONG condo — home">
+        <span class="brand__logo" aria-hidden="true">CD</span>
+        <span class="brand__text" aria-hidden="true"><span class="brand__name">Condong</span><span class="brand__sub">Condo</span></span>
       </a>
       <nav class="site-nav" aria-label="Main">
         <a href="index.html">Home</a>
         <a href="search.html">Search</a>
         <a href="team.html" class="is-active" aria-current="page">Team</a>
       </nav>
-      <!-- ปุ่ม Login หรือ Admin + Logout (common.js เติมให้) -->
-      <div id="header-actions" class="header-actions"></div>
+      <!-- ปุ่ม Login (ถ้าล็อกอินอยู่ common.js เปลี่ยนเป็นปุ่ม Admin) -->
+      <div id="header-actions" class="header-actions">
+        <a class="account-pill" href="login.html"><img src="img/icon-user.svg" alt=""><span>Login</span></a>
+      </div>
     </div>
   </header>
 
   <main class="page">
     <section class="container">
-      <p class="eyebrow">Our team</p>
-      <h1>The People Behind the Work</h1>
-      <p class="muted">ITDS241 Web Technologies — AURA Sukhumvit 36 room rental management system.</p>
-      <div id="team" class="team-grid"></div>
+      <h1 class="team-title">The People Behind the Work</h1>
+      <!-- แถวบน 2 ใบ แถวล่าง 3 ใบ (team.js เติมให้) -->
+      <div id="team"></div>
     </section>
   </main>
-
-  <footer id="site-footer" class="site-footer">
-    <div class="container">
-      <strong>AURA SUKHUMVIT 36</strong>
-      <span> · One residence. Better renting.</span>
-    </div>
-  </footer>
 
   <script src="js/api.js"></script>
   <script src="js/common.js"></script>

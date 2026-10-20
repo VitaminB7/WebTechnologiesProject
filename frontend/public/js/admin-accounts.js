@@ -1,24 +1,23 @@
 // admin-accounts.js — สคริปต์หน้าจัดการบัญชีผู้ดูแล (admin/accounts.html) ใช้ได้เฉพาะ SuperAdmin
-// ส่วนที่ 1: ตารางผู้ดูแล + ตัวกรอง 3 ช่อง (Username/name, Role, Email)
-// ส่วนที่ 2: แผงเพิ่ม/แก้ไขผู้ดูแล
-// ส่วนที่ 3: หน้าต่างรีเซ็ตรหัสผ่าน
+// หน้านี้มี 2 มุมมอง (ตาม Figma): ตารางผู้ดูแล  <->  ฟอร์มเพิ่ม/แก้ไขบัญชี
+// ส่วนที่ 1: ตารางผู้ดูแล + ตัวกรอง 3 ช่อง (ชื่อ/Username, Role, Status)
+// ส่วนที่ 2: ฟอร์มเพิ่ม/แก้ไข (ตอนแก้ไข ช่องรหัสผ่านเว้นว่าง = ใช้รหัสเดิม)
 
-const ROLE_LABELS = { Admin: 'Admin', SuperAdmin: 'Super admin' };
+const ROLE_LABELS = { Admin: 'Admin', SuperAdmin: 'Super Admin' };
+const STATUSES = ['Active', 'Inactive']; // Inactive = ปิดบัญชี ล็อกอินไม่ได้
 const USERNAME_PATTERN = /^[A-Za-z0-9_.]{3,50}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
 const FILTER_DELAY_MS = 300; // รอให้พิมพ์เสร็จก่อนค้นหา (มิลลิวินาที)
 
 const filtersForm = document.getElementById('admin-filters');
-const adminPanel = document.getElementById('admin-panel');
+const listView = document.getElementById('list-view');
+const formView = document.getElementById('form-view');
 const adminForm = document.getElementById('admin-form');
-const panelSaveButton = document.getElementById('panel-save');
-const resetDialog = document.getElementById('reset-dialog');
-const resetForm = document.getElementById('reset-form');
+const saveButton = document.getElementById('form-save');
 
 let currentAdmin = null;  // คนที่ล็อกอินอยู่
 let editingAdmin = null;  // ผู้ดูแลที่กำลังแก้ไข (null = กำลังเพิ่มใหม่)
-let resetUsername = null; // ผู้ดูแลที่กำลังรีเซ็ตรหัส
 let latestListRequest = 0;
 let filterTimer = null;
 
@@ -30,41 +29,48 @@ function showNoPermission() {
 
 // ================= ส่วนที่ 1: ตาราง + ตัวกรอง =================
 
+// ป้ายสถานะบัญชี (Active เขียว / Inactive เทา)
+function statusPill(status) {
+  if (status === 'Active') {
+    return '<span class="account-status account-status--active">Active</span>';
+  }
+  return '<span class="account-status account-status--inactive">Inactive</span>';
+}
+
 // แถวในตาราง 1 แถว (ตัวเองลบตัวเองไม่ได้ จึงไม่มีปุ่ม Delete)
 function adminRow(admin) {
-  const isSelf = admin.username === currentAdmin.username;
   const name = escapeHtml(admin.username);
+  let deleteButton = `<button type="button" class="btn btn--danger btn--delete" data-action="delete" data-username="${name}">Delete</button>`;
   let youText = '';
-  let deleteButton = `<button type="button" class="btn btn--sm btn--danger-outline" data-action="delete" data-username="${name}">Delete</button>`;
-  if (isSelf) {
-    youText = '<span class="muted"> (you)</span>';
+  if (admin.username === currentAdmin.username) {
     deleteButton = '';
+    youText = ' <span class="muted">(you)</span>';
   }
   return `
     <tr>
-      <td><strong>${name}</strong>${youText}</td>
-      <td>${escapeHtml(admin.displayName)}</td>
-      <td>${escapeHtml(ROLE_LABELS[admin.role] || admin.role)}</td>
+      <td>${escapeHtml(admin.firstName)}</td>
+      <td>${escapeHtml(admin.lastName)}</td>
+      <td>${name}${youText}</td>
       <td>${escapeHtml(admin.email || '–')}</td>
+      <td>${escapeHtml(ROLE_LABELS[admin.role] || admin.role)}</td>
+      <td>${statusPill(admin.status)}</td>
+      <td class="account-table__address">${escapeHtml(admin.address || '–')}</td>
       <td>
         <div class="row-actions">
-          <button type="button" class="btn btn--sm btn--outline" data-action="edit" data-username="${name}">Edit</button>
-          <button type="button" class="btn btn--sm btn--outline" data-action="reset" data-username="${name}">Reset password</button>
+          <button type="button" class="btn btn--edit" data-action="edit" data-username="${name}">Edit</button>
           ${deleteButton}
         </div>
       </td>
     </tr>`;
 }
 
-// ผูกปุ่ม Edit / Reset password / Delete ในตาราง
+// ผูกปุ่ม Edit / Delete ในตาราง
 function bindRowButtons(tbody) {
   for (const button of tbody.querySelectorAll('button[data-action]')) {
     button.addEventListener('click', function () {
       const username = button.dataset.username;
       if (button.dataset.action === 'edit') {
         startEdit(username, button);
-      } else if (button.dataset.action === 'reset') {
-        openResetDialog(username);
       } else {
         removeAdmin(username, button);
       }
@@ -77,7 +83,7 @@ function readFilters() {
   return {
     q: filtersForm.elements.q.value.trim(),
     role: filtersForm.elements.role.value,
-    email: filtersForm.elements.email.value.trim(),
+    status: filtersForm.elements.status.value,
   };
 }
 
@@ -119,22 +125,21 @@ async function loadAdmins() {
   }
 }
 
-// กด Delete: ถามยืนยันก่อน แล้วลบ
+// ลบผู้ดูแล: ถามยืนยันก่อน คืน true ถ้าลบสำเร็จ
 async function removeAdmin(username, button) {
   if (!window.confirm('Delete administrator "' + username + '"? This cannot be undone.')) {
-    return;
+    return false;
   }
   button.disabled = true;
   try {
     await deleteAdmin(username);
     showToast('Administrator ' + username + ' deleted', 'success');
-    if (editingAdmin && editingAdmin.username === username) {
-      closePanel();
-    }
     loadAdmins();
+    return true;
   } catch (error) {
     button.disabled = false;
     showToast(error.message, 'error');
+    return false;
   }
 }
 
@@ -144,46 +149,48 @@ function loadAdminsSoon() {
   filterTimer = setTimeout(loadAdmins, FILTER_DELAY_MS);
 }
 
-// ผูกตัวกรอง: พิมพ์/เลือกแล้วค้นหาเลย, กด Search ก็ได้, กด Clear ล้างทั้งหมด
+// ผูกตัวกรอง: พิมพ์/เลือกแล้วค้นหาเลย (กด Enter ก็ได้)
 function bindFilters() {
   filtersForm.addEventListener('submit', function (event) {
     event.preventDefault();
     loadAdmins();
   });
-  filtersForm.addEventListener('reset', function () {
-    setTimeout(loadAdmins, 0); // รอให้ฟอร์มล้างค่าเสร็จก่อน
-  });
   filtersForm.elements.q.addEventListener('input', loadAdminsSoon);
-  filtersForm.elements.email.addEventListener('input', loadAdminsSoon);
   filtersForm.elements.role.addEventListener('change', loadAdmins);
+  filtersForm.elements.status.addEventListener('change', loadAdmins);
 }
 
-// ================= ส่วนที่ 2: แผงเพิ่ม/แก้ไข =================
+// ================= ส่วนที่ 2: ฟอร์มเพิ่ม/แก้ไข =================
 
-// ซ่อน/แสดงช่องรหัสผ่าน (มีเฉพาะตอนเพิ่มใหม่ ตอนแก้ไขใช้ปุ่ม Reset password แทน)
-function showPasswordFields(show) {
-  for (const field of adminForm.querySelectorAll('.password-field')) {
-    if (show) {
-      field.classList.remove('hidden');
-    } else {
-      field.classList.add('hidden');
-    }
-    field.querySelector('input').disabled = !show;
-  }
-}
-
-// เปิดแผง (admin = null คือเพิ่มใหม่, มีค่า = แก้ไขคนนั้น)
-function openPanel(admin) {
+// เปิดฟอร์มแทนตาราง (admin = null คือเพิ่มใหม่, มีค่า = แก้ไขคนนั้น)
+function openForm(admin) {
   adminForm.reset();
   clearFieldErrors(adminForm);
   editingAdmin = admin;
   const isEdit = Boolean(admin);
-  document.getElementById('panel-title').textContent = isEdit ? 'Edit administrator: ' + admin.username : 'Add administrator';
+  document.getElementById('form-title').textContent = isEdit ? 'Edit account' : 'Add administrator';
+  document.getElementById('form-lead').textContent = isEdit
+    ? 'Edit account for a member of the administration team.'
+    : 'Create an account for a member of the administration team.';
+  saveButton.textContent = isEdit ? 'Save' : 'Create Account';
   adminForm.elements.username.readOnly = isEdit; // แก้ username ไม่ได้
-  showPasswordFields(!isEdit);
-  const resetButton = document.getElementById('panel-reset-password');
+
+  // ตอนแก้ไข รหัสผ่านไม่บังคับ (เว้นว่าง = ใช้รหัสเดิม)
+  const passwordHint = isEdit ? 'Leave blank to keep the current password' : '********';
+  adminForm.elements.password.placeholder = passwordHint;
+  adminForm.elements.confirmPassword.placeholder = passwordHint;
+  document.getElementById('password-star').classList.toggle('hidden', isEdit);
+  document.getElementById('confirm-star').classList.toggle('hidden', isEdit);
+
+  // ปิดบัญชีตัวเองไม่ได้ (API ตอบ 400) จึงล็อกช่อง Status ไว้ตอนแก้ไขตัวเอง
+  const isSelf = isEdit && admin.username === currentAdmin.username;
+  adminForm.elements.status.disabled = isSelf;
+
+  const deleteButton = document.getElementById('form-delete');
+  deleteButton.disabled = false;
+  deleteButton.classList.toggle('hidden', !isEdit || admin.username === currentAdmin.username);
+
   if (isEdit) {
-    resetButton.classList.remove('hidden');
     adminForm.elements.username.value = admin.username;
     adminForm.elements.firstName.value = admin.firstName;
     adminForm.elements.lastName.value = admin.lastName;
@@ -191,35 +198,36 @@ function openPanel(admin) {
     adminForm.elements.confirmEmail.value = admin.email || '';
     adminForm.elements.address.value = admin.address || '';
     adminForm.elements.role.value = admin.role;
-  } else {
-    resetButton.classList.add('hidden');
+    adminForm.elements.status.value = admin.status;
   }
-  adminPanel.classList.remove('hidden');
-  adminPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  adminForm.elements[isEdit ? 'firstName' : 'username'].focus({ preventScroll: true });
+  listView.classList.add('hidden');
+  formView.classList.remove('hidden');
+  window.scrollTo({ top: 0 });
+  adminForm.elements.firstName.focus({ preventScroll: true });
 }
 
-// ปิดแผงและล้างฟอร์ม
-function closePanel() {
+// ปิดฟอร์ม กลับไปหน้าตาราง
+function closeForm() {
   editingAdmin = null;
   adminForm.reset();
   clearFieldErrors(adminForm);
-  adminPanel.classList.add('hidden');
+  formView.classList.add('hidden');
+  listView.classList.remove('hidden');
 }
 
-// กด Edit: โหลดข้อมูลล่าสุดของคนนั้นแล้วเปิดแผง
+// กด Edit: โหลดข้อมูลล่าสุดของคนนั้นแล้วเปิดฟอร์ม
 async function startEdit(username, button) {
   button.disabled = true;
   try {
     const admin = await getAdmin(username);
-    openPanel(admin);
+    openForm(admin);
   } catch (error) {
     showToast(error.message, 'error');
   }
   button.disabled = false;
 }
 
-// อ่านค่าทุกช่องในแผง
+// อ่านค่าทุกช่องในฟอร์ม
 function readAdminForm() {
   const fields = adminForm.elements;
   return {
@@ -230,12 +238,25 @@ function readAdminForm() {
     confirmEmail: fields.confirmEmail.value.trim(),
     address: fields.address.value.trim(),
     role: fields.role.value,
+    status: fields.status.value,
     password: fields.password.value,
     confirmPassword: fields.confirmPassword.value,
   };
 }
 
-// ตรวจแผงก่อนส่ง (อีเมลกับยืนยันอีเมลต้องตรงกัน, รหัสผ่านกับยืนยันต้องตรงกัน)
+// ตรวจรหัสผ่าน: ตอนแก้ไขเว้นว่างได้ ถ้ากรอกต้องยาวพอและตรงกับช่องยืนยัน
+function validatePassword(values, isEdit, fields) {
+  if (isEdit && values.password === '' && values.confirmPassword === '') {
+    return;
+  }
+  if (values.password.length < MIN_PASSWORD_LENGTH) {
+    fields.password = 'Password must be at least ' + MIN_PASSWORD_LENGTH + ' characters';
+  } else if (values.password !== values.confirmPassword) {
+    fields.confirmPassword = 'Passwords do not match';
+  }
+}
+
+// ตรวจฟอร์มก่อนส่ง (ช่องที่มี * ใน Figma ต้องกรอก, อีเมล/รหัสผ่านต้องตรงกับช่องยืนยัน)
 function validateAdmin(values, isEdit) {
   const fields = {};
   if (!isEdit && !USERNAME_PATTERN.test(values.username)) {
@@ -243,44 +264,43 @@ function validateAdmin(values, isEdit) {
   }
   if (values.firstName === '') fields.firstName = 'First name is required';
   if (values.lastName === '') fields.lastName = 'Last name is required';
-  if (values.email !== '' && !EMAIL_PATTERN.test(values.email)) {
+  if (!EMAIL_PATTERN.test(values.email)) {
     fields.email = 'Enter a valid email address';
   } else if (values.email !== values.confirmEmail) {
     fields.confirmEmail = 'Emails do not match';
   }
   if (!ROLE_LABELS[values.role]) fields.role = 'Choose a role';
-  if (!isEdit) {
-    if (values.password.length < MIN_PASSWORD_LENGTH) {
-      fields.password = 'Password must be at least ' + MIN_PASSWORD_LENGTH + ' characters';
-    } else if (values.password !== values.confirmPassword) {
-      fields.confirmPassword = 'Passwords do not match';
-    }
-  }
+  if (!STATUSES.includes(values.status)) fields.status = 'Choose Active or Inactive';
+  if (values.address === '') fields.address = 'Address is required';
+  validatePassword(values, isEdit, fields);
   return fields;
 }
 
 // ส่งข้อมูลไป API: เพิ่มใหม่ (createAdmin) หรือแก้ไข (updateAdmin)
-// ตอนแก้ไขไม่ส่ง password = ใช้รหัสเดิม (เปลี่ยนรหัสผ่านปุ่ม Reset password)
+// ตอนแก้ไขถ้าไม่กรอกรหัสผ่าน จะไม่ส่ง password = ใช้รหัสเดิม
 async function sendAdmin(values) {
   const body = {
     firstName: values.firstName,
     lastName: values.lastName,
-    email: values.email || null,
-    address: values.address || null,
+    email: values.email,
+    address: values.address,
     role: values.role,
+    status: values.status,
   };
+  if (values.password !== '') {
+    body.password = values.password;
+  }
   if (editingAdmin) {
     return await updateAdmin(editingAdmin.username, body);
   }
   body.username = values.username;
-  body.password = values.password;
   return await createAdmin(body);
 }
 
-// กด Save changes
+// กด Create Account / Save
 async function saveAdmin(event) {
   event.preventDefault();
-  if (panelSaveButton.disabled) {
+  if (saveButton.disabled) {
     return;
   }
   const values = readAdminForm();
@@ -291,76 +311,38 @@ async function saveAdmin(event) {
   }
 
   clearFieldErrors(adminForm);
-  setBusy(panelSaveButton, true);
+  setBusy(saveButton, true);
   try {
     await sendAdmin(values);
     showToast('Administrator ' + values.username + (editingAdmin ? ' updated' : ' created'), 'success');
-    closePanel();
+    setBusy(saveButton, false);
+    closeForm();
     loadAdmins();
   } catch (error) {
+    setBusy(saveButton, false);
     showApiError(adminForm, error);
   }
-  setBusy(panelSaveButton, false);
 }
 
-// ================= ส่วนที่ 3: รีเซ็ตรหัสผ่าน =================
-
-// เปิดหน้าต่างรีเซ็ตรหัสของ username
-function openResetDialog(username) {
-  resetUsername = username;
-  resetForm.reset();
-  clearFieldErrors(resetForm);
-  document.getElementById('reset-for').textContent = 'Set a new password for ' + username + '.';
-  resetDialog.showModal();
-  resetForm.elements.password.focus();
-}
-
-// กดยืนยันรีเซ็ตรหัส
-async function submitReset(event) {
-  event.preventDefault();
-  const submit = document.getElementById('reset-save');
-  if (submit.disabled) {
-    return;
+// ปุ่ม Delete Account ในฟอร์มแก้ไข
+async function deleteFromForm() {
+  const button = document.getElementById('form-delete');
+  const deleted = await removeAdmin(editingAdmin.username, button);
+  if (deleted) {
+    closeForm();
   }
-  const password = resetForm.elements.password.value;
-  const fields = {};
-  if (password.length < MIN_PASSWORD_LENGTH) {
-    fields.password = 'Password must be at least ' + MIN_PASSWORD_LENGTH + ' characters';
-  } else if (password !== resetForm.elements.confirm.value) {
-    fields.confirm = 'Passwords do not match';
-  }
-  if (Object.keys(fields).length > 0) {
-    showApiError(resetForm, { message: '', fields: fields });
-    return;
-  }
-
-  setBusy(submit, true);
-  try {
-    await resetAdminPassword(resetUsername, password);
-    resetDialog.close();
-    showToast('Password for ' + resetUsername + ' was reset', 'success');
-  } catch (error) {
-    showApiError(resetForm, error);
-  }
-  setBusy(submit, false);
 }
 
 // ================= เริ่มหน้า =================
 
-// ผูกปุ่มของแผงและหน้าต่างรีเซ็ตรหัส
-function bindPanel() {
+// ผูกปุ่มของฟอร์ม
+function bindForm() {
   document.getElementById('add-admin').addEventListener('click', function () {
-    openPanel(null);
+    openForm(null);
   });
-  document.getElementById('panel-cancel').addEventListener('click', closePanel);
-  document.getElementById('panel-reset-password').addEventListener('click', function () {
-    openResetDialog(editingAdmin.username);
-  });
+  document.getElementById('form-cancel').addEventListener('click', closeForm);
+  document.getElementById('form-delete').addEventListener('click', deleteFromForm);
   adminForm.addEventListener('submit', saveAdmin);
-  resetForm.addEventListener('submit', submitReset);
-  document.getElementById('reset-cancel').addEventListener('click', function () {
-    resetDialog.close();
-  });
 }
 
 // ตรวจการล็อกอิน -> Admin ธรรมดาเห็น "No permission", SuperAdmin เห็นหน้าเต็ม
@@ -375,7 +357,7 @@ async function startAccountsPage() {
     return;
   }
   bindFilters();
-  bindPanel();
+  bindForm();
   document.getElementById('page-content').classList.remove('hidden');
   loadAdmins();
 }
