@@ -112,6 +112,8 @@ backend/
 
 ## Working with Git
 
+Step-by-step guide for group members (Thai): [CONTRIBUTING.md](CONTRIBUTING.md)
+
 - `main` always runs: `npm test` passes before anything is merged.
 - New work goes on a branch: `feature/<short-name>`, `fix/<short-name>` or `docs/<short-name>`,
   then a pull request into `main`.
