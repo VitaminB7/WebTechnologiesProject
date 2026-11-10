@@ -1,4 +1,4 @@
 node_modules/
 .env
-backend/uploads/*
-!backend/uploads/.gitkeep
+sec2_gr1_ws_src/uploads/*
+!sec2_gr1_ws_src/uploads/.gitkeep

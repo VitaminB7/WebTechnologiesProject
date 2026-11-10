@@ -1,141 +1,47 @@
-# AURA Sukhumvit 36: Room Rental Management
+# CONDONG condo — ITDS242 Project Phase 2
 
-ITDS241 Web Technologies, Phase 2. Node.js (Express) + MySQL 8.4 back end (`npm start` works without installing MySQL), plain HTML/CSS/JS front end.
-Express serves the API at `/api` and the front end (`frontend/public`) at `/`, so everything runs from one server.
+ระบบค้นหาห้องเช่าและจัดการข้อมูลห้องกับบัญชีแอดมิน
 
-- **Still missing for the assignment: [TODO.md](TODO.md)**
-- Spec: [docs/SPEC.md](docs/SPEC.md)
-- API contract: [docs/API.md](docs/API.md)
-- Database: [db/schema.sql](db/schema.sql) (tables, follows the report's Data Dictionary) + [db/seed.sql](db/seed.sql) (sample data)
-
-## Project layout
-
-```
-aura-rental/
-  backend/            Express API + serves the front end (see "Back-end layout" below)
-  frontend/public/    7 pages: plain HTML + CSS + JS, no build step
-    css/              style.css (all pages), admin.css (admin pages)
-    js/api.js         the only file that calls fetch()
-    js/common.js      shared helpers (header/nav, footer, room card, escapeHtml)
-    js/<page>.js      one script per page (home.js, search.js, room.js, ...)
-    admin/            room management + account management (login required)
-  db/                 schema.sql (tables) + seed.sql (sample data)
-  docs/               SPEC.md (pages + rules), API.md (contract), REVIEW.md (review + open decisions)
-```
-
-## Quick start (no database setup)
-
-Needs only **Node.js 20 or newer**. Open a terminal in the project folder:
-
-```bash
-cd backend
-npm install
-npm start
-```
-
-Open http://localhost:3000.
-
-`npm start` looks for MySQL first:
-
-| Your computer | What `npm start` does |
+| รายการ | หน้าที่ |
 |---|---|
-| MySQL running, `aura_rental` exists | uses it, your data is kept |
-| MySQL running, no `aura_rental` yet | creates it from `db/schema.sql` + `db/seed.sql` |
-| No MySQL (or wrong login) | starts a **temporary MySQL** with the sample data. Everything you change is lost when you stop the server |
+| `sec2_gr1_fe_src/` | Front-end server ที่ `http://localhost:8080` |
+| `sec2_gr1_ws_src/` | Express Web Service ที่ `http://localhost:3000/api` |
+| `sec2_gr1_database.sql` | โครงสร้าง MySQL และข้อมูลสาธิต |
+| `sec2_gr1_postman_collection.json` | ชุดทดสอบเว็บเซอร์วิส |
 
-The temporary MySQL is real MySQL 8.4 run by [mysql-memory-server](https://www.npmjs.com/package/mysql-memory-server).
-If MySQL 8.4 is not installed, the first `npm start` downloads it from cdn.mysql.com (a few hundred MB,
-once), so the first start can take a few minutes. Stop the server with `Ctrl + C`; the temporary MySQL stops with it.
+## ติดตั้ง
 
-## Using your own MySQL (keeps data between runs)
+1. ติดตั้ง Node.js 20 ขึ้นไปและ MySQL 8.x เปิด MySQL แล้วรัน `sec2_gr1_database.sql` ทั้งไฟล์ใน MySQL Workbench สำหรับการติดตั้งใหม่ ไฟล์จะสร้าง `aura_rental` และนำเข้าข้อมูลสาธิต
+2. เปิดเทอร์มินัลใน `sec2_gr1_ws_src` คัดลอก `.env.example` เป็น `.env` ตั้ง `DB_USER`, `DB_PASSWORD` และ `SESSION_SECRET` แล้วรัน `npm ci` และ `npm start`
+3. เปิดอีกเทอร์มินัลใน `sec2_gr1_fe_src` รัน `npm ci` และ `npm start`
+4. เปิด [หน้าเว็บ](http://localhost:8080/) หรือ [API รายการห้อง](http://localhost:3000/api/rooms)
 
-Install MySQL 8.x, then create `backend/.env`:
+ถ้าเปลี่ยนพอร์ต ให้ตั้ง `FRONTEND_PORT` และ `API_ORIGIN` ตอนรัน Front-end แล้วปรับ `PORT` และ `FRONTEND_ORIGIN` ใน `.env` ของ Web Service ให้ตรงกัน ใช้ชื่อโฮสต์เดียวกัน เช่น `localhost` ทั้งคู่ เพื่อให้ session cookie ทำงาน
 
-```bash
-copy .env.example .env      # Git Bash / macOS / Linux: cp .env.example .env
-```
+## บัญชีทดสอบ
 
-| Variable | Default | Meaning |
+| Username | Password | สิทธิ์ |
 |---|---|---|
-| `DB_HOST` / `DB_PORT` | `localhost` / `3306` | MySQL server |
-| `DB_USER` / `DB_PASSWORD` | `root` / *(empty)* | MySQL login |
-| `DB_NAME` | `aura_rental` | database used by the app |
-| `SESSION_SECRET` | random each start | any long random string (keeps you logged in across restarts) |
-| `PORT` | `3000` | web server port |
+| `admin_main` | `Admin@1234` | SuperAdmin จัดการห้อง บัญชี และดู Activity log |
+| `listing_ploy` | `Listing@1234` | Admin จัดการห้อง |
+| `ops_niran` | `Ops@12345` | Admin จัดการห้อง |
 
-To go back to the sample data at any time:
+## อ่านโค้ดและทดสอบ
 
-```bash
-npm run db:reset
+- เริ่มจาก `sec2_gr1_fe_src/public/js/api.js` (Fetch) → `sec2_gr1_ws_src/src/app.js` (CORS, session, router) → `src/routes/` (ตรวจข้อมูล, SQL, JSON) ดูรายละเอียดใน [API contract](docs/API.md)
+- หน้ารายละเอียดห้องใช้ [Frankfurter](https://frankfurter.dev/javascript/) แสดงค่าเช่า USD โดยประมาณ ราคาหลักแสดงเป็นบาทเสมอ
+- รัน `npm test` ใน `sec2_gr1_ws_src` โดยใช้บัญชี MySQL ที่มีสิทธิ์สร้างและลบฐานทดสอบ `aura_rental_test`
+- นำเข้า Postman Collection และรันตามลำดับด้วยฐานข้อมูลสาธิต เริ่มที่ Login เพื่อเก็บ session cookie เลือก PNG/JPEG/WebP ขนาดไม่เกิน 2 MB ในช่อง `images` ก่อนทดสอบอัปโหลด
+- ใช้ผลทดสอบจริงและ HTTP status ประกอบรายงาน ดู [งานที่กลุ่มต้องเติม](TODO.md)
+
+## ใช้ฐานข้อมูลเดิม
+
+ถ้า `AdminAccount` ยังไม่มี `Status` ให้รัน SQL นี้เพื่อเก็บข้อมูลเดิมไว้
+
+```sql
+ALTER TABLE aura_rental.AdminAccount
+  ADD COLUMN Status VARCHAR(10) NOT NULL DEFAULT 'Active',
+  ADD CONSTRAINT chk_admin_account_status CHECK (Status IN ('Active', 'Inactive'));
 ```
 
-This **drops and recreates** the database named in `DB_NAME`, loads `db/schema.sql`, then `db/seed.sql`
-(20 rooms L-0203 … L-3001 with 115 appliances, 3 admins). You do not need the `mysql` command-line client.
-
-Other commands: `npm run dev` restarts automatically when a file changes.
-Quick check: http://localhost:3000/api/rooms should return JSON rooms.
-
-## Test logins
-
-| Username | Password | Role | Can do |
-|---|---|---|---|
-| `admin_main` | `Admin@1234` | SuperAdmin | rooms + admin accounts + logs |
-| `listing_ploy` | `Listing@1234` | Admin | rooms |
-| `ops_niran` | `Ops@12345` | Admin | rooms (has no email) |
-
-You can also log in with an email instead of the username, e.g. `admin@aura36.co.th` / `Admin@1234`.
-
-## 4. Test
-
-```bash
-npm test
-```
-
-The tests use a **separate database `aura_rental_test`**. They create it from `schema.sql` + `seed.sql` before
-each test file, so your dev data in `aura_rental` is never touched. Uploaded test images go to a temp folder.
-The tests need a running MySQL (they do not start the temporary one).
-
-## Back-end layout
-
-Written for a year-1 reader: every route has the same shape
-(comment with Postman examples -> check input -> SQL with `?` placeholders -> send JSON).
-
-```
-backend/
-  scripts/db-reset.js       npm run db:reset (also used by the tests and by database-setup.js)
-  src/server.js             loads .env, prepares the database, starts the server
-  src/app.js                builds the Express app: middleware + routes + the one error handler (exported for tests)
-  src/db.js                 the MySQL connection pool
-  src/database-setup.js     npm start without MySQL -> temporary MySQL (mysql-memory-server)
-  src/routes/               one file per topic; validation + SQL live in the route
-    auth.js                 /api/auth/login, /logout, /me
-    rooms.js                /api/rooms, /api/rooms/:id, /similar, /api/stats
-    room-images.js          /api/rooms/:id/images (upload with multer, content checked by magic bytes)
-    admins.js               /api/admins* (SuperAdmin only)
-    logs.js                 /api/logs (SuperAdmin only)
-  src/helpers/              small functions shared by several routes
-    auth.js                 requireLogin, requireSuperAdmin, rowToAdmin
-    validate.js             isBlank, isText, isIntBetween, isEmail, isOneOf, ...
-    log.js                  writeLog() -> one row in table Log (+ describeChanges)
-    transaction.js          runInTransaction(): begin / commit / rollback, retry on deadlock
-  uploads/                  room photos, served at /uploads (gitignored except .gitkeep)
-  tests/                    node:test + supertest against the test DB aura_rental_test
-```
-
-## Troubleshooting
-
-- Data disappears after restarting: you are on the temporary MySQL (the start message says so). Use your own MySQL to keep data.
-- `Access denied for user 'root'` in `npm test`: set `DB_PASSWORD` in `backend/.env`.
-- First `npm start` seems stuck: it is downloading MySQL. Wait, and check your internet connection.
-- `EADDRINUSE :3000`: another server is already on port 3000. Stop it or change `PORT` in `.env`.
-
-## Working with Git
-
-Step-by-step guide for group members (Thai): [CONTRIBUTING.md](CONTRIBUTING.md)
-
-- `main` always runs: `npm test` passes before anything is merged.
-- New work goes on a branch: `feature/<short-name>`, `fix/<short-name>` or `docs/<short-name>`,
-  then a pull request into `main`.
-- Commit messages: `type(scope): what changed`, e.g. `feat(frontend): add room filter`,
-  `fix(backend): reject past move-in dates`. Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`.
-- Never commit `backend/.env` or `node_modules/` (already in `.gitignore`).
+คำสั่ง `npm run db:reset` ในโฟลเดอร์ Web Service จะ **ลบและสร้างฐานข้อมูลใน DB_NAME ใหม่** ใช้เมื่อต้องการกลับไปที่ข้อมูลสาธิต

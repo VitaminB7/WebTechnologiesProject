@@ -1,5 +1,7 @@
 # PM Review — 20 Oct 2026
 
+Historical review. See [README.md](../README.md) and [TODO.md](../TODO.md) for the current implementation and submission checklist.
+
 Scope: backend (BE agent) + frontend (FE agent) against `docs/SPEC.md`, `docs/API.md` and the Figma wireframes.
 Final state: **`npm test` 62/62 pass**, API attack run passed, browser walk-through passed.
 

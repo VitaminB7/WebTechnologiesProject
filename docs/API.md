@@ -1,12 +1,12 @@
-# API Contract — AURA Sukhumvit 36
+# API Contract — CONDONG condo
 
 **This file is the contract between front end and back end. Neither side may change field names without updating this file.**
 The database follows the group's Data Dictionary (report section 3.2): `AdminAccount`, `RoomUnit`, `Log`, `Appliance`,
-plus what the wireframe needs: `RoomUnit.Floor`, `RoomUnit.ConditionRating` and table `RoomImage` — see `db/schema.sql`.
+plus what the wireframe needs: `RoomUnit.Floor`, `RoomUnit.ConditionRating` and table `RoomImage` — see `sec2_gr1_database.sql`.
 
-- Base URL: same origin, prefix `/api` (Express serves the front end from `frontend/public` too → no CORS)
+- Base URL: http://localhost:3000, prefix /api. Front end runs on http://localhost:8080.
 - Body: JSON (`Content-Type: application/json`) except image upload (multipart)
-- Auth: cookie session (`express-session`). Front end calls `fetch(url, { credentials: 'same-origin' })`
+- Auth: cookie session (`express-session`). Front end calls `fetch(url, { credentials: 'include' })`
 - JSON field names are **camelCase** (back end maps from DB column names)
 
 ## Response format (every endpoint)
@@ -106,8 +106,6 @@ Error:   `{ "error": { "message": "human readable", "fields": { "price": "must b
 |---|---|---|
 | GET | `/api/rooms` | Query (all optional): `type` (roomType), `minPrice`, `maxPrice`, `bedrooms`, `available` (`true`/`false`), `floor`, `minCondition` (1–5, conditionRating ≥), `q` (matches roomId or owner name), `page` (default 1), `pageSize` (default 12, max 50), `sort` (`price_asc`, `price_desc`; default `roomId`). Returns `Room[]` + `meta`. 400 on bad values |
 | GET | `/api/rooms/:id` | `Room`, 404 if not found (400 if `:id` is not `L-` + 4 digits) |
-| GET | `/api/rooms/:id/similar` | up to 3 rooms, same `roomType`, excluding itself, available first, closest price |
-| GET | `/api/stats` | `{ totalRooms, roomTypes, availableRooms }` for the home page |
 
 ### Rooms (login: Admin or SuperAdmin)
 | Method | Path | Notes |
@@ -126,9 +124,10 @@ Error:   `{ "error": { "message": "human readable", "fields": { "price": "must b
 | POST | `/api/admins` | `{ username, password, firstName, lastName, address?, role, email? }` → 201. 409 on duplicate username/email |
 | PUT | `/api/admins/:username` | same body minus `username`; `password` optional (blank = keep) → `Admin`. Cannot change your own role (400) |
 | DELETE | `/api/admins/:username` | cannot delete yourself (400). The admin's Log rows are deleted with it (FK `ON DELETE CASCADE`) |
-| POST | `/api/admins/:username/reset-password` | `{ password }` |
 
 ### Logs (SuperAdmin only)
+| Method | Path | Notes |
+|---|---|---|
 | GET | `/api/logs` | latest 100, newest first |
 
 Every create/update/delete of a room or an admin, plus each successful login, writes one `Log` row, e.g.

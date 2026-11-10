@@ -1,0 +1,45 @@
+<!doctype html>
+<!-- team.html — หน้าทีมผู้จัดทำ (About Us): การ์ดสมาชิก 5 คน มาจาก js/team.js -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Our Team · CONDONG condo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;600&family=Open+Sans:wght@600&family=Outfit:wght@700&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header" class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="index.html" aria-label="CONDONG condo — home">
+        <span class="brand__logo" aria-hidden="true">CD</span>
+        <span class="brand__text" aria-hidden="true"><span class="brand__name">Condong</span><span class="brand__sub">Condo</span></span>
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html">Home</a>
+        <a href="search.html">Search</a>
+        <a href="team.html" class="is-active" aria-current="page">Team</a>
+      </nav>
+      <!-- ปุ่ม Login (ถ้าล็อกอินอยู่ common.js เปลี่ยนเป็นปุ่ม Admin) -->
+      <div id="header-actions" class="header-actions">
+        <a class="account-pill" href="login.html"><img src="img/icon-user.svg" alt=""><span>Login</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="container">
+      <h1 class="team-title">The People Behind the Work</h1>
+      <!-- แถวบน 2 ใบ แถวล่าง 3 ใบ (team.js เติมให้) -->
+      <div id="team"></div>
+    </section>
+  </main>
+
+  <script src="js/api-config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/team.js"></script>
+</body>
+</html>

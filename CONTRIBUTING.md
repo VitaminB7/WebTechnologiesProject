@@ -1,49 +1,10 @@
-# วิธีเข้าร่วมพัฒนา AURA Sukhumvit 36
+# วิธีเข้าร่วมพัฒนา CONDONG condo
 
 คู่มือสำหรับสมาชิกในกลุ่ม: ลงโปรแกรม → รันเว็บในเครื่อง → แก้โค้ดแล้วส่งขึ้น GitHub
 
-## 1. ลงโปรแกรม (ครั้งเดียว)
+## 1–2. ติดตั้งและรันโปรเจกต์
 
-| โปรแกรม | โหลดที่ | จำเป็นไหม |
-|---|---|---|
-| Node.js 20 ขึ้นไป | https://nodejs.org (เลือก LTS) | **ต้องมี** |
-| Git | https://git-scm.com | **ต้องมี** |
-| MySQL 8.x | https://dev.mysql.com/downloads/installer/ | ไม่ต้องก็ได้ (ดูข้อ 2) |
-
-## 2. รันเว็บในเครื่อง
-
-### ครั้งแรก
-
-```bash
-git clone https://github.com/VitaminB7/WebTechnologiesProject.git
-cd WebTechnologiesProject/backend
-npm install
-npm start
-```
-
-เปิด http://localhost:3000 แล้วล็อกอินด้วย `admin_main` / `Admin@1234`
-(บัญชีทดสอบทั้งหมดอยู่ใน [README.md](README.md#test-logins))
-
-### ครั้งต่อไป
-
-```bash
-cd backend
-npm start                     # ปิดเว็บด้วย Ctrl + C
-```
-
-### ไม่มี MySQL ก็รันได้
-
-ตอน `npm start` โปรแกรมจะหา MySQL ในเครื่องก่อน
-
-| เครื่องคุณ | สิ่งที่เกิดขึ้น |
-|---|---|
-| ไม่มี MySQL | เปิด **MySQL ชั่วคราว** พร้อมข้อมูลตัวอย่างให้เอง ปิดเว็บแล้วข้อมูลที่แก้จะหาย เปิดใหม่ได้ข้อมูลตัวอย่างชุดเดิม |
-| มี MySQL | ใช้ตัวในเครื่อง ข้อมูลที่แก้ยังอยู่ ถ้ายังไม่มีฐานข้อมูล `aura_rental` จะสร้างให้เอง |
-
-- ถ้าไม่มี MySQL การ `npm start` ครั้งแรกจะโหลด MySQL มาก่อน (หลายร้อย MB ครั้งเดียว) อาจรอหลายนาที ครั้งต่อไปเร็ว
-- ถ้ามี MySQL ที่ตั้งรหัส root ไว้ ให้ก๊อป `.env.example` เป็น `.env` แล้วใส่รหัสที่ `DB_PASSWORD=`
-- อยากล้างข้อมูลกลับเป็นข้อมูลตัวอย่าง (เฉพาะตอนใช้ MySQL ในเครื่อง): `npm run db:reset`
-- `npm test` ต้องใช้ MySQL ในเครื่องเท่านั้น
+ทำตามขั้นตอนใน [README.md](README.md) เพื่อติดตั้ง MySQL และเปิด Front-end กับ Web Service แยกกัน
 
 ## 3. แก้โค้ดแล้วส่งขึ้น GitHub
 
@@ -68,7 +29,7 @@ git checkout -b feature/team-page
 ### แก้เสร็จแล้ว
 
 ```bash
-cd backend
+cd sec2_gr1_ws_src
 npm test                      # ต้องผ่านทั้งหมดก่อนส่ง (ต้องมี MySQL ในเครื่อง)
 git add .
 git commit -m "feat(frontend): add real team members"
