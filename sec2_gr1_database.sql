@@ -7,8 +7,8 @@
 -- Also: CHECK constraints for the "range" column of the dictionary,
 -- and UNIQUE(Email) because admins can log in with their email.
 
-CREATE DATABASE IF NOT EXISTS aura_rental CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE aura_rental;
+CREATE DATABASE IF NOT EXISTS condong_condo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE condong_condo;
 
 CREATE TABLE AdminAccount (
   Username VARCHAR(50)  NOT NULL,
@@ -85,13 +85,13 @@ CREATE TABLE RoomImage (
 
 -- CONDONG condo — sample data (matches the Data Dictionary in the report)
 -- Admin passwords are bcrypt hashes (cost 10) of:
---   admin_main   / Admin@1234    (SuperAdmin, can also log in with admin@aura36.co.th)
+--   admin_main   / Admin@1234    (SuperAdmin, can also log in with admin@condong.co.th)
 --   listing_ploy / Listing@1234  (Admin)
 --   ops_niran    / Ops@12345     (Admin, no email)
 
 INSERT INTO AdminAccount (Username, Password, Fname, Lname, Address, Role, Email) VALUES
-  ('admin_main',   '$2b$10$8JBCbK6N1QiX96njL0YFueWFIbbnPtdZvvCx3uSMi6DLkRVU3h9ve', 'Somchai', 'Jaidee',   '36 Sukhumvit 36, Khlong Toei, Bangkok 10110', 'SuperAdmin', 'admin@aura36.co.th'),
-  ('listing_ploy', '$2b$10$8XiNVFF4ttmpssros1MtE.6maCdF/z7rbHESfuYvGQkRBrgE.1pU2', 'Ploy',    'Srisuk',   NULL,                                          'Admin',      'ploy.s@aura36.co.th'),
+  ('admin_main',   '$2b$10$8JBCbK6N1QiX96njL0YFueWFIbbnPtdZvvCx3uSMi6DLkRVU3h9ve', 'Somchai', 'Jaidee',   '36 Sukhumvit 36, Khlong Toei, Bangkok 10110', 'SuperAdmin', 'admin@condong.co.th'),
+  ('listing_ploy', '$2b$10$8XiNVFF4ttmpssros1MtE.6maCdF/z7rbHESfuYvGQkRBrgE.1pU2', 'Ploy',    'Srisuk',   NULL,                                          'Admin',      'ploy.s@condong.co.th'),
   ('ops_niran',    '$2b$10$bXE1FZ2sOlzPX90pLi7p4O.8m0Xkb6q9a11b.Gd3zi9Ojqf.Exr4q', 'Niran',   'Thongdee', NULL,                                          'Admin',      NULL);
 
 INSERT INTO RoomUnit
