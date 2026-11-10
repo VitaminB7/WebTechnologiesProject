@@ -1,20 +1,19 @@
 // team.js — สคริปต์หน้าทีม: วาดการ์ดสมาชิกจากรายการ TEAM_MEMBERS ด้านล่าง (แถวบน 2 ใบ แถวล่าง 3 ใบ ตาม Figma)
 
-// TODO(ยังขาด): หน้า About Us ยังเป็นสมาชิกตัวอย่าง (rubric ข้อ 7 = 2 คะแนน)
-//   ต้องใส่สมาชิกจริงครบ 5 คน: ชื่อ, รหัสนักศึกษา, รูป (เก็บใน frontend/public/img/team/),
-//   และลิงก์ Social Media อย่างน้อยคนละ 1 อัน
+// TODO(ยังขาด): หน้า About Us ใส่ชื่อ + รหัสนักศึกษาจริงครบ 5 คนแล้ว (rubric ข้อ 7 = 2 คะแนน)
+//   ที่ยังขาด: รูปจริง (เก็บใน sec2_gr1_fe_src/public/img/team/) และลิงก์ Social Media จริงอย่างน้อยคนละ 1 อัน
 
-// ข้อมูลตัวอย่าง — กลุ่มเปลี่ยนเป็นชื่อ รหัสนักศึกษา รูป และลิงก์ของสมาชิกจริงได้เลย
-// photo: path รูปใน frontend/public (เช่น 'img/team/somchai.jpg') ตอนนี้ใช้รูปตัวอย่างจาก Figma
+// photo: path รูปใน sec2_gr1_fe_src/public (เช่น 'img/team/6887073.jpg') ตอนนี้ใช้รูปตัวอย่างจาก Figma
+// links: ตอนนี้ยังเป็นลิงก์ตัวอย่าง ให้แต่ละคนเปลี่ยนเป็นลิงก์โปรไฟล์ของตัวเอง
 const PLACEHOLDER_PHOTO = 'img/team-placeholder.png';
 const FIRST_ROW_SIZE = 2; // จำนวนการ์ดแถวบน
 
 const TEAM_MEMBERS = [
-  { name: 'Name', studentId: 'Student Number', photo: PLACEHOLDER_PHOTO, links: [{ label: 'GitHub', url: 'https://github.com/' }] },
-  { name: 'Name', studentId: 'Student Number', photo: PLACEHOLDER_PHOTO, links: [{ label: 'GitHub', url: 'https://github.com/' }] },
-  { name: 'Name', studentId: 'Student Number', photo: PLACEHOLDER_PHOTO, links: [{ label: 'GitHub', url: 'https://github.com/' }] },
-  { name: 'Name', studentId: 'Student Number', photo: PLACEHOLDER_PHOTO, links: [{ label: 'GitHub', url: 'https://github.com/' }] },
-  { name: 'Name', studentId: 'Student Number', photo: PLACEHOLDER_PHOTO, links: [{ label: 'Instagram', url: 'https://www.instagram.com/' }] },
+  { name: 'ปพรรธน์ กุณามา', studentId: '6887103', photo: PLACEHOLDER_PHOTO, links: [{ label: 'GitHub', url: 'https://github.com/' }] },
+  { name: 'ณัฐณิชา คงสุกิจ', studentId: '6887017', photo: PLACEHOLDER_PHOTO, links: [{ label: 'GitHub', url: 'https://github.com/' }] },
+  { name: 'จิราวง คุ้มเดช', studentId: '6887073', photo: PLACEHOLDER_PHOTO, links: [{ label: 'GitHub', url: 'https://github.com/JKTor' }] },
+  { name: 'ปรัชญา ภูโสนิล', studentId: '6887023', photo: PLACEHOLDER_PHOTO, links: [{ label: 'GitHub', url: 'https://github.com/' }] },
+  { name: 'ทิวากร เอี่ยมสำราญ', studentId: '6887034', photo: PLACEHOLDER_PHOTO, links: [{ label: 'Instagram', url: 'https://www.instagram.com/' }] },
 ];
 
 // การ์ดสมาชิก 1 ใบ: รูป ชื่อ รหัสนักศึกษา ลิงก์โซเชียล
