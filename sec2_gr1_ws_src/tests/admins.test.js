@@ -52,7 +52,7 @@ describe('GET /api/admins', () => {
     for (const admin of res.body.data) assert.deepEqual(Object.keys(admin).sort(), ADMIN_KEYS);
     assert.ok(!/password|\$2b\$/i.test(JSON.stringify(res.body)));
     const main = res.body.data.find((a) => a.username === 'admin_main');
-    assert.equal(main.email, 'admin@aura36.co.th');
+    assert.equal(main.email, 'admin@condong.co.th');
     assert.equal(main.role, 'SuperAdmin');
     assert.equal(res.body.data.find((a) => a.username === 'ops_niran').email, null);
   });
@@ -64,10 +64,10 @@ describe('GET /api/admins', () => {
     assert.deepEqual(names(await search({ q: 'ploy' })), ['listing_ploy']); // username and first name
     assert.deepEqual(names(await search({ q: 'Thongdee' })), ['ops_niran']); // last name
     assert.deepEqual(names(await search({ q: 'Niran Thong' })), ['ops_niran']); // "first last"
-    assert.deepEqual(names(await search({ q: 'aura36.co.th' })), [], 'q does not search email');
+    assert.deepEqual(names(await search({ q: 'condong.co.th' })), [], 'q does not search email');
     assert.deepEqual(names(await search({ role: 'Admin' })), ['listing_ploy', 'ops_niran']);
     assert.deepEqual(names(await search({ role: 'SuperAdmin' })), ['admin_main']);
-    assert.deepEqual(names(await search({ email: 'AURA36.co' })), ['admin_main', 'listing_ploy']);
+    assert.deepEqual(names(await search({ email: 'CONDONG.co' })), ['admin_main', 'listing_ploy']);
     assert.deepEqual(names(await search({ q: 's', role: 'Admin', email: 'ploy' })), ['listing_ploy']);
     assert.deepEqual(names(await search({ q: 'Somchai', role: 'Admin' })), []);
     assert.equal(names(await search({ q: '', role: '', email: '' })).length, 3, 'blank = no filter');
@@ -109,7 +109,7 @@ describe('create / update / delete admins', () => {
     await superAdmin.post('/api/admins').send(newAdmin({ email: null })).expect(409);
     await superAdmin.post('/api/admins').send(newAdmin({ username: 'STAFF_TEST', email: null })).expect(409);
     const res = await superAdmin.post('/api/admins')
-      .send(newAdmin({ username: 'other_one', email: 'ADMIN@aura36.co.th' })).expect(409);
+      .send(newAdmin({ username: 'other_one', email: 'ADMIN@condong.co.th' })).expect(409);
     assert.ok(res.body.error.fields.email);
     await superAdmin.get('/api/admins/other_one').expect(404);
   });
@@ -148,7 +148,7 @@ describe('create / update / delete admins', () => {
 
   it('returns 409 when an update takes another admin\'s email', async () => {
     const res = await superAdmin.put('/api/admins/staff_test').send({
-      firstName: 'Manee', lastName: 'Deejai', role: 'Admin', email: 'ploy.s@aura36.co.th',
+      firstName: 'Manee', lastName: 'Deejai', role: 'Admin', email: 'ploy.s@condong.co.th',
     }).expect(409);
     assert.ok(res.body.error.fields.email);
     const after = await superAdmin.get('/api/admins/staff_test').expect(200);
@@ -183,11 +183,11 @@ describe('create / update / delete admins', () => {
     await superAdmin.delete('/api/admins/admin_main').expect(400);
     await superAdmin.delete('/api/admins/ADMIN_MAIN').expect(400);
     const res = await superAdmin.put('/api/admins/admin_main').send({
-      firstName: 'Somchai', lastName: 'Jaidee', role: 'Admin', email: 'admin@aura36.co.th',
+      firstName: 'Somchai', lastName: 'Jaidee', role: 'Admin', email: 'admin@condong.co.th',
     }).expect(400);
     assert.ok(res.body.error.fields.role);
     await superAdmin.put('/api/admins/admin_main').send({
-      firstName: 'Somchai', lastName: 'Jaidee', role: 'SuperAdmin', email: 'admin@aura36.co.th',
+      firstName: 'Somchai', lastName: 'Jaidee', role: 'SuperAdmin', email: 'admin@condong.co.th',
     }).expect(200);
     await superAdmin.get('/api/auth/me').expect(200);
   });
@@ -230,7 +230,7 @@ describe('create / update / delete admins', () => {
 
   it('cannot deactivate yourself (400)', async () => {
     const res = await superAdmin.put('/api/admins/admin_main').send({
-      firstName: 'Somchai', lastName: 'Jaidee', role: 'SuperAdmin', email: 'admin@aura36.co.th', status: 'Inactive',
+      firstName: 'Somchai', lastName: 'Jaidee', role: 'SuperAdmin', email: 'admin@condong.co.th', status: 'Inactive',
     }).expect(400);
     assert.ok(res.body.error.fields.status);
     await superAdmin.get('/api/auth/me').expect(200);

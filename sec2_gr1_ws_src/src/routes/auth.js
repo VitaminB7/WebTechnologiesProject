@@ -27,13 +27,13 @@ function checkLoginBody(body) {
 
 // ---------------------------------------------------------------
 // POST /api/auth/login — ล็อกอินด้วย username หรืออีเมล + รหัสผ่าน (ทุกคนเรียกได้)
-// สำเร็จ -> { data: Admin } และได้ cookie "aura.sid" / ผิด -> 401 / บัญชีถูกปิด (Inactive) -> 403
+// สำเร็จ -> { data: Admin } และได้ cookie "condong.sid" / ผิด -> 401 / บัญชีถูกปิด (Inactive) -> 403
 // Postman ตัวอย่างที่ 1 (สำเร็จ → 200)
 //   method: POST   URL: http://localhost:3000/api/auth/login
 //   body (raw JSON): { "username": "admin_main", "password": "Admin@1234" }
 // Postman ตัวอย่างที่ 2 (ล็อกอินด้วยอีเมล → 200)
 //   method: POST   URL: http://localhost:3000/api/auth/login
-//   body (raw JSON): { "username": "admin@aura36.co.th", "password": "Admin@1234" }
+//   body (raw JSON): { "username": "admin@condong.co.th", "password": "Admin@1234" }
 // Postman ตัวอย่างที่ 3 (รหัสผิด → 401)
 //   method: POST   URL: http://localhost:3000/api/auth/login
 //   body (raw JSON): { "username": "admin_main", "password": "wrong-password" }
@@ -114,7 +114,7 @@ router.post('/auth/logout', async (req, res, next) => {
       if (err) {
         return next(err);
       }
-      res.clearCookie('aura.sid');
+      res.clearCookie('condong.sid');
       res.json({ data: { ok: true } });
     });
   } catch (err) {

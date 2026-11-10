@@ -4,11 +4,11 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const TEST_DB = 'aura_rental_test';
+const TEST_DB = 'condong_condo_test';
 process.env.DB_NAME = TEST_DB;
 process.env.SESSION_SECRET = 'test-only-secret';
 process.env.FRONTEND_ORIGIN = 'http://localhost:8080';
-process.env.UPLOAD_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-uploads-'));
+process.env.UPLOAD_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'condong-uploads-'));
 // Fills DB_HOST/DB_USER/... from .env if present; never overrides the values set above.
 require('dotenv').config({ path: path.join(__dirname, '..', '.env'), quiet: true });
 

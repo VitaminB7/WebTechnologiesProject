@@ -55,9 +55,9 @@ app.use('/api', (req, res, next) => {
 // อ่าน body แบบ JSON (ใหญ่สุด 100 KB) -> req.body
 app.use(express.json({ limit: '100kb' }));
 
-// session: จำว่าใครล็อกอินอยู่ ผ่าน cookie ชื่อ aura.sid
+// session: จำว่าใครล็อกอินอยู่ ผ่าน cookie ชื่อ condong.sid
 app.use(session({
-  name: 'aura.sid',
+  name: 'condong.sid',
   secret: sessionSecret,
   resave: false,
   saveUninitialized: false,

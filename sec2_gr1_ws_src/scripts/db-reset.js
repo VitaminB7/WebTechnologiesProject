@@ -1,5 +1,5 @@
 // db-reset.js — ล้างฐานข้อมูลแล้วนำเข้าไฟล์ SQL สำหรับส่งงาน
-// ใช้: npm run db:reset   (ใช้ชื่อฐานข้อมูลจาก DB_NAME ใน .env ถ้าไม่ตั้งไว้ = aura_rental)
+// ใช้: npm run db:reset   (ใช้ชื่อฐานข้อมูลจาก DB_NAME ใน .env ถ้าไม่ตั้งไว้ = condong_condo)
 // ไฟล์เทสต์ก็เรียก resetDatabase() โดยใช้ชื่อฐานข้อมูลแยก
 const fs = require('fs');
 const path = require('path');
@@ -12,7 +12,7 @@ async function resetDatabase(dbName) {
   if (!/^\w+$/.test(dbName)) {
     throw new Error(`Unsafe database name: ${dbName}`);
   }
-  const sql = fs.readFileSync(SQL_FILE, 'utf8').replace(/\baura_rental\b/g, dbName);
+  const sql = fs.readFileSync(SQL_FILE, 'utf8').replace(/\bcondong_condo\b/g, dbName);
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT) || 3306,
@@ -33,7 +33,7 @@ async function resetDatabase(dbName) {
 // ส่วนนี้ทำงานเฉพาะตอนสั่ง `node scripts/db-reset.js` ตรง ๆ (ไม่ใช่ตอนไฟล์อื่น require)
 if (require.main === module) {
   require('dotenv').config({ path: path.join(__dirname, '..', '.env'), quiet: true });
-  const dbName = process.env.DB_NAME || 'aura_rental';
+  const dbName = process.env.DB_NAME || 'condong_condo';
   resetDatabase(dbName)
     .then(() => {
       console.log(`Database ${dbName} reset with schema + seed data.`);

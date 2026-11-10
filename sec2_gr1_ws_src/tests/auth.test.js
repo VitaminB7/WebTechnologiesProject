@@ -13,11 +13,11 @@ describe('POST /api/auth/login', () => {
     assert.equal(res.body.data.username, 'admin_main');
     assert.equal(res.body.data.role, 'SuperAdmin');
     assert.equal(res.body.data.displayName, 'Somchai Jaidee');
-    assert.equal(res.body.data.email, 'admin@aura36.co.th');
+    assert.equal(res.body.data.email, 'admin@condong.co.th');
     assert.ok(!('password' in res.body.data));
     assert.ok(!JSON.stringify(res.body).includes('$2b$'));
     const cookie = res.headers['set-cookie'].join(';');
-    assert.match(cookie, /aura\.sid=/);
+    assert.match(cookie, /condong\.sid=/);
     assert.match(cookie, /HttpOnly/i);
     assert.match(cookie, /SameSite=Lax/i);
     assert.deepEqual(await lastLog(), { Username: 'admin_main', Changed: 'LOGIN admin_main' });
@@ -25,7 +25,7 @@ describe('POST /api/auth/login', () => {
 
   it('logs in with the admin email', async () => {
     const res = await request(app).post('/api/auth/login')
-      .send({ username: 'admin@aura36.co.th', password: 'Admin@1234' }).expect(200);
+      .send({ username: 'admin@condong.co.th', password: 'Admin@1234' }).expect(200);
     assert.equal(res.body.data.username, 'admin_main');
   });
 

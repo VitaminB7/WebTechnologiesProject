@@ -113,7 +113,7 @@ function sendEmailTaken(res) {
 //   status = Active / Inactive
 // ต้องล็อกอินก่อน (POST /api/auth/login) — Postman เก็บ cookie ให้เอง (ต้องเป็น SuperAdmin)
 // Postman ตัวอย่างที่ 1 (สำเร็จ → 200 { "data": [Admin...] })
-//   method: GET    URL: http://localhost:3000/api/admins?q=ploy&role=Admin&email=aura36
+//   method: GET    URL: http://localhost:3000/api/admins?q=ploy&role=Admin&email=condong
 // Postman ตัวอย่างที่ 2 (role ผิด → 400 fields.role)
 //   method: GET    URL: http://localhost:3000/api/admins?role=root
 // Postman ตัวอย่างที่ 2.1 (เฉพาะบัญชีที่ถูกปิด → 200)
@@ -330,7 +330,7 @@ async function updateAdmin(username, admin, hash, actor) {
 // Postman ตัวอย่างที่ 1 (สำเร็จ → 200 { "data": Admin })
 //   method: PUT    URL: http://localhost:3000/api/admins/listing_ploy
 //   body (raw JSON): { "firstName": "Ploy", "lastName": "Srisuk", "address": "Bangkok",
-//                      "role": "Admin", "email": "ploy.s@aura36.co.th", "password": "" }
+//                      "role": "Admin", "email": "ploy.s@condong.co.th", "password": "" }
 // Postman ตัวอย่างที่ 2 (ล็อกอินเป็น admin_main แล้วเปลี่ยน role ตัวเอง → 400 fields.role)
 //   method: PUT    URL: http://localhost:3000/api/admins/admin_main
 //   body (raw JSON): { "firstName": "Somchai", "lastName": "Jaidee", "role": "Admin" }
