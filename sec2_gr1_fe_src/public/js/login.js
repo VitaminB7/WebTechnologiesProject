@@ -1,6 +1,6 @@
 // login.js — สคริปต์หน้า login: ตรวจช่องว่าง ส่ง username/password ไป API แล้วไปหน้าจัดการห้อง
 
-const ADMIN_HOME = '/admin/rooms.html';
+const ADMIN_HOME = '/admin/rooms';
 const loginForm = document.getElementById('login-form');
 const loginButton = document.getElementById('login-submit');
 

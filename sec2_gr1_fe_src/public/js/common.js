@@ -111,7 +111,7 @@ function roomCard(room) {
   if (room.owner) {
     ownerName = room.owner.name;
   }
-  const link = '/room.html?id=' + encodeURIComponent(room.roomId);
+  const link = '/room?id=' + encodeURIComponent(room.roomId);
   return `
     <article class="room-card">
       <a class="room-card__link" href="${escapeHtml(link)}">
@@ -336,7 +336,7 @@ async function handleLogout(button) {
   setBusy(button, true, 'Logging out...');
   try {
     await logout();
-    window.location.href = '/index.html';
+    window.location.href = '/';
   } catch (error) {
     setBusy(button, false);
     showToast(error.message, 'error');
@@ -364,9 +364,9 @@ async function setupPublicHeader() {
   const actions = document.getElementById('header-actions');
   try {
     await getMe();
-    actions.innerHTML = accountPillHtml('/admin/rooms.html', 'Admin');
+    actions.innerHTML = accountPillHtml('/admin/rooms', 'Admin');
   } catch (error) {
-    actions.innerHTML = accountPillHtml('/login.html', 'Login');
+    actions.innerHTML = accountPillHtml('/login', 'Login');
   }
 }
 
@@ -387,7 +387,7 @@ async function requireAdmin(container) {
     return await getMe();
   } catch (error) {
     if (error.status === 401) {
-      window.location.replace('/login.html');
+      window.location.replace('/login');
     } else {
       showState(container, 'error', error.message, 'Could not verify your session');
     }

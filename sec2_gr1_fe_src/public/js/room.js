@@ -28,7 +28,7 @@ function showNotFound() {
     <div class="state state--empty" role="status">
       <p class="state__title">Room not found</p>
       <p>This room does not exist or has been removed.</p>
-      <a class="btn btn--primary" href="/search.html">Browse available rooms</a>
+      <a class="btn btn--primary" href="/search">Browse available rooms</a>
     </div>`;
 }
 
