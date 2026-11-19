@@ -11,12 +11,14 @@
 
 ## ติดตั้ง
 
-1. ติดตั้ง Node.js 20 ขึ้นไปและ MySQL 8.x เปิด MySQL แล้วรัน `sec2_gr1_database.sql` ทั้งไฟล์ใน MySQL Workbench สำหรับการติดตั้งใหม่ ไฟล์จะสร้าง `condong_condo` และนำเข้าข้อมูลสาธิต
-2. เปิดเทอร์มินัลใน `sec2_gr1_ws_src` คัดลอก `.env.example` เป็น `.env` ตั้ง `DB_USER`, `DB_PASSWORD` และ `SESSION_SECRET` แล้วรัน `npm ci` และ `npm start`
-3. เปิดอีกเทอร์มินัลใน `sec2_gr1_fe_src` รัน `npm ci` และ `npm start`
-4. เปิด [หน้าเว็บ](http://localhost:8080/) หรือ [API รายการห้อง](http://localhost:3000/api/rooms)
-
-ถ้าเปลี่ยนพอร์ต ให้ตั้ง `FRONTEND_PORT` และ `API_ORIGIN` ตอนรัน Front-end แล้วปรับ `PORT` และ `FRONTEND_ORIGIN` ใน `.env` ของ Web Service ให้ตรงกัน ใช้ชื่อโฮสต์เดียวกัน เช่น `localhost` ทั้งคู่ เพื่อให้ session cookie ทำงาน
+1. ติดตั้ง Node.js 20 ขึ้นไปและ MySQL 8.x เปิด 
+2. เปิด MySQL Workbench สำหรับการติดตั้งใหม่ 
+3. แล้ว open sql script เลือก `sec2_gr1_database.sql` แล้วรันไฟล์จะสร้าง `condong_condo` 
+4. เปลี่ยนชื่อ `.env.example` ใน `sec2_gr1_ws_src` เป็น `.env`
+5. เอาข้อมูล user ที่เข้าถึง `condong_condo` ได้ ใส่ใน `.env` ตั้ง `DB_USER`, `DB_PASSWORD` และ `SESSION_SECRET`(เป็นอะไรก็ได้) หรือ `PORT` ถ้าไม่ได้ใช้ default
+6. เปิดเทอร์มินัลแล้ว cd ไปที่ `sec2_gr1_ws_src` แล้วรัน `npm install` และ `npm start`
+7. เปิดอีกเเทอร์มินัลแล้ว cd ไปที่ `sec2_gr1_fe_src` แล้วรัน `npm install` และ `npm start`
+8. เปิด `http://localhost:8080/`
 
 ## บัญชีทดสอบ
 
@@ -35,13 +37,5 @@
 - ใช้ผลทดสอบจริงและ HTTP status ประกอบรายงาน ดู [งานที่กลุ่มต้องเติม](TODO.md)
 
 ## ใช้ฐานข้อมูลเดิม
-
-ถ้า `AdminAccount` ยังไม่มี `Status` ให้รัน SQL นี้เพื่อเก็บข้อมูลเดิมไว้
-
-```sql
-ALTER TABLE condong_condo.AdminAccount
-  ADD COLUMN Status VARCHAR(10) NOT NULL DEFAULT 'Active',
-  ADD CONSTRAINT chk_admin_account_status CHECK (Status IN ('Active', 'Inactive'));
-```
 
 คำสั่ง `npm run db:reset` ในโฟลเดอร์ Web Service จะ **ลบและสร้างฐานข้อมูลใน DB_NAME ใหม่** ใช้เมื่อต้องการกลับไปที่ข้อมูลสาธิต
