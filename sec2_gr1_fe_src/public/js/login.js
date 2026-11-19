@@ -54,5 +54,16 @@ async function redirectIfLoggedIn() {
   }
 }
 
+// ปุ่มตา: สลับแสดง/ซ่อนรหัสผ่าน
+const passwordInput = document.getElementById('password');
+const togglePassword = document.getElementById('toggle-password');
+
+togglePassword.addEventListener('click', function () {
+  const show = passwordInput.type === 'password';
+  passwordInput.type = show ? 'text' : 'password';
+  togglePassword.setAttribute('aria-pressed', String(show));
+  togglePassword.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+});
+
 loginForm.addEventListener('submit', handleLogin);
 redirectIfLoggedIn();

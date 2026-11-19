@@ -24,19 +24,26 @@ let latestListRequest = 0;
 
 // ================= ส่วนที่ 1: ตารางห้อง =================
 
-// ป้ายสถานะในตาราง: Available (พื้นเทา) / Occupied (พื้นใส)
+// ป้ายสถานะในตาราง: Available (เขียว) / Occupied (เทา) ตาม wireframe
 function statusPill(available) {
   if (available) {
     return '<span class="status-pill status-pill--available">Available</span>';
   }
-  return '<span class="status-pill">Occupied</span>';
+  return '<span class="status-pill status-pill--occupied">Occupied</span>';
+}
+
+// ไฮไลต์แถวของห้องที่กำลังแก้ไขในฟอร์มด้านล่าง
+function markEditingRow() {
+  for (const row of document.querySelectorAll('#rooms-body tr')) {
+    row.classList.toggle('is-editing', Boolean(editingRoom) && row.dataset.roomId === editingRoom.roomId);
+  }
 }
 
 // แถวในตาราง 1 แถว
 function roomRow(room) {
   const id = escapeHtml(room.roomId);
   return `
-    <tr>
+    <tr data-room-id="${id}">
       <td><div class="thumb">${imageHtml(firstImageUrl(room), 'Room ' + room.roomId)}</div></td>
       <td class="room-id">${id}</td>
       <td><span class="pill">${escapeHtml(room.roomType)}</span></td>
@@ -71,6 +78,7 @@ function renderRooms(rooms, meta) {
     });
   }
 
+  markEditingRow();
   document.getElementById('rooms-range').textContent = rangeText(meta, rooms.length, 'rooms');
   renderPagination(document.getElementById('rooms-pagination'), meta, function (page) {
     roomSearch.page = page;
@@ -286,6 +294,7 @@ function setMode(room) {
   tabEdit.textContent = room ? 'Edit Room ' + room.roomId : 'Edit Room';
   roomForm.elements.roomId.readOnly = Boolean(room); // แก้รหัสห้องไม่ได้
   showSaveLabel();
+  markEditingRow();
 }
 
 // ข้อความปุ่มบันทึก: โหมดเพิ่ม = "Create Room", โหมดแก้ไข = "Save Room" (ตาม Figma)
@@ -303,6 +312,7 @@ function resetEditor() {
   clearFieldErrors(roomForm);
   setMode(null);
   renderImageList();
+  refreshDropdowns(roomForm); // ให้ปุ่ม dropdown แสดงค่าหลัง reset
 }
 
 // ใส่ข้อมูลห้องลงฟอร์ม (โหมดแก้ไข)
@@ -326,6 +336,7 @@ function fillEditor(room) {
   fillAppliances(room.appliances);
   setMode(room);
   renderImageList();
+  refreshDropdowns(roomForm); // ให้ปุ่ม dropdown แสดงค่าของห้องนี้
 }
 
 // ค่าตัวเลขจากช่อง (ว่าง -> null)
@@ -571,6 +582,8 @@ function handleFilesChosen(event) {
 // ผูกปุ่มและฟอร์มทั้งหมดของหน้า
 function bindRoomPage() {
   const searchForm = document.getElementById('room-search');
+  enhanceSelects(searchForm); // dropdown แบบเดียวกับหน้าอื่น (common.js)
+  enhanceSelects(roomForm);
   searchForm.addEventListener('submit', handleSearchSubmit);
   roomForm.addEventListener('submit', saveRoom);
   document.getElementById('r-images').addEventListener('change', handleFilesChosen);

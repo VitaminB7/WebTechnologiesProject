@@ -40,11 +40,10 @@
             <h1 class="admin-title">Room Management</h1>
             <form id="room-search" class="search-card" novalidate>
               <h2>Search Room</h2>
-              <hr>
               <div class="search-card__fields">
                 <div class="field">
                   <label for="s-room-id">Room ID</label>
-                  <input id="s-room-id" name="q" type="search" placeholder="L-1203, owner name">
+                  <input id="s-room-id" name="q" type="search" placeholder="e.g. L-1203 or owner name">
                 </div>
                 <div class="field">
                   <label for="s-type">Room Type</label>
@@ -65,10 +64,10 @@
                   </select>
                 </div>
               </div>
-              <hr>
               <div class="search-card__actions">
-                <button type="submit" class="btn btn--dark btn--icon-left btn--search-room">
-                  <img src="../img/icon-search.svg" alt=""> Search Room
+                <button type="submit" class="btn-pill btn-pill--green btn--search-room">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                  Search Room
                 </button>
               </div>
             </form>
@@ -110,11 +109,11 @@
               <div class="form-grid form-grid--3">
                 <div class="field">
                   <label for="r-room-id">Room ID <span class="required">*</span></label>
-                  <input id="r-room-id" name="roomId" type="text" maxlength="6" placeholder="L-1203" autocomplete="off" required>
+                  <input id="r-room-id" name="roomId" type="text" maxlength="6" placeholder="e.g. L-1203" autocomplete="off" required>
                 </div>
                 <div class="field">
                   <label for="r-floor">Floor <span class="required">*</span></label>
-                  <input id="r-floor" name="floor" type="number" min="1" max="99" step="1" placeholder="2" required>
+                  <input id="r-floor" name="floor" type="number" min="1" max="99" step="1" placeholder="e.g. 2" required>
                 </div>
                 <div class="field">
                   <label for="r-type">Room Type <span class="required">*</span></label>
@@ -127,12 +126,12 @@
                   </select>
                 </div>
                 <div class="field">
-                  <label for="r-size">Size (sq.m)</label>
-                  <input id="r-size" name="size" type="number" min="1" max="500" step="0.01" placeholder="35">
+                  <label for="r-size">Size (m²)</label>
+                  <input id="r-size" name="size" type="number" min="1" max="500" step="0.01" placeholder="e.g. 35">
                 </div>
                 <div class="field">
-                  <label for="r-price">Monthly Rent <span class="required">*</span></label>
-                  <input id="r-price" name="price" type="number" min="0" max="999999.99" step="0.01" placeholder="18000" required>
+                  <label for="r-price">Monthly Rent (฿) <span class="required">*</span></label>
+                  <input id="r-price" name="price" type="number" min="0" max="999999.99" step="0.01" placeholder="e.g. 18000" required>
                 </div>
                 <div class="field">
                   <label for="r-available">Status <span class="required">*</span></label>
@@ -144,7 +143,7 @@
                 <!-- 4 ช่องด้านล่างไม่มีใน Figma แต่ฐานข้อมูล (RoomUnit) ต้องใช้ -->
                 <div class="field">
                   <label for="r-building">Building <span class="required">*</span></label>
-                  <input id="r-building" name="building" type="text" maxlength="100" placeholder="Building A" required>
+                  <input id="r-building" name="building" type="text" maxlength="100" placeholder="e.g. Building A" required>
                 </div>
                 <div class="field">
                   <label for="r-bedrooms">Bedrooms <span class="required">*</span></label>
@@ -177,20 +176,20 @@
               <legend>Room owner details</legend>
               <div class="form-grid form-grid--3">
                 <div class="field">
-                  <label for="r-owner-name">Owner Name <span class="required">*</span></label>
-                  <input id="r-owner-name" name="owner.name" type="text" maxlength="150" placeholder="MR.Thiwakon" required>
+                  <label for="r-owner-name">Owner name <span class="required">*</span></label>
+                  <input id="r-owner-name" name="owner.name" type="text" maxlength="150" placeholder="e.g. Somchai Jaidee" required>
                 </div>
                 <div class="field">
-                  <label for="r-owner-phone">Phone-Number <span class="required">*</span></label>
-                  <input id="r-owner-phone" name="owner.phone" type="tel" maxlength="12" placeholder="080-123-1234" required>
+                  <label for="r-owner-phone">Phone number <span class="required">*</span></label>
+                  <input id="r-owner-phone" name="owner.phone" type="tel" maxlength="12" placeholder="e.g. 080-123-1234" required>
                 </div>
                 <div class="field">
                   <label for="r-owner-email">Email</label>
-                  <input id="r-owner-email" name="owner.email" type="email" maxlength="100" placeholder="guss@gmail.com">
+                  <input id="r-owner-email" name="owner.email" type="email" maxlength="100" placeholder="e.g. owner@example.com">
                 </div>
                 <div class="field">
-                  <label for="r-owner-line">Line_ID</label>
-                  <input id="r-owner-line" name="owner.lineId" type="text" maxlength="50" placeholder="Guest.123">
+                  <label for="r-owner-line">LINE ID</label>
+                  <input id="r-owner-line" name="owner.lineId" type="text" maxlength="50" placeholder="e.g. somchai.j">
                 </div>
               </div>
             </fieldset>
@@ -208,19 +207,21 @@
               <legend>Room Images</legend>
               <!-- กดตรงไหนในกล่องก็เลือกไฟล์ได้ (input type=file โปร่งใสคลุมทั้งกล่อง) -->
               <div class="field dropzone">
-                <label for="r-images" class="dropzone__text">Upload room images</label>
+                <svg class="dropzone__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m21 16-5-5-9 9"/></svg>
+                <label for="r-images" class="dropzone__text"><strong>Click to upload room images</strong><br>JPG, PNG or WEBP · up to 2 MB each</label>
                 <input id="r-images" name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple>
               </div>
-              <p class="hint">Recommended: 4–6 images per room · JPG, PNG or WEBP, up to 2 MB each, max 5 per save (uploaded when you save)</p>
+              <p class="hint">Recommended: 4 images per room (the room page shows 4) · the first image is the card photo · max 5 per save, uploaded when you save</p>
               <!-- รูปที่บันทึกแล้ว (Saved) + รูปที่เพิ่งเลือก (New) -->
               <div id="image-list" class="image-list"></div>
             </fieldset>
 
             <p class="form-error hidden" role="alert"></p>
 
-            <div class="form-actions">
-              <button id="room-cancel" type="button" class="btn btn--outline">Cancel</button>
-              <button id="room-save" type="submit" class="btn btn--dark">Create Room</button>
+            <!-- แถบปุ่มติดขอบล่างจอขณะเลื่อนดูฟอร์ม -->
+            <div class="form-actions form-actions--sticky">
+              <button id="room-cancel" type="button" class="btn-pill btn-pill--light">Cancel</button>
+              <button id="room-save" type="submit" class="btn-pill btn-pill--green">Create Room</button>
             </div>
           </form>
         </section>

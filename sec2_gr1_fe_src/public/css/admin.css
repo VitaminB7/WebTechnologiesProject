@@ -1,26 +1,91 @@
 /* admin.css — สไตล์เฉพาะหน้าแอดมิน (จัดการห้อง + จัดการบัญชีผู้ดูแล) ใช้คู่กับ style.css
-   ค่าสี/ขนาดตาม Figma หน้า 05 (Product/Service Management) และ 06 (User account management) */
+   โครงตาม Figma หน้า 05 (Product/Service Management) และ 06 (User account management)
+   หน้าตา (การ์ด ช่องกรอก dropdown ปุ่ม) ใช้ชุดเดียวกับหน้าอื่นของเว็บ */
 
-/* หน้าจัดการบัญชีพื้นหลังฟ้าอ่อน (หน้าจัดการห้องพื้นขาว) */
-.admin-body--soft,
-.admin-body--soft #site-header {
-  background: #f4f7fb;
+/* พื้นหลังเทาฟ้า ให้การ์ดขาวเด่น */
+.admin-body,
+.admin-body--soft {
+  background: var(--surface);
 }
 
-/* เมนูแอดมิน: อันที่ไม่ได้เลือกเป็นสีเทาตัวหนา */
-.site-nav--admin {
-  gap: 88px;
+/* ================= ช่องกรอก (ใช้ร่วมกันในหน้าจัดการห้อง) ================= */
+/* แบบเดียวกับกล่องตัวกรองหน้าค้นหา: สูง 44px มุมโค้ง พื้นเทาฟ้า กดแล้วขอบฟ้า */
+.search-card input,
+.room-editor input[type='text'],
+.room-editor input[type='number'],
+.room-editor input[type='email'],
+.room-editor input[type='tel'],
+.room-editor textarea,
+.search-card .dropdown__button,
+.room-editor .dropdown__button {
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background-color: var(--surface);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--heading);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.site-nav--admin a {
-  font-size: 17px;
+.search-card .dropdown__button,
+.room-editor .dropdown__button {
+  padding-right: 38px;
+  background-position: right 12px center;
+}
+
+.room-editor textarea {
+  height: auto;
+  min-height: 140px;
+  padding: 12px 14px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+/* ข้อความตัวอย่างสีอ่อน ไม่ให้ดูเหมือนค่าที่กรอกแล้ว */
+.search-card ::placeholder,
+.room-editor ::placeholder {
+  font-weight: 400;
+  color: #a0a4aa;
+}
+
+.search-card input:hover,
+.room-editor input:hover,
+.room-editor textarea:hover,
+.dropdown:hover > .dropdown__button {
+  background-color: #e4e6eb;
+}
+
+.search-card input:focus,
+.room-editor input:focus,
+.room-editor textarea:focus,
+.search-card .dropdown.is-open > .dropdown__button,
+.room-editor .dropdown.is-open > .dropdown__button,
+.search-card .dropdown__button:focus-visible,
+.room-editor .dropdown__button:focus-visible {
+  outline: none;
+  border-color: var(--primary);
+  background-color: #fff;
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.room-editor input[readonly] {
+  background: #e9ebee;
+  color: var(--text-2);
+}
+
+/* dropdown ที่ข้อมูลผิด: ขอบแดงที่ปุ่ม (select ตัวจริงซ่อนอยู่) */
+.dropdown:has(select.is-invalid) > .dropdown__button {
+  border-color: var(--danger);
+}
+
+.search-card .field label,
+.room-editor .field label {
+  font-size: 13px;
   font-weight: 600;
-  color: #6b7280;
-}
-
-.site-nav--admin a.is-active {
-  color: #131313;
-  font-weight: 700;
+  color: var(--text-2);
 }
 
 /* ================= หน้าจัดการห้อง ================= */
@@ -29,9 +94,9 @@
 .admin-layout {
   display: grid;
   grid-template-columns: 303px minmax(0, 1fr);
-  gap: 61px;
+  gap: 32px;
   align-items: start;
-  margin-bottom: 48px;
+  margin-bottom: 32px;
 }
 
 @media (max-width: 960px) {
@@ -42,78 +107,82 @@
 }
 
 .admin-title {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
-  color: #111827;
-  margin: 0 0 18px;
+  color: var(--heading);
+  margin: 0 0 16px;
+}
+
+/* การ์ดขาวมีเงา (กล่องค้นหา ตาราง ฟอร์ม) */
+.search-card,
+.table-card,
+.form-section {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
 .search-card {
-  background: #fff;
-  border: 2px solid #d1d5db;
-  border-radius: 8px;
-  box-shadow: 0 12px 12px rgba(0, 0, 0, 0.1);
-  padding: 24px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 
 .search-card h2 {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
-  color: #111827;
-  margin: 0;
-}
-
-.search-card hr {
-  width: 100%;
-  border: 0;
-  border-top: 1px solid #e5e7eb;
+  color: var(--heading);
   margin: 0;
 }
 
 .search-card__fields {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .search-card__actions {
   display: flex;
-  justify-content: flex-end;
-}
-
-.btn--icon-left img {
-  width: 12px;
-  height: 12px;
 }
 
 .btn--search-room {
-  width: 143px;
-  height: 32px;
-  padding: 0 12px;
-  font-size: 13px;
+  width: 100%;
+  border-radius: 10px;
 }
 
 .table-card {
-  background: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
   overflow: hidden;
 }
 
 .table-card .table th {
-  background: #e5e7eb;
+  background: #f7f8fa;
   font-size: 12px;
-  font-weight: 600;
-  color: #6b7280;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-2);
   text-transform: uppercase;
-  border-bottom: 0;
+  border-bottom: 1px solid var(--divider);
 }
 
 .table-card .table td {
-  color: #111827;
+  color: var(--heading);
+  border-bottom-color: #eef0f3;
+  vertical-align: middle;
+}
+
+.table-card .table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.table-card .table tbody tr:hover {
+  background: #f7f8fa;
+}
+
+/* แถวของห้องที่กำลังแก้ไขในฟอร์มด้านล่าง */
+.table-card .table tbody tr.is-editing {
+  background: var(--primary-soft);
+  box-shadow: inset 3px 0 0 var(--primary);
 }
 
 .table-card .table th:last-child,
@@ -129,20 +198,20 @@
   gap: 12px;
   padding: 12px 16px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-2);
 }
 
 .table-footer .pagination {
   margin-top: 0;
 }
 
+/* รูปในตาราง: ใหญ่พอดูออกว่าเป็นห้องไหน */
 .thumb {
-  width: 48px;
-  height: 36px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
+  width: 64px;
+  height: 44px;
+  border-radius: 8px;
   overflow: hidden;
-  background: #e5e7eb;
+  background: var(--placeholder);
 }
 
 .thumb img,
@@ -151,58 +220,93 @@
   height: 100%;
   min-height: 0;
   object-fit: cover;
-  background: #e5e7eb;
+}
+
+.thumb .img-placeholder svg {
+  width: 20px;
+  height: 20px;
 }
 
 .room-id {
-  font-weight: 500;
+  font-weight: 700;
 }
 
-/* ป้ายประเภทห้อง (ขอบมน) และป้ายสถานะ (เหลี่ยม) */
+/* ป้ายประเภทห้อง: ฟ้าอ่อนแบบป้ายบนการ์ดห้อง */
 .pill {
   display: inline-block;
-  padding: 4px 8px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  font-size: 11px;
-  color: #6b7280;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--primary-soft);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  white-space: nowrap;
 }
 
+/* ป้ายสถานะ: Available เขียว / Occupied เทา (ตาม wireframe) */
 .status-pill {
-  display: inline-block;
-  padding: 4px 8px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #111827;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-pill::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .status-pill--available {
-  background: #e5e7eb;
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.status-pill--occupied {
+  background: #edf0f3;
+  color: #5f6b7a;
 }
 
 .row-actions {
   display: inline-flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .icon-btn {
-  padding: 6px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
   border: 0;
-  border-radius: 4px;
-  background: #e5e7eb;
+  border-radius: 8px;
+  background: var(--surface);
   cursor: pointer;
-  line-height: 0;
+  transition: background-color 0.15s ease;
 }
 
 .icon-btn img {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
 }
 
 .icon-btn:hover:not(:disabled) {
-  background: #d1d5db;
+  background: #e4e6eb;
+}
+
+.icon-btn[data-action='delete']:hover:not(:disabled) {
+  background: #fde8e8;
+}
+
+.icon-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .icon-btn:disabled {
@@ -210,39 +314,39 @@
   cursor: not-allowed;
 }
 
-/* ฟอร์มเพิ่ม/แก้ไขห้อง */
+/* ---------- ฟอร์มเพิ่ม/แก้ไขห้อง: แท็บด้านบน + การ์ดย่อยตามหัวข้อ ---------- */
 .room-editor {
-  background: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 0 10px 10px;
+  scroll-margin-top: 96px; /* เลื่อนมาแล้วไม่โดน header ทับ */
 }
 
 .tabs {
   display: flex;
-  gap: 30px;
-  padding: 10px 20px;
-  min-height: 65px;
-  align-items: center;
+  gap: 6px;
+  padding: 0 0 16px;
   overflow-x: auto;
 }
 
 .tab {
-  padding: 0 0 4px;
+  padding: 10px 18px;
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-radius: 10px;
   background: none;
   font: inherit;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
-  color: #a4a4a4;
+  color: #8a8d91;
   cursor: pointer;
   white-space: nowrap;
 }
 
+.tab:hover:not(:disabled) {
+  background: #e4e6eb;
+}
+
 .tab[aria-selected='true'] {
-  color: #111827;
-  border-bottom-color: var(--primary);
+  background: #fff;
+  color: var(--heading);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), inset 0 -3px 0 var(--admin-green);
 }
 
 .tab:disabled {
@@ -252,43 +356,39 @@
 .admin-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 .form-section {
   border: 0;
-  padding: 0;
+  padding: 24px;
   margin: 0;
   min-width: 0;
 }
 
+/* legend ใน fieldset จัดตำแหน่งยาก ใช้ float ให้อยู่ในการ์ด */
 .form-section > legend {
-  font-size: 20px;
-  font-weight: 600;
-  color: #000;
+  float: left;
+  width: 100%;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--heading);
   padding: 0;
-  margin: 0 0 16px;
+  margin: 0 0 18px;
+}
+
+.form-section > legend + * {
+  clear: both;
 }
 
 .room-editor .field {
-  gap: 3px;
-}
-
-.room-editor input,
-.room-editor select,
-.room-editor textarea {
-  border-radius: 0;
-}
-
-.room-editor textarea {
-  min-height: 187px;
-  resize: vertical;
+  gap: 6px;
 }
 
 .form-grid--3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   column-gap: 16px;
-  row-gap: 20px;
+  row-gap: 18px;
 }
 
 @media (max-width: 860px) {
@@ -307,7 +407,7 @@
 .appliance-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 22px 16px;
+  gap: 10px;
 }
 
 @media (max-width: 900px) {
@@ -316,24 +416,36 @@
   }
 }
 
-.appliance-option label {
+.appliance-option {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  transition: background-color 0.15s ease;
+}
+
+.appliance-option:has(input[type='checkbox']:checked) {
+  background: #e8f1ee;
+  box-shadow: inset 0 0 0 1px rgba(47, 93, 80, 0.35);
+}
+
+.room-editor .appliance-option label {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 10px;
   font-size: 14px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--heading);
   cursor: pointer;
 }
 
 .appliance-option input[type='checkbox'] {
   appearance: none;
-  width: 27px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   margin: 0;
-  border-radius: 8px;
+  border: 1.5px solid #bcc0c4;
+  border-radius: 6px;
   background: #fff;
-  box-shadow: 0 0.5px 0 rgba(26, 26, 26, 0.08), 0 1px 3px rgba(26, 26, 26, 0.08);
   flex-shrink: 0;
   cursor: pointer;
   display: grid;
@@ -341,45 +453,58 @@
 }
 
 .appliance-option input[type='checkbox']:checked {
-  background: var(--dark-btn);
+  border-color: var(--admin-green);
+  background: var(--admin-green);
 }
 
 .appliance-option input[type='checkbox']:checked::after {
   content: '✓';
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
 }
 
 .appliance-option input[type='checkbox']:focus-visible {
-  outline: 2px solid rgba(37, 99, 235, 0.5);
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
-.appliance-option input[type='text'] {
-  margin-top: 6px;
-  padding: 6px 8px;
+.room-editor .appliance-option input[type='text'] {
+  height: 36px;
+  margin-top: 8px;
+  padding: 0 10px;
   font-size: 13px;
+  background-color: #fff;
 }
 
-/* รูปห้อง: กล่องใหญ่ให้กดเลือกไฟล์ + รายการรูป */
+/* รูปห้อง: กล่องเส้นประให้กดเลือกไฟล์ + รายการรูป */
 .dropzone {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  min-height: 243px;
+  justify-content: center;
+  gap: 10px;
+  min-height: 170px;
   padding: 20px;
-  border: 1px solid #d1d5db;
-  font-size: 14px;
-  color: #505050;
+  border: 2px dashed #ccd0d5;
+  border-radius: 14px;
+  background: #fafbfc;
+  text-align: center;
   cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .dropzone:hover,
 .dropzone:focus-within {
-  background: #f9fafb;
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.dropzone__icon {
+  width: 40px;
+  height: 40px;
+  color: var(--primary);
 }
 
 .dropzone input[type='file'] {
@@ -389,22 +514,31 @@
   cursor: pointer;
 }
 
-.dropzone__text {
-  margin: 0 0 46px;
+.room-editor .dropzone .dropzone__text {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.dropzone__text strong {
+  font-size: 15px;
+  color: var(--heading);
 }
 
 .hint {
   font-size: 12px;
-  font-weight: 600;
-  color: #6b7280;
-  margin: 3px 0 0;
+  font-weight: 500;
+  color: var(--text-2);
+  margin: 8px 0 0;
 }
 
 .image-list {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 12px;
+  margin-top: 14px;
 }
 
 .image-list:empty {
@@ -413,11 +547,12 @@
 
 .image-item {
   position: relative;
-  width: 120px;
-  height: 90px;
-  border-radius: 4px;
+  width: 132px;
+  height: 96px;
+  border-radius: 10px;
   overflow: hidden;
-  background: #e5e7eb;
+  background: var(--placeholder);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .image-item img,
@@ -430,8 +565,8 @@
 
 .image-item__remove {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 6px;
+  right: 6px;
   width: 26px;
   height: 26px;
   border-radius: 50%;
@@ -441,231 +576,412 @@
   cursor: pointer;
 }
 
+.image-item__remove:hover {
+  background: var(--danger);
+}
+
 .image-item__tag {
   position: absolute;
-  left: 4px;
-  bottom: 4px;
-  font-size: 0.65rem;
-  padding: 1px 6px;
+  left: 6px;
+  bottom: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
   border-radius: 999px;
-  background: #fef3c7;
-  color: #92400e;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--heading);
 }
 
-.room-editor .form-actions {
-  padding: 10px 0;
-  margin-top: 40px;
+/* แถบปุ่มติดขอบล่างจอ: ไม่ต้องเลื่อนลงสุดเพื่อกดบันทึก */
+.form-actions--sticky {
+  position: sticky;
+  bottom: 16px;
+  z-index: 5;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
-.room-editor .form-actions .btn {
-  padding: 8px 16px;
-  font-size: 13px;
-  border-radius: 0;
+.form-actions--sticky .btn-pill {
+  min-width: 120px;
+  border-radius: 10px;
 }
 
 /* ================= หน้าจัดการบัญชีผู้ดูแล ================= */
+/* หน้าตาชุดเดียวกับหน้าจัดการห้อง: การ์ดขาวมีเงา ช่องกรอกพื้นเทาฟ้า ปุ่ม .btn-pill */
 
 .account-head {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: 16px;
-  margin-bottom: 26px;
+  margin-bottom: 20px;
 }
 
 .account-head .eyebrow {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0;
-  color: #8a97a8;
-  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--admin-green);
+  margin: 0 0 8px;
 }
 
 .account-head h1 {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
-  color: var(--navy-text);
-  margin: 0 0 18px;
+  color: var(--heading);
+  margin: 0 0 6px;
 }
 
 .account-head__lead {
   font-size: 15px;
-  color: var(--slate-3);
+  color: var(--text-2);
   margin: 0;
 }
 
 .btn--add-admin {
-  width: 180px;
-  height: 48px;
-  font-size: 13px;
-  font-weight: 700;
+  border-radius: 10px;
+}
+
+.account-card,
+.account-form-card,
+.activity-log {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
 .account-card {
-  background: #fff;
-  border: 1px solid #e6ebf2;
-  border-radius: 16px;
-  padding: 28px 28px 60px;
+  padding: 20px 20px 16px;
 }
 
+/* ตัวกรอง: ช่องค้นหา (มีไอคอนแว่น) + 2 dropdown */
 .filters {
   display: grid;
-  grid-template-columns: minmax(0, 500px) minmax(0, 171px) minmax(0, 171px);
-  gap: 20px;
-  margin-bottom: 32px;
+  grid-template-columns: minmax(0, 1fr) 200px 200px;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filters__search {
+  position: relative;
+}
+
+.filters__search svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--text-2);
+  pointer-events: none;
 }
 
 .filters input,
-.filters select {
-  height: 51px;
-  padding: 0 18px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  background: #fff;
-  font-size: 13px;
-  color: var(--navy-text);
+.filters .dropdown__button,
+.account-grid input,
+.account-grid .dropdown__button {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background-color: var(--surface);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--heading);
+  box-shadow: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.filters input[type='search'] {
-  background: #f9fbfd;
+.filters input {
+  padding-left: 42px;
+}
+
+.filters .dropdown__button,
+.account-grid .dropdown__button {
+  padding-right: 38px;
+  background-position: right 12px center;
+}
+
+.filters ::placeholder,
+.account-grid ::placeholder {
+  font-weight: 400;
+  color: #a0a4aa;
+}
+
+.filters input:hover,
+.account-grid input:hover {
+  background-color: #e4e6eb;
+}
+
+.filters input:focus,
+.account-grid input:focus,
+.filters .dropdown.is-open > .dropdown__button,
+.account-grid .dropdown.is-open > .dropdown__button,
+.filters .dropdown__button:focus-visible,
+.account-grid .dropdown__button:focus-visible {
+  outline: none;
+  border-color: var(--primary);
+  background-color: #fff;
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.account-grid input[readonly] {
+  background: #e9ebee;
+  color: var(--text-2);
 }
 
 @media (max-width: 760px) {
   .filters {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .filters__search {
+    grid-column: 1 / -1;
   }
 }
 
+/* ตาราง: หัวตารางเทาอ่อนแบบหน้าจัดการห้อง */
 .account-table th {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--slate-3);
-  padding: 12px 8px 22px 0;
-  border-bottom: 1px solid #eef2f6;
+  background: #f7f8fa;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  padding: 12px 12px;
+  border-bottom: 1px solid var(--divider);
 }
 
 .account-table td {
-  font-size: 13px;
-  color: var(--navy-text);
-  padding: 20px 8px 40px 0;
-  border-bottom: 1px solid #eef2f6;
-  vertical-align: top;
+  font-size: 14px;
+  color: var(--heading);
+  padding: 14px 12px;
+  border-bottom: 1px solid #eef0f3;
+  vertical-align: middle;
   white-space: normal;
+}
+
+.account-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.account-table tbody tr:hover {
+  background: #f7f8fa;
 }
 
 .account-table tbody tr:last-child td {
   border-bottom: 0;
 }
 
-.account-table td:last-child {
+.account-table td:last-child,
+.account-table th:last-child {
   white-space: nowrap;
+  text-align: right;
 }
 
 .account-table__address {
-  max-width: 100px;
-  color: var(--slate-3);
+  max-width: 180px;
+  font-size: 13px;
+  color: var(--text-2);
   overflow-wrap: anywhere;
 }
 
-/* ป้ายสถานะบัญชี: Active เขียว / Inactive เทา */
-.account-status {
+.you-tag {
   display: inline-block;
-  min-width: 68px;
-  padding: 6px 14px;
+  margin-left: 4px;
+  padding: 1px 8px;
   border-radius: 999px;
+  background: var(--primary-soft);
   font-size: 11px;
   font-weight: 700;
-  text-align: center;
+  color: var(--primary);
+}
+
+/* ป้ายบทบาท */
+.role-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #edf0f3;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+  white-space: nowrap;
+}
+
+.role-pill--super {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* ป้ายสถานะบัญชี: Active เขียว / Inactive เทา (มีจุดหน้าคำ แบบป้ายสถานะห้อง) */
+.account-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.account-status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .account-status--active {
-  background: #e8f7f0;
-  color: #21875b;
+  background: var(--success-bg);
+  color: var(--success);
 }
 
 .account-status--inactive {
-  background: #edf1f5;
-  color: #64748b;
-}
-
-.btn--edit {
-  width: 67px;
-  height: 46px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  color: var(--navy-text);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.btn--delete {
-  width: 72px;
-  height: 46px;
-  font-size: 13px;
-  font-weight: 600;
+  background: #edf0f3;
+  color: #5f6b7a;
 }
 
 .account-count {
   font-size: 13px;
-  color: var(--slate-3);
+  color: var(--text-2);
   margin: 12px 0 0;
+}
+
+/* Activity log: การ์ดพับได้ */
+.activity-log {
+  margin-top: 16px;
+  padding: 0 20px;
+}
+
+.activity-log > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--heading);
+  cursor: pointer;
+  list-style: none;
+}
+
+.activity-log > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* ลูกศรหมุนตอนเปิด */
+.activity-log > summary::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--text-2);
+  border-bottom: 2px solid var(--text-2);
+  transform: rotate(-45deg);
+  transition: transform 0.2s ease;
+}
+
+.activity-log[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+.activity-log > summary .muted {
+  font-weight: 500;
+}
+
+.activity-log__status {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.activity-log__list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  max-height: 360px;
+  overflow-y: auto;
+  border-top: 1px solid var(--divider);
+}
+
+.activity-log__list li {
+  display: grid;
+  grid-template-columns: 180px 120px minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eef0f3;
+  font-size: 13px;
+}
+
+.activity-log__time {
+  color: var(--text-2);
+}
+
+.activity-log__user {
+  font-weight: 700;
+  color: var(--heading);
+}
+
+.activity-log__text {
+  color: var(--heading);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .activity-log__list li {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
 }
 
 /* ฟอร์มเพิ่ม/แก้ไขบัญชี (แสดงแทนตาราง) */
 .account-form-card {
-  background: #fff;
-  border: 1px solid #e6ebf2;
-  border-radius: 24px;
-  padding: 36px 46px 56px;
-  margin-left: 5px;
+  padding: 28px;
 }
 
 .account-form-card h2 {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
-  color: var(--navy-text);
-  margin: 0 0 42px;
+  color: var(--heading);
+  margin: 0 0 20px;
 }
 
 .account-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 527px));
-  column-gap: 51px;
-  row-gap: 36px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 20px;
+  row-gap: 18px;
 }
 
 .account-grid .field {
-  gap: 20px;
+  gap: 6px;
 }
 
 .account-grid .field label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--navy-text);
-}
-
-.account-grid input,
-.account-grid select {
-  height: 70px;
-  padding: 0 17px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
   font-size: 13px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  font-weight: 600;
+  color: var(--text-2);
 }
 
 .account-grid .field--wide {
   grid-column: 1 / -1;
-  max-width: 1105px;
 }
 
-.account-grid .field--address input {
-  height: 37px;
-  padding: 0 10px;
-  border-color: #cbd5e1;
-  border-radius: 0;
-  font-size: 15px;
+.dropdown:has(select.is-invalid) > .dropdown__button {
+  border-color: var(--danger);
 }
 
 @media (max-width: 760px) {
@@ -674,7 +990,7 @@
   }
 
   .account-form-card {
-    padding: 24px 20px;
+    padding: 20px;
   }
 }
 
@@ -682,48 +998,23 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 24px;
-  margin-top: 96px;
-  padding-right: 32px;
+  gap: 10px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--divider);
 }
 
 .account-actions__right {
   display: flex;
-  gap: 24px;
+  gap: 10px;
   margin-left: auto;
 }
 
-.account-actions .btn {
-  height: 66px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-}
-
-.btn--cancel {
-  width: 160px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  color: var(--navy-text);
-}
-
-.btn--save-account {
-  width: 208px;
-}
-
-.btn--delete-account {
-  width: 203px;
-  background: #f00505;
-  color: #fff;
+.account-actions .btn-pill {
+  min-width: 120px;
+  border-radius: 10px;
 }
 
 .account-form-card .form-error {
-  margin-top: 24px;
-}
-
-.dropzone .dropzone__text {
-  font-size: 14px;
-  font-weight: 400;
-  color: #505050;
+  margin-top: 20px;
 }

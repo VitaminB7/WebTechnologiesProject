@@ -37,14 +37,23 @@ function statusPill(status) {
   return '<span class="account-status account-status--inactive">Inactive</span>';
 }
 
+// ป้ายบทบาท: Super Admin ฟ้า / Admin เทา
+function rolePill(role) {
+  const label = escapeHtml(ROLE_LABELS[role] || role);
+  if (role === 'SuperAdmin') {
+    return `<span class="role-pill role-pill--super">${label}</span>`;
+  }
+  return `<span class="role-pill">${label}</span>`;
+}
+
 // แถวในตาราง 1 แถว (ตัวเองลบตัวเองไม่ได้ จึงไม่มีปุ่ม Delete)
 function adminRow(admin) {
   const name = escapeHtml(admin.username);
-  let deleteButton = `<button type="button" class="btn btn--danger btn--delete" data-action="delete" data-username="${name}">Delete</button>`;
+  let deleteButton = `<button type="button" class="btn-pill btn-pill--danger btn-pill--sm" data-action="delete" data-username="${name}">Delete</button>`;
   let youText = '';
   if (admin.username === currentAdmin.username) {
     deleteButton = '';
-    youText = ' <span class="muted">(you)</span>';
+    youText = ' <span class="you-tag">You</span>';
   }
   return `
     <tr>
@@ -52,12 +61,12 @@ function adminRow(admin) {
       <td>${escapeHtml(admin.lastName)}</td>
       <td>${name}${youText}</td>
       <td>${escapeHtml(admin.email || '–')}</td>
-      <td>${escapeHtml(ROLE_LABELS[admin.role] || admin.role)}</td>
+      <td>${rolePill(admin.role)}</td>
       <td>${statusPill(admin.status)}</td>
       <td class="account-table__address">${escapeHtml(admin.address || '–')}</td>
       <td>
         <div class="row-actions">
-          <button type="button" class="btn btn--edit" data-action="edit" data-username="${name}">Edit</button>
+          <button type="button" class="btn-pill btn-pill--light btn-pill--sm" data-action="edit" data-username="${name}">Edit</button>
           ${deleteButton}
         </div>
       </td>
@@ -176,9 +185,8 @@ function openForm(admin) {
   adminForm.elements.username.readOnly = isEdit; // แก้ username ไม่ได้
 
   // ตอนแก้ไข รหัสผ่านไม่บังคับ (เว้นว่าง = ใช้รหัสเดิม)
-  const passwordHint = isEdit ? 'Leave blank to keep the current password' : '********';
-  adminForm.elements.password.placeholder = passwordHint;
-  adminForm.elements.confirmPassword.placeholder = passwordHint;
+  adminForm.elements.password.placeholder = isEdit ? 'Leave blank to keep the current password' : 'At least 8 characters';
+  adminForm.elements.confirmPassword.placeholder = isEdit ? 'Leave blank to keep the current password' : 'Type the password again';
   document.getElementById('password-star').classList.toggle('hidden', isEdit);
   document.getElementById('confirm-star').classList.toggle('hidden', isEdit);
 
@@ -200,6 +208,7 @@ function openForm(admin) {
     adminForm.elements.role.value = admin.role;
     adminForm.elements.status.value = admin.status;
   }
+  refreshDropdowns(adminForm); // ให้ปุ่ม dropdown แสดงค่า (และล็อก Status ถ้าแก้ไขตัวเอง)
   listView.classList.add('hidden');
   formView.classList.remove('hidden');
   window.scrollTo({ top: 0 });
@@ -354,10 +363,20 @@ async function loadActivityLog() {
   try {
     const logs = await listLogs();
     const items = document.createDocumentFragment();
+    // แถวละ 1 รายการ: เวลา | ใคร | ทำอะไร (ใช้ textContent กันโค้ดแปลกปลอม)
     for (const log of logs) {
       const item = document.createElement('li');
-      const time = new Date(log.dateTime).toLocaleString();
-      item.textContent = time + ' · ' + log.username + ' · ' + log.changed;
+      const parts = [
+        ['activity-log__time', new Date(log.dateTime).toLocaleString()],
+        ['activity-log__user', log.username],
+        ['activity-log__text', log.changed],
+      ];
+      for (const [className, text] of parts) {
+        const span = document.createElement('span');
+        span.className = className;
+        span.textContent = text;
+        item.appendChild(span);
+      }
       items.appendChild(item);
     }
     list.replaceChildren(items);
@@ -378,6 +397,8 @@ async function startAccountsPage() {
     showNoPermission();
     return;
   }
+  enhanceSelects(filtersForm); // dropdown แบบเดียวกับหน้าอื่น (common.js)
+  enhanceSelects(adminForm);
   bindFilters();
   bindForm();
   const activityLog = document.getElementById('activity-log');

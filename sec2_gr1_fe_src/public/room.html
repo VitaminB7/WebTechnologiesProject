@@ -35,16 +35,17 @@
       <div id="room-state"></div>
 
       <article id="room" class="hidden">
-        <!-- รูป 1 ใหญ่ + 3 เล็ก (room.js เติมให้) -->
+        <!-- ถ้ามาจากหน้าค้นหา room.js จะชี้ลิงก์กลับไปผลค้นหาเดิม (ตัวกรองเดิม) -->
+        <a id="back-link" class="back-link" href="/search"><span aria-hidden="true">←</span> Back to search</a>
+
+        <!-- รูป 1 ใหญ่ + 3 เล็ก (room.js เติมให้) กดรูปเพื่อดูเต็มจอ -->
         <div id="gallery" class="gallery" aria-label="Room photos"></div>
         <!-- กลุ่มแก้ข้อความเครดิตรูปตรงนี้ได้ -->
         <!-- TODO(ยังขาด): ถ้าใช้รูปจากที่อื่น (ไม่ใช่รูปของกลุ่ม) ต้องเขียนแหล่งที่มาให้ถูกต้องตรงนี้ (rubric ข้อ 4) -->
-        <p id="photo-credit" class="photo-credit hidden">Room photos supplied by CONDONG condo.</p>
+        <p id="photo-credit" class="photo-credit hidden">Photo source: illustrative reference images from public property listings, not the actual unit.</p>
 
         <div class="title-row">
           <h1 id="room-title"></h1>
-          <!-- ดาวสีเหลือง = คะแนนสภาพห้อง -->
-          <span id="room-stars" class="stars"></span>
         </div>
         <p id="room-building" class="room-subline"></p>
 
@@ -60,7 +61,8 @@
           <div>
             <section class="detail-block" aria-label="Room owner">
               <div class="owner">
-                <img class="owner__avatar" src="img/owner-avatar.png" alt="">
+                <!-- วงกลมตัวอักษรย่อของชื่อเจ้าของ (room.js เติม) -->
+                <span id="owner-avatar" class="owner__avatar" aria-hidden="true"></span>
                 <div>
                   <h2 id="owner-name" class="owner__name"></h2>
                   <ul id="owner-rows" class="owner__rows"></ul>
@@ -93,6 +95,22 @@
       </article>
     </div>
   </main>
+
+  <!-- ดูรูปเต็มจอ (room.js เปิดเมื่อกดรูปในแกลเลอรี) -->
+  <dialog id="lightbox" class="lightbox" aria-label="Room photo viewer">
+    <img id="lightbox-img" class="lightbox__img" src="" alt="">
+    <p id="lightbox-count" class="lightbox__count"></p>
+    <button type="button" class="lightbox__btn lightbox__close" data-action="close" aria-label="Close">✕</button>
+    <button type="button" class="lightbox__btn lightbox__prev" data-action="prev" aria-label="Previous photo">‹</button>
+    <button type="button" class="lightbox__btn lightbox__next" data-action="next" aria-label="Next photo">›</button>
+  </dialog>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <span>© 2026 CONDONG condo · ITDS242 Section 2 Group 1</span>
+      <span><a href="/">Home</a> · <a href="/search">Search</a> · <a href="/team">Team</a></span>
+    </div>
+  </footer>
 
   <script src="js/api-config.js"></script>
   <script src="js/api.js"></script>

@@ -3,7 +3,7 @@
 // ดังนั้นกดรีเฟรช / ย้อนกลับ / ส่งลิงก์ให้เพื่อน ก็ได้ผลลัพธ์เดิม
 
 // ชื่อช่องตัวกรอง (ตรงกับ name ใน search.html และชื่อ query ของ API)
-const FILTER_NAMES = ['type', 'floor', 'minCondition', 'minPrice', 'maxPrice'];
+const FILTER_NAMES = ['type', 'floor', 'minCondition', 'bedrooms', 'minPrice', 'maxPrice'];
 // ห้องต่อหน้า: แถวแรก 2 ใบ + 3 แถว แถวละ 3 ใบ = 11 ใบ (ตาม Figma)
 const PAGE_SIZE = 11;
 
@@ -19,6 +19,7 @@ function fillFilterForm(params) {
     filterForm.elements[name].value = params[name] || '';
   }
   filterForm.elements.available.checked = params.available === 'true';
+  refreshDropdowns(filterForm); // ให้ปุ่ม dropdown แสดงค่าใหม่
 }
 
 // อ่านค่าจากฟอร์ม (เอาเฉพาะช่องที่กรอก)
@@ -59,11 +60,8 @@ function validateFilters(filters) {
 
 // วาดการ์ดผลลัพธ์ + จำนวนที่เจอ + ปุ่มแบ่งหน้า
 function renderResults(rooms, meta) {
-  let total = rooms.length;
-  if (meta) {
-    total = meta.total;
-  }
-  resultsCount.textContent = total + ' room(s) found';
+  // เช่น "Showing 1-11 of 20 rooms"
+  resultsCount.textContent = rangeText(meta || { page: 1, pageSize: rooms.length, total: rooms.length }, rooms.length, 'rooms');
 
   if (rooms.length === 0) {
     showState(results, 'empty', 'Try widening the price range or clearing some filters.', 'No rooms match your search');
@@ -145,6 +143,7 @@ function handleClearFilters() {
   runSearch();
 }
 
+enhanceSelects(filterForm); // dropdown แบบเดียวกับหน้าแรก (common.js)
 filterForm.addEventListener('submit', handleFilterSubmit);
 document.getElementById('clear-filters').addEventListener('click', handleClearFilters);
 window.addEventListener('popstate', runSearch); // ปุ่มย้อนกลับ/ไปข้างหน้าของเบราว์เซอร์

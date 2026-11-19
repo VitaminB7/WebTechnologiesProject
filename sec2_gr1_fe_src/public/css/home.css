@@ -1,0 +1,624 @@
+/* home.css — เฉพาะหน้าแรก (โหลดหลัง style.css)
+   ชิ้นส่วนที่ใช้ร่วมกับหน้าอื่น (header แคปซูล, ปุ่ม .btn-pill, สวิตช์, dropdown, การ์ดห้อง, footer) อยู่ใน style.css
+   รูปที่ใส่เองได้ (ไม่มีไฟล์ = ใช้พื้นไล่สีฟ้าแทน):
+     public/img/residence.jpg  -> พื้นหลัง hero
+     public/img/welcome.jpg    -> รูปในส่วน Welcome */
+
+/* ---------- Hero ---------- */
+/* ดึงขึ้นไปใต้ header (เว้นบน 16px + แคปซูล 64px) ให้ nav ลอยอยู่บนรูป */
+.home-hero {
+  position: relative;
+  margin-top: -80px;
+  min-height: 620px;
+  padding: 168px 0 132px;
+  color: #fff;
+  background:
+    linear-gradient(90deg, rgba(5, 22, 54, 0.78) 0%, rgba(5, 22, 54, 0.42) 50%, rgba(5, 22, 54, 0.08) 100%),
+    url('../img/residence.jpg') center / cover no-repeat,
+    radial-gradient(ellipse at 80% 15%, rgba(255, 255, 255, 0.35) 0%, transparent 40%),
+    radial-gradient(ellipse at 65% 115%, #3b9bff 0%, transparent 55%),
+    linear-gradient(155deg, #4aa3ff 0%, var(--primary) 45%, var(--primary-deep) 100%);
+  border-radius: 0 0 32px 32px;
+}
+
+.home-hero__content {
+  max-width: 640px;
+}
+
+.home-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.home-hero__badge-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--primary);
+}
+
+.home-hero__badge-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.home-hero h1 {
+  margin: 0 0 18px;
+  font-size: clamp(2.3rem, 5.2vw, 60px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+}
+
+.home-hero__lead {
+  max-width: 500px;
+  margin: 0 0 30px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ---------- กล่องค้นหา: การ์ดขาวทับขอบล่าง hero ---------- */
+.home-search {
+  position: relative;
+  z-index: 2;
+  margin-top: -52px;
+}
+
+.quick-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
+  align-items: center;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 10px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* ช่องเลือก: ไอคอนในวงกลมฟ้า + label เล็ก + ค่าที่เลือก (ทั้งช่องกดเปิด dropdown ได้) */
+.quick-search__field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  height: 64px;
+  padding: 0 14px;
+  border-radius: 12px;
+  transition: background-color 0.15s ease;
+}
+
+.quick-search__field:hover,
+.quick-search__field.is-open {
+  background: var(--surface);
+}
+
+.quick-search__field.is-open {
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+.quick-search__field + .quick-search__field::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 1px;
+  background: var(--divider);
+}
+
+.quick-search__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.quick-search__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.quick-search__control {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.quick-search__control label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.quick-search__control .dropdown__button {
+  height: 26px;
+}
+
+/* สวิตช์ Available only */
+.quick-search__toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 64px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--heading);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.quick-search__toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.quick-search__toggle input:checked + .switch {
+  background: var(--primary);
+}
+
+.quick-search__toggle input:checked + .switch::after {
+  transform: translateX(16px);
+}
+
+.quick-search__toggle input:focus-visible + .switch {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.quick-search__submit {
+  height: 56px;
+  padding: 0 28px;
+  border-radius: 12px;
+  font-size: 16px;
+}
+
+/* ---------- Welcome ---------- */
+.home-welcome {
+  padding: 96px 0 88px;
+}
+
+.home-welcome__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  align-items: center;
+  gap: 72px;
+}
+
+.welcome-media {
+  position: relative;
+  max-width: 480px;
+  justify-self: center;
+  width: 100%;
+}
+
+.welcome-media__photo {
+  aspect-ratio: 4 / 3;
+  border: 8px solid #fff;
+  border-radius: 20px;
+  box-shadow: 0 20px 44px rgba(11, 79, 179, 0.18);
+  background:
+    url('../img/welcome.jpg') center / cover no-repeat,
+    radial-gradient(ellipse at 75% 15%, rgba(255, 255, 255, 0.45) 0%, transparent 45%),
+    linear-gradient(165deg, #8cc4ff 0%, #3b8ff5 55%, var(--primary-deep) 100%);
+}
+
+/* วงกลมป้ายลอย */
+.welcome-media__badge {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  text-align: center;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.welcome-media__badge--top {
+  top: -24px;
+  left: -24px;
+  width: 92px;
+  height: 92px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+}
+
+.welcome-media__badge--top strong {
+  font-size: 22px;
+}
+
+.welcome-media__badge--bottom {
+  right: -18px;
+  bottom: -18px;
+  width: 78px;
+  height: 78px;
+  background: #fff;
+  color: var(--primary);
+  font-size: 11px;
+  border-color: var(--primary-soft);
+}
+
+.welcome-media__badge--bottom strong {
+  font-size: 18px;
+}
+
+.home-eyebrow {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.home-welcome h2 {
+  margin: 0 0 16px;
+  font-size: clamp(1.8rem, 3.4vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--heading);
+}
+
+.home-welcome__text {
+  margin: 0 0 28px;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--text-2);
+}
+
+.home-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 32px;
+}
+
+.home-stats__item {
+  display: flex;
+  flex-direction: column-reverse;
+  min-width: 128px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.home-stats dt {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.home-stats dd {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.home-welcome__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ---------- ห้องว่างแนะนำ (พื้นเทาฟ้า การ์ดเหมือนหน้าค้นหา) ---------- */
+.home-rooms {
+  padding: 80px 0 88px;
+  background: var(--surface);
+  border-radius: 32px;
+}
+
+.home-heading {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: clamp(1.7rem, 3vw, 34px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--heading);
+}
+
+.home-subheading {
+  max-width: 560px;
+  margin: 0 auto 40px;
+  text-align: center;
+  color: var(--text-2);
+}
+
+.home-rooms__more {
+  margin-top: 36px;
+  text-align: center;
+}
+
+/* ---------- ประเภทห้อง ---------- */
+.home-types {
+  padding: 88px 0 0;
+}
+
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.type-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px 22px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--divider);
+  color: var(--heading);
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.type-card:hover,
+.type-card:focus-visible {
+  transform: translateY(-3px);
+  border-color: #b9d7ff;
+  box-shadow: 0 12px 28px rgba(24, 119, 242, 0.12);
+}
+
+.type-card__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.type-card__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.type-card__name {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.type-card__desc {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+
+.type-card__cta {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* ---------- จุดเด่น ---------- */
+.home-features {
+  padding: 88px 0 0;
+}
+
+.feature-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.feature {
+  text-align: center;
+}
+
+.feature__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(24, 119, 242, 0.25);
+}
+
+.feature__icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.feature h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--heading);
+}
+
+.feature p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+/* ---------- ปิดท้าย ---------- */
+.home-cta {
+  padding: 96px 0 24px;
+}
+
+.home-cta__panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 44px 52px;
+  border-radius: 20px;
+  color: #fff;
+  background:
+    radial-gradient(ellipse at 90% 0%, rgba(255, 255, 255, 0.25) 0%, transparent 45%),
+    linear-gradient(110deg, var(--primary) 0%, var(--primary-deep) 100%);
+}
+
+.home-cta__panel h2 {
+  margin: 0 0 6px;
+  font-size: clamp(1.5rem, 3vw, 30px);
+  font-weight: 700;
+}
+
+.home-cta__panel p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1024px) {
+  .type-grid,
+  .feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-welcome__grid {
+    gap: 56px;
+  }
+}
+
+/* แท็บเล็ต/มือถือ: 2 ช่องเลือกเคียงกัน แถวล่างเป็นสวิตช์ + ปุ่มค้นหา */
+@media (max-width: 860px) {
+  .quick-search {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .quick-search__field {
+    height: 60px;
+    padding: 0 10px;
+    gap: 10px;
+    background: var(--surface);
+  }
+
+  .quick-search__field + .quick-search__field::before {
+    display: none;
+  }
+
+  .quick-search__icon {
+    width: 34px;
+    height: 34px;
+    background: #fff;
+  }
+
+  .quick-search__icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .quick-search__toggle {
+    height: 52px;
+    padding: 0 8px;
+  }
+
+  .quick-search__submit {
+    height: 52px;
+  }
+
+  .home-welcome__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-media {
+    max-width: 420px;
+    margin: 0 24px;
+    width: auto;
+  }
+
+  .home-cta__panel {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 36px 28px;
+  }
+}
+
+/* จอแคบ: ช่องขวาให้รายการชิดขวา ไม่ล้นจอ */
+@media (max-width: 860px) and (min-width: 481px) {
+  .quick-search__field + .quick-search__field .dropdown__list {
+    left: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .home-hero {
+    margin-top: -76px;
+    min-height: 0;
+    padding: 140px 0 100px;
+    border-radius: 0 0 24px 24px;
+  }
+
+  .home-welcome {
+    padding: 72px 0 64px;
+  }
+
+  .home-rooms {
+    padding: 56px 0 64px;
+    border-radius: 24px;
+  }
+
+  .home-types,
+  .home-features {
+    padding-top: 64px;
+  }
+
+  .home-cta {
+    padding-top: 64px;
+  }
+}
+
+/* มือถือเล็ก: ช่องเลือกเรียงลง ปุ่มค้นหาเต็มความกว้าง */
+@media (max-width: 480px) {
+  .quick-search {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-search__toggle {
+    justify-content: space-between;
+  }
+
+  .type-grid,
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-media__badge--top {
+    width: 78px;
+    height: 78px;
+    top: -18px;
+    left: -18px;
+  }
+}

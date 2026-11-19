@@ -42,13 +42,16 @@
               <h1>User account management</h1>
               <p class="account-head__lead">Search, add, edit, deactivate, restore, and delete administrator accounts.</p>
             </div>
-            <button id="add-admin" type="button" class="btn btn--green btn--add-admin">+ Add administrator</button>
+            <button id="add-admin" type="button" class="btn-pill btn-pill--green btn--add-admin">+ Add administrator</button>
           </div>
 
           <section class="account-card" aria-label="Administrators">
             <form id="admin-filters" class="filters" role="search" novalidate>
               <!-- ตัวกรอง 3 ช่องตาม Figma ใช้พร้อมกันได้ (ส่งไป API เป็น q, role, status) -->
-              <input id="a-q" name="q" type="search" placeholder="Search by name or username" aria-label="Search by name or username">
+              <div class="filters__search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <input id="a-q" name="q" type="search" placeholder="Search by name or username" aria-label="Search by name or username">
+              </div>
               <select id="a-role" name="role" aria-label="Role">
                 <option value="">Role: All</option>
                 <option value="Admin">Role: Admin</option>
@@ -83,10 +86,10 @@
           </section>
         </div>
 
-        <details id="activity-log" class="account-form-card">
-          <summary>Activity log (latest 100)</summary>
-          <p id="log-status" role="status"></p>
-          <ul id="log-list"></ul>
+        <details id="activity-log" class="activity-log">
+          <summary>Activity log <span class="muted">(latest 100)</span></summary>
+          <p id="log-status" class="activity-log__status" role="status"></p>
+          <ul id="log-list" class="activity-log__list"></ul>
         </details>
 
         <!-- มุมมองที่ 2: ฟอร์มเพิ่ม / แก้ไขผู้ดูแล (แสดงแทนตาราง) -->
@@ -105,31 +108,31 @@
               <div class="account-grid">
                 <div class="field">
                   <label for="p-first-name">First Name *</label>
-                  <input id="p-first-name" name="firstName" type="text" maxlength="100" placeholder="Kittisak" required>
+                  <input id="p-first-name" name="firstName" type="text" maxlength="100" placeholder="e.g. Kittisak" required>
                 </div>
                 <div class="field">
                   <label for="p-last-name">Last Name *</label>
-                  <input id="p-last-name" name="lastName" type="text" maxlength="100" placeholder="Parama" required>
+                  <input id="p-last-name" name="lastName" type="text" maxlength="100" placeholder="e.g. Parama" required>
                 </div>
                 <div class="field field--wide">
                   <label for="p-username">Username *</label>
-                  <input id="p-username" name="username" type="text" maxlength="50" autocomplete="off" placeholder="pk.listing" required>
+                  <input id="p-username" name="username" type="text" maxlength="50" autocomplete="off" placeholder="e.g. pk.listing" required>
                 </div>
                 <div class="field">
                   <label for="p-password">Password <span id="password-star">*</span></label>
-                  <input id="p-password" name="password" type="password" minlength="8" autocomplete="new-password" placeholder="********">
+                  <input id="p-password" name="password" type="password" minlength="8" autocomplete="new-password" placeholder="At least 8 characters">
                 </div>
                 <div class="field">
                   <label for="p-confirm-password">Confirm Password <span id="confirm-star">*</span></label>
-                  <input id="p-confirm-password" name="confirmPassword" type="password" minlength="8" autocomplete="new-password" placeholder="********">
+                  <input id="p-confirm-password" name="confirmPassword" type="password" minlength="8" autocomplete="new-password" placeholder="Type the password again">
                 </div>
                 <div class="field">
                   <label for="p-email">Email *</label>
-                  <input id="p-email" name="email" type="email" maxlength="100" autocomplete="off" placeholder="Guest@gmail.com" required>
+                  <input id="p-email" name="email" type="email" maxlength="100" autocomplete="off" placeholder="e.g. name@condong.co.th" required>
                 </div>
                 <div class="field">
                   <label for="p-confirm-email">Confirm Email *</label>
-                  <input id="p-confirm-email" name="confirmEmail" type="email" maxlength="100" autocomplete="off" placeholder="Guest@gmail.com" required>
+                  <input id="p-confirm-email" name="confirmEmail" type="email" maxlength="100" autocomplete="off" placeholder="Type the email again" required>
                 </div>
                 <div class="field">
                   <label for="p-role">Role *</label>
@@ -148,7 +151,7 @@
                 </div>
                 <div class="field field--wide field--address">
                   <label for="p-address">Address *</label>
-                  <input id="p-address" name="address" type="text" maxlength="255" placeholder="44/120 samchuk supanburi" required>
+                  <input id="p-address" name="address" type="text" maxlength="255" placeholder="e.g. 36 Sukhumvit 36, Khlong Toei, Bangkok 10110" required>
                 </div>
               </div>
 
@@ -156,10 +159,10 @@
 
               <div class="account-actions">
                 <!-- ปุ่มลบมีเฉพาะตอนแก้ไขคนอื่น (ลบตัวเองไม่ได้) -->
-                <button id="form-delete" type="button" class="btn btn--delete-account hidden">Delete Account</button>
+                <button id="form-delete" type="button" class="btn-pill btn-pill--danger hidden">Delete Account</button>
                 <div class="account-actions__right">
-                  <button id="form-cancel" type="button" class="btn btn--cancel">Cancel</button>
-                  <button id="form-save" type="submit" class="btn btn--green btn--save-account">Create Account</button>
+                  <button id="form-cancel" type="button" class="btn-pill btn-pill--light">Cancel</button>
+                  <button id="form-save" type="submit" class="btn-pill btn-pill--green">Create Account</button>
                 </div>
               </div>
             </form>
