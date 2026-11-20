@@ -16,7 +16,7 @@
 3. แล้ว open sql script เลือก `sec2_gr1_database.sql` แล้วรันไฟล์จะสร้าง `condong_condo` 
 4. เปลี่ยนชื่อ `.env.example` ใน `sec2_gr1_ws_src` เป็น `.env`
 5. เอาข้อมูล user ที่เข้าถึง `condong_condo` ได้ ใส่ใน `.env` ตั้ง `DB_USER`, `DB_PASSWORD` และ `SESSION_SECRET`(เป็นอะไรก็ได้) หรือ `PORT` ถ้าไม่ได้ใช้ default
-6. เปิดเทอร์มินัลแล้ว cd ไปที่ `sec2_gr1_ws_src` แล้วรัน `npm install` และ `npm start`
+6. เปิดเทอร์มินัลแล้ว cd ไปที่ `sec2_gr1_ws_src` แล้วรัน `npm install` และ `npm start` (รูปห้องจะถูกนำเข้าอัตโนมัติ)
 7. เปิดอีกเเทอร์มินัลแล้ว cd ไปที่ `sec2_gr1_fe_src` แล้วรัน `npm install` และ `npm start`
 8. เปิด `http://localhost:8080/`
 
@@ -37,5 +37,7 @@
 - ใช้ผลทดสอบจริงและ HTTP status ประกอบรายงาน ดู [งานที่กลุ่มต้องเติม](TODO.md)
 
 ## ใช้ฐานข้อมูลเดิม
+
+เมื่อเปิด Web Service ระบบจะคัดลอกรูปจาก `prototype_rooms` ไปที่ `uploads` และเพิ่ม path ลงตาราง `RoomImage` ให้ตรงกับรหัสห้องโดยอัตโนมัติ โดยข้ามห้องที่มีรูปอยู่แล้ว การเปิดเซิร์ฟเวอร์ซ้ำไม่เพิ่มรูปซ้ำ ไม่ต้องรันคำสั่งนำเข้ารูปแยก และไม่ต้องล้างฐานข้อมูล
 
 คำสั่ง `npm run db:reset` ในโฟลเดอร์ Web Service จะ **ลบและสร้างฐานข้อมูลใน DB_NAME ใหม่** ใช้เมื่อต้องการกลับไปที่ข้อมูลสาธิต
