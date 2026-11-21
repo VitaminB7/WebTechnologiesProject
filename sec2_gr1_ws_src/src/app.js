@@ -10,6 +10,7 @@ const rooms = require('./routes/rooms'); // ไฟล์นี้ส่ง route
 const roomImageRoutes = require('./routes/room-images');
 const adminRoutes = require('./routes/admins');
 const logRoutes = require('./routes/logs');
+const { bundledImagePath } = require('./helpers/room-image-files');
 
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:8080';
 const EIGHT_HOURS = 8 * 60 * 60 * 1000;
@@ -78,6 +79,13 @@ app.use('/api', (req, res) => {
 
 // ===== ไฟล์ทั่วไป =====
 app.use('/uploads', express.static(rooms.UPLOAD_DIR)); // รูปห้อง เช่น /uploads/L-1201-a1b2c3.jpg
+// A fresh clone has no uploads directory contents. Serve versioned room
+// originals at the same URLs, without requiring a copy from another computer.
+app.get('/uploads/:filename', (req, res, next) => {
+  const file = bundledImagePath(req.params.filename);
+  if (!file) return next();
+  res.sendFile(file);
+});
 
 // ===== ตัวจัดการ error ตัวสุดท้าย =====
 // ทุก route เรียก next(err) เมื่อเกิด error -> มาจบที่นี่

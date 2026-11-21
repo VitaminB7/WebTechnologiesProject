@@ -15,6 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const pool = require('../db');
+const { resolveRoomImagePath } = require('./room-image-files');
 
 // __dirname คือโฟลเดอร์ src/helpers; ย้อนขึ้นไปหาโฟลเดอร์รูปที่ root ของโปรเจกต์
 const SOURCE_DIR = path.join(__dirname, '..', '..', '..', 'prototype_rooms');
@@ -56,8 +57,9 @@ async function seedRoomImages() {
         // รูปที่ไฟล์ยังอยู่ (รวมรูปที่แอดมินอัปโหลด) ไม่ถูกแตะ
         let validImages = 0;
         for (const image of images) {
-          const file = path.join(UPLOAD_DIR, path.basename(image.FilePath));
-          if (fs.existsSync(file)) {
+          // Bundled originals also count as available on a fresh clone.
+          // Missing uploads must not discard valid RoomImage rows or IDs.
+          if (resolveRoomImagePath(image.FilePath)) {
             validImages++;
           } else {
             await connection.execute('DELETE FROM RoomImage WHERE ImageID = ?', [image.ImageID]);

@@ -12,12 +12,11 @@
   min-height: 620px;
   padding: 168px 0 132px;
   color: #fff;
+  background-color: #102b4f;
   background:
-    linear-gradient(90deg, rgba(5, 22, 54, 0.78) 0%, rgba(5, 22, 54, 0.42) 50%, rgba(5, 22, 54, 0.08) 100%),
+    linear-gradient(90deg, rgba(5, 22, 54, 0.86) 0%, rgba(5, 22, 54, 0.48) 48%, rgba(5, 22, 54, 0.10) 100%),
     url('../img/residence.jpg') center / cover no-repeat,
-    radial-gradient(ellipse at 80% 15%, rgba(255, 255, 255, 0.35) 0%, transparent 40%),
-    radial-gradient(ellipse at 65% 115%, #3b9bff 0%, transparent 55%),
-    linear-gradient(155deg, #4aa3ff 0%, var(--primary) 45%, var(--primary-deep) 100%);
+    #102b4f;
   border-radius: 0 0 32px 32px;
 }
 
@@ -579,6 +578,7 @@
     min-height: 0;
     padding: 140px 0 100px;
     border-radius: 0 0 24px 24px;
+    background-position: center, 65% center;
   }
 
   .home-welcome {

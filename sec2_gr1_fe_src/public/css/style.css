@@ -1646,9 +1646,11 @@ body.login-body {
 }
 
 .team-card__photo {
+  display: block;
   width: 100%;
   height: 230px;
   object-fit: cover;
+  object-position: center 12%;
   background: #eef4ff;
   margin-bottom: 27px;
 }
