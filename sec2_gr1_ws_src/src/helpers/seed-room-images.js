@@ -50,10 +50,25 @@ async function seedRoomImages() {
       try {
         // FOR UPDATE ล็อกแถวห้องระหว่าง transaction เพื่อประสานกับงานที่ล็อกห้องเดียวกัน
         const [rooms] = await connection.execute('SELECT RoomID FROM RoomUnit WHERE RoomID = ? FOR UPDATE', [roomId]);
-        const [images] = await connection.execute('SELECT ImageID FROM RoomImage WHERE RoomID = ?', [roomId]);
-        // ข้ามห้องที่ไม่มีในฐานข้อมูลหรือมีรูปแล้ว จึงไม่เพิ่มซ้ำเมื่อเปิดเซิร์ฟเวอร์ใหม่
+        const [images] = await connection.execute('SELECT ImageID, FilePath FROM RoomImage WHERE RoomID = ?', [roomId]);
+        // ลบแถวรูปที่ไฟล์ไม่มีอยู่จริงใน uploads (เช่น ฐานข้อมูลมาจากโปรเจกต์ชุดอื่น)
+        // แถวเหล่านี้แสดงรูปไม่ได้อยู่แล้ว ถ้าเก็บไว้ ห้องจะถูกข้ามและเป็นกล่องเทาตลอด
+        // รูปที่ไฟล์ยังอยู่ (รวมรูปที่แอดมินอัปโหลด) ไม่ถูกแตะ
+        let validImages = 0;
+        for (const image of images) {
+          const file = path.join(UPLOAD_DIR, path.basename(image.FilePath));
+          if (fs.existsSync(file)) {
+            validImages++;
+          } else {
+            await connection.execute('DELETE FROM RoomImage WHERE ImageID = ?', [image.ImageID]);
+          }
+        }
+        if (validImages < images.length) {
+          console.log(roomId + ': removed ' + (images.length - validImages) + ' image rows with missing files');
+        }
+        // ข้ามห้องที่ไม่มีในฐานข้อมูลหรือมีรูปที่ใช้ได้แล้ว จึงไม่เพิ่มซ้ำเมื่อเปิดเซิร์ฟเวอร์ใหม่
         // และไม่แทนที่รูปที่แอดมินอัปโหลดไว้
-        if (rooms.length === 0 || images.length > 0) {
+        if (rooms.length === 0 || validImages > 0) {
           await connection.commit();
           skipped++;
           continue;
